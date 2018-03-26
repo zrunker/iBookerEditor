@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">书客编辑器</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="article">文章</string>
+    <string name="local">本地</string>
+    <string name="recommend">推荐</string>
+    <string name="grammar_reference">语法参考</string>
+    <string name="set">设置</string>
+    <string name="feedback">反馈</string>
+    <string name="score">评分</string>
+    <string name="about">关于</string>
+
+</resources>

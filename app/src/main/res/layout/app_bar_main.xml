@@ -16,24 +16,35 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:titleTextAppearance="@style/Toolbar.TitleText" />
 
+        <TextView
+            android:id="@+id/tv_top"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorAccent"
+            android:paddingBottom="15dp"
+            android:paddingEnd="20dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:paddingStart="20dp"
+            android:paddingTop="15dp"
+            android:text="@string/app_name"
+            android:textColor="#FFFFFF" />
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/layout_content_main" />
+    <include
+        layout="@layout/layout_content_main" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+    <ImageButton
+        android:id="@+id/ibtn_edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        app:backgroundTint="@android:color/transparent"
-        app:borderWidth="0dp"
-        app:elevation="0dp"
-        app:fabSize="normal"
-        app:rippleColor="@android:color/transparent"
-        app:srcCompat="@drawable/icon_edit"
-        app:useCompatPadding="true" />
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/write_article"
+        android:src="@drawable/icon_edit" />
 
 </android.support.design.widget.CoordinatorLayout>

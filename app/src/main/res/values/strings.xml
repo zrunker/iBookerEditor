@@ -1,8 +1,11 @@
 <resources>
     <string name="app_name">书客编辑器</string>
+    <string name="website">http://editor.ibooker.cc</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="mepic">个人图像</string>
 
     <string name="article">文章</string>
     <string name="local">本地</string>
@@ -12,5 +15,6 @@
     <string name="feedback">反馈</string>
     <string name="score">评分</string>
     <string name="about">关于</string>
+    <string name="write_article">写文章</string>
 
 </resources>

@@ -1,6 +1,7 @@
 package cc.ibooker.ibookereditor.adapter;
 
 import android.content.Context;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +29,7 @@ public class SideMenuAdapter extends BaseAdapter {
     }
 
     // 刷新数据
-    private void reflashData(ArrayList<SideMenuItem> list) {
+    public void reflashData(ArrayList<SideMenuItem> list) {
         this.mDatas = list;
         this.notifyDataSetChanged();
     }
@@ -56,6 +57,9 @@ public class SideMenuAdapter extends BaseAdapter {
             convertView = inflater.inflate(R.layout.layout_side_nav_bar_menu_item, parent, false);
             holder.textView = convertView.findViewById(R.id.textView);
             holder.view = convertView.findViewById(R.id.view);
+            if (position == 0) {
+                holder.textView.setPadding(holder.textView.getPaddingLeft(), (int) dpToPx(40), holder.textView.getPaddingRight(), (int) dpToPx(10));
+            }
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -73,5 +77,10 @@ public class SideMenuAdapter extends BaseAdapter {
     static class ViewHolder {
         TextView textView;
         View view;
+    }
+
+    // dp to px
+    private float dpToPx(float value) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, value, context.getResources().getDisplayMetrics());
     }
 }

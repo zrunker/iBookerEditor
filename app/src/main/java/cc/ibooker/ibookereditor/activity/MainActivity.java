@@ -1,23 +1,26 @@
-package cc.ibooker.ibookereditor;
+package cc.ibooker.ibookereditor.activity;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+
+import java.util.ArrayList;
+
+import cc.ibooker.ibookereditor.R;
+import cc.ibooker.ibookereditor.adapter.SideMenuAdapter;
+import cc.ibooker.ibookereditor.bean.SideMenuItem;
 
 /**
  * 书客编辑器
  */
 public class MainActivity extends AppCompatActivity {
+    private ArrayList<SideMenuItem> mDatas;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-
+        init();
     }
 
     @Override
@@ -69,5 +72,27 @@ public class MainActivity extends AppCompatActivity {
 //        }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void init() {
+        LinearLayout navView = findViewById(R.id.nav_view);
+        ListView listView = navView.findViewById(R.id.id_layout_side_nav_bar_menu);
+        initData();
+        listView.setAdapter(new SideMenuAdapter(this, mDatas));
+    }
+
+    // 初始化数据
+    private void initData() {
+        if (mDatas == null)
+            mDatas = new ArrayList<>();
+        mDatas.clear();
+        mDatas.add(new SideMenuItem(0, getString(R.string.article), false));
+        mDatas.add(new SideMenuItem(R.drawable.icon_location, getString(R.string.local), false));
+        mDatas.add(new SideMenuItem(R.drawable.icon_recommend, getString(R.string.recommend), true));
+        mDatas.add(new SideMenuItem(R.drawable.icon_question, getString(R.string.grammar_reference), false));
+        mDatas.add(new SideMenuItem(R.drawable.icon_set, getString(R.string.set), false));
+        mDatas.add(new SideMenuItem(R.drawable.icon_feedback, getString(R.string.feedback), false));
+        mDatas.add(new SideMenuItem(R.drawable.icon_star, getString(R.string.score), false));
+        mDatas.add(new SideMenuItem(R.drawable.icon_about, getString(R.string.about), false));
     }
 }

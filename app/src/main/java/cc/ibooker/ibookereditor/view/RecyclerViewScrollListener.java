@@ -4,6 +4,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.view.View;
 
 /**
  * RecyclerView加载更多滚动事件
@@ -40,21 +41,18 @@ public class RecyclerViewScrollListener extends RecyclerView.OnScrollListener {
      */
     private int dy;
 
-    private int totalDy = 0;
-
     @Override
     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
         super.onScrolled(recyclerView, dx, dy);
         // 记录y轴滚动距离（>0代表向下滚动）
         this.dy = dy;
-        this.totalDy += dy;
         // 获取RecyclerView布局管理器
         RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
         if (layoutManagerType == null) {
-            if (layoutManager instanceof LinearLayoutManager) {
-                layoutManagerType = LAYOUT_MANAGER_TYPE.LINEAR;
-            } else if (layoutManager instanceof GridLayoutManager) {
+            if (layoutManager instanceof GridLayoutManager) {
                 layoutManagerType = LAYOUT_MANAGER_TYPE.GRID;
+            } else if (layoutManager instanceof LinearLayoutManager) {
+                layoutManagerType = LAYOUT_MANAGER_TYPE.LINEAR;
             } else if (layoutManager instanceof StaggeredGridLayoutManager) {
                 layoutManagerType = LAYOUT_MANAGER_TYPE.STAGGERED_GRID;
             } else {
@@ -83,9 +81,18 @@ public class RecyclerViewScrollListener extends RecyclerView.OnScrollListener {
          * 设置滚动距离事件
          */
         if (onScrollDistanceListener != null) {
-            onScrollDistanceListener.onScrollDistance(totalDy);
+            onScrollDistanceListener.onScrollDistance(dy);
         }
 
+        /**
+         * 设置指定位置到顶部距离事件
+         */
+        if (targetPosition >= 0 && targetPosition < layoutManager.getChildCount() && onPositionTopDistanceListener != null) {
+            View view = layoutManager.findViewByPosition(targetPosition);
+            if (view != null) {
+                onPositionTopDistanceListener.onPositionTopDistance(view.getTop());
+            }
+        }
     }
 
     // 滚动状态改变
@@ -117,6 +124,7 @@ public class RecyclerViewScrollListener extends RecyclerView.OnScrollListener {
         }
     }
 
+    // 计算最大值
     private int findMax(int[] lastPositions) {
         int max = lastPositions[0];
         for (int value : lastPositions) {
@@ -166,5 +174,18 @@ public class RecyclerViewScrollListener extends RecyclerView.OnScrollListener {
 
     public void setOnScrollStateChangedListener(OnScrollStateChangedListener onScrollStateChangedListener) {
         this.onScrollStateChangedListener = onScrollStateChangedListener;
+    }
+
+    // 指定位置position到顶部距离接口
+    public interface OnPositionTopDistanceListener {
+        void onPositionTopDistance(int dy);
+    }
+
+    private OnPositionTopDistanceListener onPositionTopDistanceListener;
+    private int targetPosition;
+
+    public void setOnPositionTopDistanceListener(OnPositionTopDistanceListener onPositionTopDistanceListener, int position) {
+        this.onPositionTopDistanceListener = onPositionTopDistanceListener;
+        this.targetPosition = position;
     }
 }

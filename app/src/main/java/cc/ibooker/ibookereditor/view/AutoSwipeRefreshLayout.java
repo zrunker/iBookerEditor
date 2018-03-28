@@ -10,13 +10,14 @@ import java.lang.reflect.Method;
 
 /**
  * 自定义自动下拉刷新SwipeRefreshLayout
- * \
+ *
  * Created by 邹峰立 on 2017/5/10.
  */
 public class AutoSwipeRefreshLayout extends SwipeRefreshLayout {
     public AutoSwipeRefreshLayout(Context context) {
         super(context);
     }
+
     public AutoSwipeRefreshLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
     }

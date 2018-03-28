@@ -7,7 +7,6 @@ import android.util.AttributeSet;
 
 /**
  * 自定义LinearLayoutManager，将RecylerView的IndexOutOfBoundsException抛出
- *
  * Created by 邹峰立 on 2017/6/2.
  */
 public class MyLinearLayoutManager extends LinearLayoutManager {

@@ -87,7 +87,7 @@ public class RecyclerViewScrollListener extends RecyclerView.OnScrollListener {
         /**
          * 设置指定位置到顶部距离事件
          */
-        if (targetPosition >= 0 && targetPosition < layoutManager.getChildCount() && onPositionTopDistanceListener != null) {
+        if (targetPosition >= 0 && targetPosition < layoutManager.getItemCount() && onPositionTopDistanceListener != null) {
             View view = layoutManager.findViewByPosition(targetPosition);
             if (view != null) {
                 onPositionTopDistanceListener.onPositionTopDistance(view.getTop());

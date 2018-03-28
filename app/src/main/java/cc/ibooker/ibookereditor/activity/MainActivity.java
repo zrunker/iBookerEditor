@@ -10,12 +10,14 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -26,11 +28,18 @@ import java.util.ArrayList;
 import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.adapter.SideMenuAdapter;
 import cc.ibooker.ibookereditor.base.BaseActivity;
+import cc.ibooker.ibookereditor.bean.ArticleUserData;
 import cc.ibooker.ibookereditor.bean.SideMenuItem;
+import cc.ibooker.ibookereditor.dto.ResultData;
 import cc.ibooker.ibookereditor.event.SaveArticleSuccessEvent;
+import cc.ibooker.ibookereditor.net.service.HttpMethods;
 import cc.ibooker.ibookereditor.utils.AppUtil;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
+import cc.ibooker.ibookereditor.utils.NetworkUtil;
+import cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout;
 import cc.ibooker.ibookereditor.zrecycleview.MyLinearLayoutManager;
+import rx.Subscriber;
+import rx.subscriptions.CompositeSubscription;
 
 /**
  * 书客编辑器开源项目
@@ -47,7 +56,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     private ArrayList<SideMenuItem> mSideMenuDatas;
 
     // 内容区
+    private AutoSwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
+
+    private int page = 1;
+
+    private Subscriber<ResultData<ArrayList<ArticleUserData>>> getRecommendArticleListSubscriber;
+    private CompositeSubscription mSubscription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +90,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     @Override
     protected void onStop() {
         super.onStop();
+        if (getRecommendArticleListSubscriber != null)
+            getRecommendArticleListSubscriber.unsubscribe();
     }
 
     @Override
@@ -82,8 +99,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         super.onDestroy();
         EventBus.getDefault().register(SaveArticleSuccessEvent.class);
         EventBus.getDefault().unregister(this);
+        if (mSubscription != null)
+            mSubscription.unsubscribe();
     }
 
+    // 保存文章成功事件
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void executeSaveArticleSuccessEvent(SaveArticleSuccessEvent event) {
 
@@ -119,7 +139,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         editImgBtn = findViewById(R.id.ibtn_edit);
         editImgBtn.setOnClickListener(this);
 
-        SwipeRefreshLayout swipeRefreshLayout = findViewById(R.id.swiperefreshlayout);
+        swipeRefreshLayout = findViewById(R.id.swiperefreshlayout);
         swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
@@ -147,6 +167,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                     case 2:// 推荐
                         drawer.closeDrawer(GravityCompat.START);
                         topTv.setText("推荐");
+                        swipeRefreshLayout.autoRefresh();
+                        // 加载数据
+                        onRefresh();
                         break;
                     case 3:// 语法参考
                         drawer.closeDrawer(GravityCompat.START);
@@ -182,7 +205,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     // 下拉刷新
     @Override
     public void onRefresh() {
-
+        page = 1;
     }
 
     // 初始化数据
@@ -200,13 +223,42 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         mSideMenuDatas.add(new SideMenuItem(R.drawable.icon_about, getString(R.string.about), false));
     }
 
-    // 自定义
+    // 自定义setSideAdapter
     private void setSideAdapter() {
         if (sideMenuAdapter == null) {
             sideMenuAdapter = new SideMenuAdapter(this, mSideMenuDatas);
             sideListview.setAdapter(sideMenuAdapter);
         } else {
             sideMenuAdapter.reflashData(mSideMenuDatas);
+        }
+    }
+
+    /**
+     * 获取推荐文章相关信息
+     */
+    private void getRecommendArticleList() {
+        if (NetworkUtil.isNetworkConnected(this)) {
+            getRecommendArticleListSubscriber = new Subscriber<ResultData<ArrayList<ArticleUserData>>>() {
+                @Override
+                public void onCompleted() {
+                    swipeRefreshLayout.setRefreshing(false);
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onNext(ResultData<ArrayList<ArticleUserData>> arrayListResultData) {
+                    Log.d("arrayListResultData", arrayListResultData.toString());
+                }
+            };
+            HttpMethods.getInstance().getRecommendArticleList(getRecommendArticleListSubscriber, page);
+            if (mSubscription == null)
+                mSubscription = new CompositeSubscription();
+            mSubscription.add(getRecommendArticleListSubscriber);
+        } else {// 无网络
         }
     }
 }

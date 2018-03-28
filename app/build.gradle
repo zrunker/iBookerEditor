@@ -4,7 +4,7 @@ android {
     compileSdkVersion 27
     defaultConfig {
         applicationId "cc.ibooker.ibookereditor"
-        minSdkVersion 15
+        minSdkVersion 19
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -32,14 +32,17 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+
     /*引入书客编辑器*/
     implementation project(':ibookereditorlib')
+
     /*网络框架 rxjava + retrofit + okhttp + glide*/
     compile 'io.reactivex:rxjava:1.2.10'
     compile 'io.reactivex:rxandroid:1.2.1'
+
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-    compile 'com.squareup.retrofit2:adapter-rxjava:2.1.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.2.0'
+    compile 'com.squareup.retrofit2:adapter-rxjava:2.2.0'
     compile 'com.google.code.gson:gson:2.8.0'
 
     compile 'com.squareup.okhttp3:okhttp:3.10.0'

@@ -18,6 +18,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 
@@ -78,8 +80,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
         EventBus.getDefault().register(SaveArticleSuccessEvent.class);
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    public void executeSaveArticleSuccessEvent(SaveArticleSuccessEvent event) {
+
+        EventBus.getDefault().removeStickyEvent(event);
     }
 
     // 返回按钮监听

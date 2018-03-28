@@ -4,6 +4,9 @@
     package="cc.ibooker.ibookereditor">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -31,6 +34,42 @@
         <!--编辑界面-->
         <activity
             android:name=".activity.EditArticleActivity"
+            android:alwaysRetainTaskState="true"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan" />
+
+        <!--图片预览界面-->
+        <activity
+            android:name=".activity.ImgVPagerActivity"
+            android:alwaysRetainTaskState="true"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan" />
+
+        <!--书客编辑器Web页面-->
+        <activity
+            android:name=".activity.IbookerEditorWebActivity"
+            android:alwaysRetainTaskState="true"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan" />
+
+        <!--设置-->
+        <activity
+            android:name=".activity.SetActivity"
+            android:alwaysRetainTaskState="true"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan" />
+
+        <!--反馈-->
+        <activity
+            android:name=".activity.FeedbackActivity"
             android:alwaysRetainTaskState="true"
             android:hardwareAccelerated="true"
             android:launchMode="singleTask"

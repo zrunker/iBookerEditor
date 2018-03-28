@@ -1,6 +1,7 @@
 package cc.ibooker.ibookereditor.activity;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -16,14 +17,18 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 
 import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.adapter.SideMenuAdapter;
 import cc.ibooker.ibookereditor.base.BaseActivity;
 import cc.ibooker.ibookereditor.bean.SideMenuItem;
+import cc.ibooker.ibookereditor.event.SaveArticleSuccessEvent;
+import cc.ibooker.ibookereditor.utils.AppUtil;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
-import cc.ibooker.ibookereditor.view.MyLinearLayoutManager;
+import cc.ibooker.ibookereditor.zrecycleview.MyLinearLayoutManager;
 
 /**
  * 书客编辑器开源项目
@@ -61,6 +66,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         // 初始化侧边栏数据
         initData();
         setSideAdapter();
+
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        EventBus.getDefault().register(SaveArticleSuccessEvent.class);
     }
 
     // 返回按钮监听
@@ -115,12 +134,18 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 switch (position) {
                     case 1:// 本地
                         drawer.closeDrawer(GravityCompat.START);
+                        topTv.setText("本地");
                         break;
                     case 2:// 推荐
                         drawer.closeDrawer(GravityCompat.START);
+                        topTv.setText("推荐");
                         break;
                     case 3:// 语法参考
                         drawer.closeDrawer(GravityCompat.START);
+                        Intent intentGrammer = new Intent(MainActivity.this, IbookerEditorWebActivity.class);
+                        intentGrammer.putExtra("aId", 1);
+                        intentGrammer.putExtra("title", "语法参考");
+                        startActivity(intentGrammer);
                         break;
                     case 4:// 设置
                         drawer.closeDrawer(GravityCompat.START);
@@ -129,10 +154,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                         drawer.closeDrawer(GravityCompat.START);
                         break;
                     case 6:// 评分
-                        drawer.closeDrawer(GravityCompat.START);
+                        String mAddress = "market://details?id=" + AppUtil.getVersion(MainActivity.this);
+                        Intent marketIntent = new Intent("android.intent.action.VIEW");
+                        marketIntent.setData(Uri.parse(mAddress));
+                        startActivity(marketIntent);
                         break;
                     case 7:// 关于
                         drawer.closeDrawer(GravityCompat.START);
+                        Intent intentAbout = new Intent(MainActivity.this, IbookerEditorWebActivity.class);
+                        intentAbout.putExtra("aId", 182);
+                        intentAbout.putExtra("title", "关于");
+                        startActivity(intentAbout);
                         break;
                 }
             }

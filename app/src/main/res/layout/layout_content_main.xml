@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cc.ibooker.ibookereditor.view.AutoSwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/swiperefreshlayout"
@@ -13,4 +13,4 @@
         android:id="@+id/recycleview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-</cc.ibooker.ibookereditor.view.AutoSwipeRefreshLayout>
+</cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout>

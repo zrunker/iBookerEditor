@@ -9,8 +9,6 @@
 
         <!--设置窗体无主题-->
         <item name="windowNoTitle">true</item>
-        <!--设置窗体透明-->
-        <item name="android:windowIsTranslucent">true</item>
         <!--设置窗体切换动画-->
         <item name="android:windowAnimationStyle">@style/activityAnimation</item>
     </style>

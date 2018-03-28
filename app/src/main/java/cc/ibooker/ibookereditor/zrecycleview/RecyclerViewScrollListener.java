@@ -1,4 +1,4 @@
-package cc.ibooker.ibookereditor.view;
+package cc.ibooker.ibookereditor.zrecycleview;
 
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;

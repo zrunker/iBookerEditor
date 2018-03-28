@@ -36,7 +36,7 @@ public class MyOkHttpClient {
             }
         });
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-        File fileCache = new File(Environment.getExternalStorageDirectory() + File.separator + "YiDai", "cacheData");
+        File fileCache = new File(Environment.getExternalStorageDirectory() + File.separator + "IbookerEditor", "cacheData");
         Cache cache = new Cache(fileCache.getAbsoluteFile(), 1024 * 1024 * 30);//设置缓存30M
         CaheInterceptor caheInterceptor = new CaheInterceptor(MyApplication.getInstance().getApplicationContext());// 缓存拦截器
 

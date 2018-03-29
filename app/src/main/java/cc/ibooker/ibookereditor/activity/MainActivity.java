@@ -180,6 +180,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                         break;
                     case 4:// 设置
                         drawer.closeDrawer(GravityCompat.START);
+                        Intent intentSet = new Intent(MainActivity.this, SetActivity.class);
+                        startActivity(intentSet);
                         break;
                     case 5:// 反馈
                         drawer.closeDrawer(GravityCompat.START);

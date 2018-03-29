@@ -13,19 +13,18 @@
             android:id="@+id/img_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:contentDescription="@null"
             android:padding="15dp"
-            android:src="@drawable/icon_back_black" />
+            android:src="@drawable/icon_back_white" />
 
         <TextView
             android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:textColor="#555555"
+            android:textColor="@color/white"
             android:textSize="18sp" />
 
     </RelativeLayout>

@@ -28,7 +28,7 @@ public class CaheInterceptor implements Interceptor {
         Request request = chain.request();
         if (NetworkUtil.isNetworkConnected(context)) {// 有网络缓存
             Response response = chain.proceed(request);
-            // read from cache for 60 s
+            // icon_read from cache for 60 s
             int maxAge = 60;
             //获取头部信息
             return response.newBuilder()

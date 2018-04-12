@@ -86,6 +86,7 @@
                     tools:ignore="BatteryLife" />
             </intent-filter>
         </receiver>
+        <service android:name=".service.DownLoadService" />
     </application>
 
 </manifest>

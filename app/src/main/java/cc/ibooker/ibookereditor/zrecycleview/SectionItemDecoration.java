@@ -44,8 +44,6 @@ public class SectionItemDecoration extends RecyclerView.ItemDecoration {
 
         fontMetrics = new Paint.FontMetrics();
 //        topGap = res.getDimensionPixelSize(R.dimen.sectioned_top);// 32dp
-
-
     }
 
 

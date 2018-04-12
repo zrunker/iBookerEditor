@@ -27,4 +27,18 @@
     <string name="quit_login">退出登录</string>
     <string name="login">登录</string>
 
+    <string name="nonet_tip">网络开小差啦~</string>
+    <string name="no_data">未获取到任何数据</string>
+    <string name="reload">重新加载</string>
+
+    <string name="load_more_before">加载更多</string>
+    <string name="load_more">正在加载&#8230;</string>
+    <string name="load_more_complete">已经到达底部了</string>
+
+    <string name="submit">提交</string>
+    <string name="feedback_tip">建议、意见或者问题，您也可以发送问题到我的邮箱：zrunker@yahoo.com。</string>
+    <string name="email_input">请输入您的邮箱地址</string>
+    <string name="suggest">建议</string>
+    <string name="complain">投诉</string>
+    <string name="message">留言</string>
 </resources>

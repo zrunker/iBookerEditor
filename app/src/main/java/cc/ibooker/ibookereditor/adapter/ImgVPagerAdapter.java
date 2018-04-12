@@ -47,7 +47,6 @@ public class ImgVPagerAdapter extends PagerAdapter {
 
     @Override
     public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
-        super.destroyItem(container, position, object);
         container.removeView(mDatas.get(position));
     }
 }

@@ -4,7 +4,7 @@ android {
     compileSdkVersion 27
     defaultConfig {
         applicationId "cc.ibooker.ibookereditor"
-        minSdkVersion 19
+        minSdkVersion 15
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -15,19 +15,23 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
     }
 }
 
 allprojects {
     repositories {
-        maven { url 'https://jitpack.io' }
+        maven { url 'https://www.jitpack.io' }
     }
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:appcompat-v7:27.1.0'
-    implementation 'com.android.support:design:27.1.0'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:design:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
@@ -54,4 +58,7 @@ dependencies {
     implementation "com.github.bumptech.glide:okhttp3-integration:4.6.1"
 
     implementation 'org.greenrobot:eventbus:3.1.1'
+
+    implementation 'com.github.zrunker:ZDialog:v1.0.0'
+    implementation 'com.github.zrunker:ZPopupWindow:v1.03'
 }

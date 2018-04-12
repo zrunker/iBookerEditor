@@ -5,17 +5,20 @@ import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 
 import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.adapter.ImgVPagerAdapter;
+import cc.ibooker.ibookereditor.view.DownLoadImgPopuwindow;
+import cc.ibooker.ibookereditor.zglide.GlideApp;
 import cc.ibooker.ibookereditorlib.IbookerEditorScaleImageView;
+import cc.ibooker.zpopupwindowlib.ZPopupWindow;
+import cc.ibooker.zpopupwindowlib.ZPopupWindowUtil;
 
 /**
  * 图片预览Activity
@@ -94,22 +97,24 @@ public class ImgVPagerActivity extends AppCompatActivity implements View.OnClick
             // 获取图片资源，并保存到imageViews中
             for (int i = 0; i < imgAllPathList.size(); i++) {
                 IbookerEditorScaleImageView imageView = new IbookerEditorScaleImageView(this);
-                final int finalI = i;
+                imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 imageView.setOnMyClickListener(new IbookerEditorScaleImageView.OnMyClickListener() {
                     @Override
                     public void onMyClick(View v) {// 点击事件
-                        Toast.makeText(ImgVPagerActivity.this, "图片点击事件：" + finalI, Toast.LENGTH_LONG).show();
                         finish();
                     }
                 });
+                final int finalI = i;
                 imageView.setOnMyLongClickListener(new IbookerEditorScaleImageView.OnMyLongClickListener() {
                     @Override
                     public void onMyLongClick(View v) {// 长按事件
-                        Toast.makeText(ImgVPagerActivity.this, "图片长按事件：" + finalI, Toast.LENGTH_LONG).show();
+                        String imgPath = imgAllPathList.get(finalI);
+                        Toast.makeText(ImgVPagerActivity.this, "图片长按事件：" + imgPath, Toast.LENGTH_LONG).show();
+                        new DownLoadImgPopuwindow(ImgVPagerActivity.this, imgPath).showBottom();
                     }
                 });
                 String imgPath = imgAllPathList.get(i);
-                Glide.with(this).load(imgPath).into(imageView);
+                GlideApp.with(this).load(imgPath).into(imageView);
                 imageViews.add(imageView);
             }
             // 刷新数据

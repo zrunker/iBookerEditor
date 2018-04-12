@@ -10,11 +10,12 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,27 +27,39 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 
 import cc.ibooker.ibookereditor.R;
+import cc.ibooker.ibookereditor.adapter.ALocalAdapter;
+import cc.ibooker.ibookereditor.adapter.ARecommendAdapter;
 import cc.ibooker.ibookereditor.adapter.SideMenuAdapter;
 import cc.ibooker.ibookereditor.base.BaseActivity;
 import cc.ibooker.ibookereditor.bean.ArticleUserData;
+import cc.ibooker.ibookereditor.bean.LocalEntity;
 import cc.ibooker.ibookereditor.bean.SideMenuItem;
+import cc.ibooker.ibookereditor.dto.FooterData;
 import cc.ibooker.ibookereditor.dto.ResultData;
 import cc.ibooker.ibookereditor.event.SaveArticleSuccessEvent;
 import cc.ibooker.ibookereditor.net.service.HttpMethods;
+import cc.ibooker.ibookereditor.utils.ActivityUtil;
 import cc.ibooker.ibookereditor.utils.AppUtil;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
 import cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout;
 import cc.ibooker.ibookereditor.zrecycleview.MyLinearLayoutManager;
+import cc.ibooker.ibookereditor.zrecycleview.RecyclerViewScrollListener;
 import rx.Subscriber;
 import rx.subscriptions.CompositeSubscription;
+
+import static cc.ibooker.ibookereditor.utils.ConstantUtil.PAGE_SIZE_RECOMMEND_ARTICLE;
 
 /**
  * 书客编辑器开源项目
  *
  * @author 邹峰立
  */
-public class MainActivity extends BaseActivity implements View.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
+public class MainActivity extends BaseActivity implements
+        View.OnClickListener,
+        SwipeRefreshLayout.OnRefreshListener,
+        RecyclerViewScrollListener.OnScrollDistanceListener,
+        RecyclerViewScrollListener.OnLoadListener {
     private DrawerLayout drawer;
     private TextView topTv, nameTv, phoneTv;
     private ImageButton editImgBtn;
@@ -56,11 +69,24 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     private ArrayList<SideMenuItem> mSideMenuDatas;
 
     // 内容区
+    private RecyclerViewScrollListener ryScrollListener;
     private AutoSwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
+    private ARecommendAdapter aRecommendAdapter;
+    private ArrayList<ArticleUserData> articleUserDataList = new ArrayList<>();
+    private ALocalAdapter aLocalAdapter;
+    private ArrayList<LocalEntity> localEntities = new ArrayList<>();
 
+    private boolean isCanLoadMore = false;
+    private FooterData footerData;// 底部数据
+
+    // 网络状态、数据加载状态
+    private LinearLayout stateLayout;
+    private ImageView stateImg;
+    private TextView stateTv;
+
+    private int dataRes = 0;// 数据来源，0来自本地，1来自推荐。
     private int page = 1;
-
     private Subscriber<ResultData<ArrayList<ArticleUserData>>> getRecommendArticleListSubscriber;
     private CompositeSubscription mSubscription;
 
@@ -99,8 +125,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         super.onDestroy();
         EventBus.getDefault().register(SaveArticleSuccessEvent.class);
         EventBus.getDefault().unregister(this);
-        if (mSubscription != null)
+        if (mSubscription != null) {
+            mSubscription.clear();
             mSubscription.unsubscribe();
+        }
     }
 
     // 保存文章成功事件
@@ -116,7 +144,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         if (drawer == null)
             drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
+            drawer.closeDrawer(GravityCompat.START, true);
         } else {
             super.onBackPressed();
         }
@@ -125,6 +153,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
     // 点击事件监听
     @Override
     public void onClick(View v) {
+        if (ClickUtil.isFastClick()) return;
         switch (v.getId()) {
             case R.id.ibtn_edit:// 编辑
                 Intent intent_edit = new Intent(this, EditArticleActivity.class);
@@ -147,7 +176,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
         swipeRefreshLayout.setOnRefreshListener(this);
 
         recyclerView = findViewById(R.id.recycleview);
+        // 若item的布局是固定的，设置这个属性可以提高性能
+        recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new MyLinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+
+        ryScrollListener = new RecyclerViewScrollListener();
+        ryScrollListener.setOnScrollDistanceListener(this);
+        ryScrollListener.setOnLoadListener(this);
+        recyclerView.addOnScrollListener(ryScrollListener);
+
+        footerData = new FooterData(false, false, getResources().getString(R.string.load_more_before));
 
         // 侧边栏相关信息
         picImg = findViewById(R.id.img_pic);
@@ -161,30 +199,43 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 if (ClickUtil.isFastClick()) return;
                 switch (position) {
                     case 1:// 本地
-                        drawer.closeDrawer(GravityCompat.START);
-                        topTv.setText("本地");
+                        if (dataRes != 0) {
+                            topTv.setText("本地");
+
+                            // 加载数据
+                            dataRes = 0;
+                            swipeRefreshLayout.autoRefresh();
+                            onRefresh();
+                        }
+                        drawer.closeDrawer(GravityCompat.START, true);
                         break;
                     case 2:// 推荐
-                        drawer.closeDrawer(GravityCompat.START);
-                        topTv.setText("推荐");
-                        swipeRefreshLayout.autoRefresh();
-                        // 加载数据
-                        onRefresh();
+                        if (dataRes != 1) {
+                            topTv.setText("推荐");
+
+                            // 加载数据
+                            dataRes = 1;
+                            swipeRefreshLayout.autoRefresh();
+                            onRefresh();
+                        }
+                        drawer.closeDrawer(GravityCompat.START, true);
                         break;
                     case 3:// 语法参考
-                        drawer.closeDrawer(GravityCompat.START);
+                        drawer.closeDrawer(GravityCompat.START, true);
                         Intent intentGrammer = new Intent(MainActivity.this, IbookerEditorWebActivity.class);
-                        intentGrammer.putExtra("aId", 1);
+                        intentGrammer.putExtra("aId", 1L);
                         intentGrammer.putExtra("title", "语法参考");
                         startActivity(intentGrammer);
                         break;
                     case 4:// 设置
-                        drawer.closeDrawer(GravityCompat.START);
+                        drawer.closeDrawer(GravityCompat.START, true);
                         Intent intentSet = new Intent(MainActivity.this, SetActivity.class);
                         startActivity(intentSet);
                         break;
                     case 5:// 反馈
-                        drawer.closeDrawer(GravityCompat.START);
+                        drawer.closeDrawer(GravityCompat.START, true);
+                        Intent intentFeedback = new Intent(MainActivity.this, FeedbackActivity.class);
+                        startActivity(intentFeedback);
                         break;
                     case 6:// 评分
                         String mAddress = "market://details?id=" + AppUtil.getVersion(MainActivity.this);
@@ -193,21 +244,169 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                         startActivity(marketIntent);
                         break;
                     case 7:// 关于
-                        drawer.closeDrawer(GravityCompat.START);
+                        drawer.closeDrawer(GravityCompat.START, true);
                         Intent intentAbout = new Intent(MainActivity.this, IbookerEditorWebActivity.class);
-                        intentAbout.putExtra("aId", 182);
+                        intentAbout.putExtra("aId", 182L);
                         intentAbout.putExtra("title", "关于");
                         startActivity(intentAbout);
                         break;
                 }
             }
         });
+
+        // 状态信息
+        stateLayout = findViewById(R.id.layout_state);
+        stateImg = stateLayout.findViewById(R.id.img_state);
+        stateTv = stateLayout.findViewById(R.id.tv_state_tip);
+        TextView reloadTv = stateLayout.findViewById(R.id.tv_reload);
+        reloadTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (ClickUtil.isFastClick()) return;
+                updateStateLayout(false, -1, null);
+                swipeRefreshLayout.autoRefresh();
+                onRefresh();
+            }
+        });
+        updateStateLayout(false, -1, null);
     }
 
     // 下拉刷新
     @Override
     public void onRefresh() {
         page = 1;
+        ryScrollListener.setLoadingMore(false);
+        if (0 == dataRes) {// 加载本地数据
+
+        } else if (1 == dataRes) {// 加载推荐数据
+            if (getRecommendArticleListSubscriber != null && !getRecommendArticleListSubscriber.isUnsubscribed())
+                getRecommendArticleListSubscriber.unsubscribe();
+            getRecommendArticleList();
+        }
+    }
+
+    // 加载更多
+    @Override
+    public void onLoad() {
+        if (0 == dataRes) {// 加载本地数据
+
+        } else if (1 == dataRes) {// 加载推荐数据
+            if (isCanLoadMore && articleUserDataList.size() >= PAGE_SIZE_RECOMMEND_ARTICLE) {
+                page++;
+                swipeRefreshLayout.setRefreshing(false);
+                if (getRecommendArticleListSubscriber != null && !getRecommendArticleListSubscriber.isUnsubscribed())
+                    getRecommendArticleListSubscriber.unsubscribe();
+                getRecommendArticleList();
+            } else {
+                ryScrollListener.setLoadingMore(false);
+            }
+            // 刷新底部
+            updateFooterView();
+        }
+    }
+
+    // 滚动距离判断
+    private boolean isHidden = false;
+    private long preTime = 0;
+
+    @Override
+    public void onScrollDistance(int dy) {
+        if (System.currentTimeMillis() - preTime > 1000)
+            if (dy > 0) {// 向上滚动
+                if (!isHidden) {
+                    topTv.setVisibility(View.GONE);
+                    isHidden = !isHidden;
+                    preTime = System.currentTimeMillis();
+                }
+            } else {
+                if (isHidden) {
+                    topTv.setVisibility(View.VISIBLE);
+                    isHidden = !isHidden;
+                    preTime = System.currentTimeMillis();
+                }
+            }
+    }
+
+    // 更新状态布局
+    private void updateStateLayout(boolean isShow, int state, String stateTip) {
+        if (isShow) {
+            stateLayout.setVisibility(View.VISIBLE);
+            swipeRefreshLayout.setVisibility(View.GONE);
+            switch (state) {
+                case 1:// 无网络
+                    stateImg.setImageResource(R.drawable.img_load_error);
+                    stateTv.setText(getResources().getString(R.string.nonet_tip));
+                    break;
+                case 2:// 异常
+                    stateImg.setImageResource(R.drawable.img_load_error);
+                    stateTv.setText(stateTip);
+                    break;
+                case 3:// 失败
+                    stateImg.setImageResource(R.drawable.img_load_failed);
+                    stateTv.setText(stateTip);
+                    break;
+                case 4:// 数据为空
+                    stateImg.setImageResource(R.drawable.img_load_empty);
+                    stateTv.setText(getResources().getString(R.string.no_data));
+                    break;
+                case 0:// 成功
+                    stateImg.setImageResource(R.drawable.img_load_success);
+                    stateTv.setText(stateTip);
+                    break;
+            }
+        } else {
+            stateLayout.setVisibility(View.GONE);
+            swipeRefreshLayout.setVisibility(View.VISIBLE);
+        }
+    }
+
+    // 刷新本地文章列表
+    private void setaLocalAdapter() {
+        if (aLocalAdapter == null) {
+            aLocalAdapter = new ALocalAdapter(this, localEntities);
+            recyclerView.setAdapter(aLocalAdapter);
+        } else {
+            aLocalAdapter.reflashData(localEntities);
+        }
+    }
+
+    // 刷新推荐文章列表
+    private void setaRecommendAdapter() {
+        if (aRecommendAdapter == null) {
+            aRecommendAdapter = new ARecommendAdapter(this, articleUserDataList, footerData);
+            recyclerView.setAdapter(aRecommendAdapter);
+        } else {
+            aRecommendAdapter.reflashData(articleUserDataList);
+        }
+
+        stateLayout.setVisibility(View.GONE);
+        swipeRefreshLayout.setVisibility(View.VISIBLE);
+        isCanLoadMore = ((articleUserDataList.size() >= PAGE_SIZE_RECOMMEND_ARTICLE) && (articleUserDataList.size() % PAGE_SIZE_RECOMMEND_ARTICLE == 0));
+        updateFooterView();
+    }
+
+    // 更新RecyclerView底部
+    private void updateFooterView() {
+        if (ryScrollListener.isLoadingMore()) {
+            footerData.setShowFooter(true);
+            footerData.setShowProgressBar(true);
+            footerData.setTitle(getResources().getString(R.string.load_more));
+        } else {
+            if (articleUserDataList == null || articleUserDataList.size() < PAGE_SIZE_RECOMMEND_ARTICLE) {
+                footerData.setShowFooter(false);
+                footerData.setShowProgressBar(false);
+                footerData.setTitle(getResources().getString(R.string.load_more_before));
+            } else if (isCanLoadMore) {
+                footerData.setShowFooter(true);
+                footerData.setShowProgressBar(false);
+                footerData.setTitle(getResources().getString(R.string.load_more_before));
+            } else {
+                footerData.setShowFooter(true);
+                footerData.setShowProgressBar(false);
+                footerData.setTitle(getResources().getString(R.string.load_more_complete));
+            }
+        }
+        aRecommendAdapter.updateFooterView(footerData);
     }
 
     // 初始化数据
@@ -244,16 +443,34 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 @Override
                 public void onCompleted() {
                     swipeRefreshLayout.setRefreshing(false);
+                    ryScrollListener.setLoadingMore(false);
                 }
 
                 @Override
                 public void onError(Throwable e) {
                     Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    swipeRefreshLayout.setRefreshing(false);
+                    ryScrollListener.setLoadingMore(false);
                 }
 
                 @Override
                 public void onNext(ResultData<ArrayList<ArticleUserData>> arrayListResultData) {
-                    Log.d("arrayListResultData", arrayListResultData.toString());
+                    if (arrayListResultData.getResultCode() == 0) {// 成功
+                        if (arrayListResultData.getData() == null) {
+                            updateStateLayout(true, 4, null);
+                        } else {
+                            if (articleUserDataList == null)
+                                articleUserDataList = new ArrayList<>();
+                            if (page == 1)
+                                articleUserDataList.clear();
+                            articleUserDataList.addAll(arrayListResultData.getData());
+                            setaRecommendAdapter();
+
+                            updateStateLayout(false, -1, null);
+                        }
+                    } else {// 失败
+                        updateStateLayout(true, 3, arrayListResultData.getResultMsg());
+                    }
                 }
             };
             HttpMethods.getInstance().getRecommendArticleList(getRecommendArticleListSubscriber, page);
@@ -261,6 +478,34 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
                 mSubscription = new CompositeSubscription();
             mSubscription.add(getRecommendArticleListSubscriber);
         } else {// 无网络
+            updateStateLayout(true, 1, null);
+        }
+    }
+
+    // 退出应用
+    private long exitTime = 0;
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK || event.getAction() == KeyEvent.ACTION_DOWN) {
+            if (System.currentTimeMillis() - exitTime > 5000) {
+                exitTime = System.currentTimeMillis();
+                Toast.makeText(getApplicationContext(), "再按一次退出程序", Toast.LENGTH_LONG).show();
+            } else {
+                ActivityUtil.getInstance().exitSystem();
+            }
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    // 网络状态监听
+    @Override
+    public void onNetChange(boolean netWorkState) {
+        super.onNetChange(netWorkState);
+        if (netWorkState) {
+            if (dataRes == 1)
+                getRecommendArticleList();
         }
     }
 }

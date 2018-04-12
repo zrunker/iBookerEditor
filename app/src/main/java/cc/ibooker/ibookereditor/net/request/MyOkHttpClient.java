@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import cc.ibooker.ibookereditor.application.MyApplication;
-import cc.ibooker.ibookereditor.net.interceptor.CaheInterceptor;
+import cc.ibooker.ibookereditor.net.interceptor.CacheInterceptor;
 import okhttp3.Cache;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -38,12 +38,12 @@ public class MyOkHttpClient {
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
         File fileCache = new File(Environment.getExternalStorageDirectory() + File.separator + "IbookerEditor", "cacheData");
         Cache cache = new Cache(fileCache.getAbsoluteFile(), 1024 * 1024 * 30);//设置缓存30M
-        CaheInterceptor caheInterceptor = new CaheInterceptor(MyApplication.getInstance().getApplicationContext());// 缓存拦截器
+        CacheInterceptor caheInterceptor = new CacheInterceptor(MyApplication.getInstance().getApplicationContext());// 缓存拦截器
 
         mClient = new OkHttpClient.Builder()
                 .addInterceptor(logging)
                 .connectTimeout(DEFAULT_TIMEOUT, TimeUnit.SECONDS)//超时时间15S
-                .retryOnConnectionFailure(true)//连接失败后是否重新连接
+                .retryOnConnectionFailure(true)// 连接失败后是否重新连接
                 .cache(cache)//设置缓存
                 .addInterceptor(caheInterceptor)//离线缓存
                 .addNetworkInterceptor(caheInterceptor)//在线缓存

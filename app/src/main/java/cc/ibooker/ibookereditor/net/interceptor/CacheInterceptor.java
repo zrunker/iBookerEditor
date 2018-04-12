@@ -15,18 +15,18 @@ import okhttp3.Response;
  * 缓存拦截器
  * Created by 邹峰立 on 2016/12/8.
  */
-public class CaheInterceptor implements Interceptor {
+public class CacheInterceptor implements Interceptor {
 
     private Context context;// 用来判断网络状态
 
-    public CaheInterceptor(@NonNull Context context) {
+    public CacheInterceptor(@NonNull Context context) {
         this.context = context;
     }
 
     @Override
-    public Response intercept(Chain chain) throws IOException {
+    public Response intercept(@NonNull Chain chain) throws IOException {
         Request request = chain.request();
-        if (NetworkUtil.isNetworkConnected(context)) {// 有网络缓存
+        if (NetworkUtil.isNetworkConnected(context.getApplicationContext())) {// 有网络缓存
             Response response = chain.proceed(request);
             // icon_read from cache for 60 s
             int maxAge = 60;

@@ -1,5 +1,0 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="cc.ibooker.ibookereditorlib">
-
-    <uses-permission android:name="android.permission.INTERNET" />
-</manifest>

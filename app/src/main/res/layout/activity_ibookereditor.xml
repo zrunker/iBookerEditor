@@ -47,7 +47,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <cc.ibooker.ibookereditorlib.IbookerEditorPreView
+        <cc.ibooker.ibookereditorlib.IbookerEditorWebView
             android:id="@+id/ibookerEditorPreView"
             android:layout_width="match_parent"
             android:layout_height="0dp"

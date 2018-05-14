@@ -21,7 +21,7 @@ import cc.ibooker.ibookereditor.net.service.HttpMethods;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
 import cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout;
-import cc.ibooker.ibookereditorlib.IbookerEditorPreView;
+import cc.ibooker.ibookereditorlib.IbookerEditorWebView;
 import rx.Subscriber;
 import rx.subscriptions.CompositeSubscription;
 
@@ -32,7 +32,7 @@ import rx.subscriptions.CompositeSubscription;
  */
 public class IbookerEditorWebActivity extends BaseActivity implements View.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
     private AutoSwipeRefreshLayout swipeRefreshLayout;
-    private IbookerEditorPreView preWebView;
+    private IbookerEditorWebView preWebView;
 
     // 网络状态、数据加载状态
     private LinearLayout stateLayout;
@@ -83,7 +83,7 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
         backImg.setOnClickListener(this);
         TextView titleTv = findViewById(R.id.tv_title);
         preWebView = findViewById(R.id.ibookerEditorPreView);
-        preWebView.setIbookerEditorImgPreviewListener(new IbookerEditorPreView.IbookerEditorImgPreviewListener() {
+        preWebView.setIbookerEditorImgPreviewListener(new IbookerEditorWebView.IbookerEditorImgPreviewListener() {
             @Override
             public void onIbookerEditorImgPreview(String currentPath, int position, ArrayList<String> imgAllPathList) {
                 if (ClickUtil.isFastClick()) return;

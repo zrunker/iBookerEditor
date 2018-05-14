@@ -49,16 +49,16 @@
                 android:id="@+id/rbtn_suggest"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/dp10"
-                android:layout_marginRight="@dimen/dp10"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
                 android:text="@string/suggest" />
 
             <RadioButton
                 android:id="@+id/rbtn_complain"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/dp10"
-                android:layout_marginRight="@dimen/dp10"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
                 android:text="@string/complain" />
 
             <RadioButton
@@ -76,7 +76,7 @@
             android:background="@drawable/bg_label_orange"
             android:hint="@string/email_input"
             android:inputType="textEmailAddress"
-            android:padding="@dimen/dp8"
+            android:padding="8dp"
             android:textColorHint="#999"
             android:textSize="14sp" />
 
@@ -90,7 +90,7 @@
             android:hint="@string/feedback_tip"
             android:inputType="textMultiLine"
             android:lines="10"
-            android:padding="@dimen/dp8"
+            android:padding="8dp"
             android:textColorHint="#999"
             android:textSize="14sp" />
 

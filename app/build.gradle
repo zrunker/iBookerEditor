@@ -39,7 +39,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
     /*引入书客编辑器*/
-    implementation 'com.github.zrunker:IbookerEditorAndroid:v1.1.0'
+    implementation 'com.github.zrunker:IbookerEditorAndroid:v1.1.1'
 
     /*网络框架 rxjava + retrofit + okhttp + glide*/
     implementation 'io.reactivex:rxjava:1.2.10'

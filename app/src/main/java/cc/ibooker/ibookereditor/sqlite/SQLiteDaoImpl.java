@@ -1,13 +1,21 @@
 package cc.ibooker.ibookereditor.sqlite;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+
+import java.util.ArrayList;
+
+import cc.ibooker.ibookereditor.dto.FileInfoBean;
+
+import static cc.ibooker.ibookereditor.utils.ConstantUtil.PAGE_SIZE_LOCAL_ARTICLE;
 
 /**
  * 数据库访问接口实现类
  * Created by 邹峰立 on 2017/2/16 0016.
  */
 public class SQLiteDaoImpl implements SQLiteDao {
-    private SQLiteHelper dbHelper = null;
+    private SQLiteHelper dbHelper;
 
     /**
      * 构造方法
@@ -18,156 +26,123 @@ public class SQLiteDaoImpl implements SQLiteDao {
         dbHelper = SQLiteHelper.getSqliteHelper(context);
     }
 
-//    /**
-//     * 插入用户信息-删除旧的数据
-//     *
-//     * @param user 插入值（用户信息）
-//     */
-//    @Override
-//    public void insertUserOne(User user) {
-//        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
-//        db.execSQL("delete from t_user", new Object[]{});
-//        if (user != null) {
-//            String sql = "insert into t_user(app_token, user_id, user_name) values(?,?,?)";
-//            db.execSQL(sql, new Object[]{user.getApp_token(), user.getUser_id(), user.getUser_name()});
-//        }
-//        dbHelper.closeDatabase();
-//    }
-//
-//    /**
-//     * 插入用户信息
-//     *
-//     * @param user 插入值（用户信息）
-//     */
-//    @Override
-//    public synchronized void insertUser(User user) {
-//        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
-//        String sql = "insert into t_user(app_token, user_id, user_name) values(?,?,?)";
-//        db.execSQL(sql, new Object[]{user.getApp_token(), user.getUser_id(), user.getUser_name()});
-//        dbHelper.closeDatabase();
-//    }
-//
-//    /**
-//     * 删除用户信息
-//     */
-//    @Override
-//    public synchronized void deleteUser() {
-//        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
-//        db.execSQL("delete from t_user", new Object[]{});
-//        dbHelper.closeDatabase();
-//    }
-//
-//    /**
-//     * 查询用户信息
-//     */
-//    @Override
-//    public synchronized User selectUser() {
-//        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可读的数据库
-//        User user = null;
-//        Cursor cursor = db.rawQuery("select * from t_user", new String[]{});
-//        while (cursor.moveToNext()) {
-//            user = new User();
-//            user.setApp_token(cursor.getString(cursor.getColumnIndex("app_token")));
-//            user.setUser_id(cursor.getString(cursor.getColumnIndex("user_id")));
-//            user.setUser_name(cursor.getString(cursor.getColumnIndex("user_name")));
-//        }
-//        cursor.close();
-//        dbHelper.closeDatabase();
-//        return user;
-//    }
-//
-//    /**
-//     * 查询历史搜索内容
-//     */
-//    @Override
-//    public synchronized List<String> selectSearchHistory() {
-//        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可读的数据库
-//        List<String> list = new ArrayList<>();
-//        Cursor cursor = db.rawQuery("select * from t_search_history", new String[]{});
-//        while (cursor.moveToNext()) {
-//            String str = cursor.getString(cursor.getColumnIndex("content"));
-//            list.add(str);
-//        }
-//        cursor.close();
-//        dbHelper.closeDatabase();
-//        return list;
-//    }
-//
-//    /**
-//     * 判断搜索是否已经存在
-//     */
-//    @Override
-//    public synchronized boolean isSearchExists(String content) {
-//        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可读的数据库
-//        String sql = "select * from t_search_history where content = ?";
-//        Cursor cursor = db.rawQuery(sql, new String[]{content});
-//        boolean exists = cursor.moveToNext();
-//        cursor.close();
-//        dbHelper.closeDatabase();
-//        return exists;
-//    }
-//
-//    /**
-//     * 插入历史搜索表
-//     */
-//    @Override
-//    public synchronized void insertSearchHistory(String content) {
-//        if (!isSearchExists(content)) {
-//            // 不存在才进行插入
-//            SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
-//            String sql = "insert into t_search_history(content) values(?)";
-//            db.execSQL(sql, new Object[]{content});
-//            dbHelper.closeDatabase();
-//        }
-//    }
-//
-//    /**
-//     * 删除历史搜索表
-//     */
-//    @Override
-//    public void deleteSearchHistory() {
-//        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
-//        db.execSQL("delete from t_search_history", new Object[]{});
-//        dbHelper.closeDatabase();
-//    }
-//
-//    /**
-//     * 插入新人礼包弹框记录表
-//     */
-//    @Override
-//    public void insertNewGiftBagDiyDialog(NewGiftBagDiyDialogEntity newGiftBagDiyDialogEntity) {
-//        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
-//        try {
-//            String sql = "insert into t_new_gift_bag_dialog(ishasshow,time,userid) values(?,?,?)";
-//            db.execSQL(sql, new Object[]{newGiftBagDiyDialogEntity.getIshasshow(), newGiftBagDiyDialogEntity.getTime(), newGiftBagDiyDialogEntity.getUserid()});
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        dbHelper.closeDatabase();
-//    }
-//
-//    /**
-//     * 查询新人礼包弹框记录表
-//     */
-//    @Override
-//    public NewGiftBagDiyDialogEntity selectNewGiftBagDiyDialog(String userid, String time) {
-//        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可读的数据库
-//        NewGiftBagDiyDialogEntity newGiftBagDiyDialogEntity = null;
-//        try {
-//            String sql = "select * from t_new_gift_bag_dialog where time=? and userid=?";
-//            Cursor cursor = db.rawQuery(sql, new String[]{time, userid});
-//            while (cursor.moveToNext()) {
-//                newGiftBagDiyDialogEntity = new NewGiftBagDiyDialogEntity();
-//                newGiftBagDiyDialogEntity.set_id(cursor.getInt(cursor.getColumnIndex("_id")));
-//                newGiftBagDiyDialogEntity.setIshasshow(cursor.getString(cursor.getColumnIndex("ishasshow")));
-//                newGiftBagDiyDialogEntity.setTime(cursor.getString(cursor.getColumnIndex("time")));
-//                newGiftBagDiyDialogEntity.setUserid(cursor.getString(cursor.getColumnIndex("userid")));
-//            }
-//            cursor.close();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        dbHelper.closeDatabase();
-//        return newGiftBagDiyDialogEntity;
-//    }
+    /**
+     * 插入本地文件信息
+     *
+     * @param data 插入值（本地文件信息）
+     */
+    @Override
+    public synchronized void insertLocalFile(FileInfoBean data) {
+        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
+        String sql = "insert into t_local_file(lf_name, lf_path, lf_size, lf_create_time) values(?,?,?,?)";
+        db.execSQL(sql, new Object[]{data.getFileName(), data.getFilePath(), data.getFileSize(), data.getFileCreateTime()});
+        dbHelper.closeDatabase();
+    }
+
+    /**
+     * 插入本地文件信息，返回ID信息
+     *
+     * @param data 插入值（本地文件信息）
+     */
+    @Override
+    public synchronized int insertLocalFile2(FileInfoBean data) {
+        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
+
+        // 插入数据
+        String sql = "insert into t_local_file(lf_name, lf_path, lf_size, lf_create_time) values(?,?,?,?)";
+        db.execSQL(sql, new Object[]{data.getFileName(), data.getFilePath(), data.getFileSize(), data.getFileCreateTime()});
+
+        // 查询插入的ID
+        int _id = 0;
+        Cursor cursor = db.rawQuery("select last_insert_rowid() from t_local_file", null);
+        if (cursor.moveToFirst())
+            _id = cursor.getInt(0);
+
+        cursor.close();
+        dbHelper.closeDatabase();
+        return _id;
+    }
+
+    /**
+     * 根据ID删除本地文件信息
+     *
+     * @param _id 本地文件ID
+     */
+    @Override
+    public synchronized void deleteLocalFileById(int _id) {
+        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
+        db.execSQL("delete from t_local_file where _id=?", new Object[]{_id});
+        dbHelper.closeDatabase();
+    }
+
+    /**
+     * 根据ID修改本地文件信息
+     *
+     * @param data 待修改本地文件信息
+     * @param _id  文件信息ID
+     */
+    @Override
+    public synchronized void updateLocalFileById(FileInfoBean data, int _id) {
+        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
+        db.execSQL("update t_local_file set lf_name = ?, lf_path = ?, lf_size = ? where _id=?", new Object[]{data.getFileName(), data.getFilePath(), data.getFileSize(), _id});
+        dbHelper.closeDatabase();
+    }
+
+    /**
+     * 根据时间查询所有本地文件
+     */
+    @Override
+    public synchronized ArrayList<FileInfoBean> selectLocalFilesByTime() {
+        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可读的数据库
+        ArrayList<FileInfoBean> list = new ArrayList<>();
+        Cursor cursor = db.rawQuery("select * from t_local_file order by lf_create_time desc", new String[]{});
+        while (cursor.moveToNext()) {
+            FileInfoBean data = new FileInfoBean();
+            int id = cursor.getInt(cursor.getColumnIndex("_id"));
+            data.setId(id);
+            String fileName = cursor.getString(cursor.getColumnIndex("lf_name"));
+            data.setFileName(fileName);
+            String filePath = cursor.getString(cursor.getColumnIndex("lf_path"));
+            data.setFilePath(filePath);
+            long fileSize = cursor.getLong(cursor.getColumnIndex("lf_size"));
+            data.setFileSize(fileSize);
+            long fileCreateTime = cursor.getLong(cursor.getColumnIndex("lf_create_time"));
+            data.setFileCreateTime(fileCreateTime);
+            list.add(data);
+        }
+        cursor.close();
+        dbHelper.closeDatabase();
+        return list;
+    }
+
+    /**
+     * 根据时间分页查询所有本地文件
+     *
+     * @param page 当前页
+     */
+    @Override
+    public ArrayList<FileInfoBean> selectLocalFilesByTimePager(int page) {
+        int limit = (page - 1) * PAGE_SIZE_LOCAL_ARTICLE;
+        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可读的数据库
+        ArrayList<FileInfoBean> list = new ArrayList<>();
+        Cursor cursor = db.rawQuery("select * from t_local_file order by lf_create_time desc limit ? offset ?", new String[]{limit + "", PAGE_SIZE_LOCAL_ARTICLE + ""});
+        while (cursor.moveToNext()) {
+            FileInfoBean data = new FileInfoBean();
+            int id = cursor.getInt(cursor.getColumnIndex("_id"));
+            data.setId(id);
+            String fileName = cursor.getString(cursor.getColumnIndex("lf_name"));
+            data.setFileName(fileName);
+            String filePath = cursor.getString(cursor.getColumnIndex("lf_path"));
+            data.setFilePath(filePath);
+            long fileSize = cursor.getLong(cursor.getColumnIndex("lf_size"));
+            data.setFileSize(fileSize);
+            long fileCreateTime = cursor.getLong(cursor.getColumnIndex("lf_create_time"));
+            data.setFileCreateTime(fileCreateTime);
+            list.add(data);
+        }
+        cursor.close();
+        dbHelper.closeDatabase();
+        return list;
+    }
+
 }

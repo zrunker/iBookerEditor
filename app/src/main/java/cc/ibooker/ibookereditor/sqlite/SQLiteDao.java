@@ -1,63 +1,53 @@
 package cc.ibooker.ibookereditor.sqlite;
 
-import java.util.List;
+import java.util.ArrayList;
+
+import cc.ibooker.ibookereditor.dto.FileInfoBean;
 
 /**
  * 数据库访问接口
  * Created by 邹封立 on 2017/2/16 0016.
  */
 public interface SQLiteDao {
-//    /**
-//     * 插入用户信息-删除旧的数据
-//     *
-//     * @param user 插入值（用户信息）
-//     */
-//    void insertUserOne(User user);
-//
-//    /**
-//     * 插入用户信息
-//     *
-//     * @param user 插入值（用户信息）
-//     */
-//    void insertUser(User user);
-//
-//    /**
-//     * 删除用户信息
-//     */
-//    void deleteUser();
-//
-//    /**
-//     * 查询用户信息
-//     */
-//    User selectUser();
-//
-//    /**
-//     * 查询历史搜索内容
-//     */
-//    List<String> selectSearchHistory();
-//
-//    /**
-//     * 判断搜索是否已经存在
-//     */
-//    boolean isSearchExists(String content);
-//
-//    /**
-//     * 插入历史搜索表
-//     */
-//    void insertSearchHistory(String content);
-//
-//    /**
-//     * 删除历史搜索表
-//     */
-//    void deleteSearchHistory();
-//
-//    /**
-//     * 插入新人礼包弹框记录表
-//     */
-//    void insertNewGiftBagDiyDialog(NewGiftBagDiyDialogEntity newGiftBagDiyDialogEntity);
-//
-//    /**
-//     * 查询新人礼包弹框记录表
-//     */
-//    NewGiftBagDiyDialogEntity selectNewGiftBagDiyDialog(String userid, String time);
+    /**
+     * 插入本地文件信息
+     *
+     * @param data 插入值（本地文件信息）
+     */
+    void insertLocalFile(FileInfoBean data);
+
+    /**
+     * 插入本地文件信息，返回ID信息
+     *
+     * @param data 插入值（本地文件信息）
+     */
+    int insertLocalFile2(FileInfoBean data);
+
+    /**
+     * 根据ID删除本地文件信息
+     *
+     * @param _id 本地文件ID
+     */
+    void deleteLocalFileById(int _id);
+
+    /**
+     * 根据ID修改本地文件信息
+     *
+     * @param data 待修改本地文件信息
+     * @param _id  文件信息ID
+     */
+    void updateLocalFileById(FileInfoBean data, int _id);
+
+    /**
+     * 根据时间查询所有本地文件
+     */
+    ArrayList<FileInfoBean> selectLocalFilesByTime();
+
+    /**
+     * 根据时间分页查询所有本地文件
+     *
+     * @param page 当前页
+     */
+    ArrayList<FileInfoBean> selectLocalFilesByTimePager(int page);
+
 }

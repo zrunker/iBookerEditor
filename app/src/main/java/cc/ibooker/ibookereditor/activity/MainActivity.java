@@ -1,7 +1,10 @@
 package cc.ibooker.ibookereditor.activity;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -34,13 +37,18 @@ import cc.ibooker.ibookereditor.base.BaseActivity;
 import cc.ibooker.ibookereditor.bean.ArticleUserData;
 import cc.ibooker.ibookereditor.bean.LocalEntity;
 import cc.ibooker.ibookereditor.bean.SideMenuItem;
+import cc.ibooker.ibookereditor.dto.FileInfoBean;
 import cc.ibooker.ibookereditor.dto.FooterData;
 import cc.ibooker.ibookereditor.dto.ResultData;
 import cc.ibooker.ibookereditor.event.SaveArticleSuccessEvent;
 import cc.ibooker.ibookereditor.net.service.HttpMethods;
+import cc.ibooker.ibookereditor.sqlite.SQLiteDao;
+import cc.ibooker.ibookereditor.sqlite.SQLiteDaoImpl;
 import cc.ibooker.ibookereditor.utils.ActivityUtil;
 import cc.ibooker.ibookereditor.utils.AppUtil;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
+import cc.ibooker.ibookereditor.utils.DateUtil;
+import cc.ibooker.ibookereditor.utils.FileUtil;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
 import cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout;
 import cc.ibooker.ibookereditor.zrecycleview.MyLinearLayoutManager;
@@ -49,12 +57,14 @@ import rx.Subscriber;
 import rx.subscriptions.CompositeSubscription;
 
 import static cc.ibooker.ibookereditor.utils.ConstantUtil.PAGE_SIZE_RECOMMEND_ARTICLE;
+import static cc.ibooker.ibookereditor.utils.ConstantUtil.PERMISSIONS_REQUEST_OPER_FILE;
 
 /**
  * 书客编辑器开源项目
  *
  * @author 邹峰立
  */
+@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 public class MainActivity extends BaseActivity implements
         View.OnClickListener,
         SwipeRefreshLayout.OnRefreshListener,
@@ -86,9 +96,19 @@ public class MainActivity extends BaseActivity implements
     private TextView stateTv;
 
     private int dataRes = 0;// 数据来源，0来自本地，1来自推荐。
-    private int page = 1;
+    private int recommendPage = 1, localPage = 1;
     private Subscriber<ResultData<ArrayList<ArticleUserData>>> getRecommendArticleListSubscriber;
     private CompositeSubscription mSubscription;
+
+    // 权限组
+    private String[] needPermissions = new String[]{
+            // SDK在Android 6.0+需要进行运行检测的权限如下：
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.READ_PHONE_STATE
+    };
+
+    private SQLiteDao sqLiteDao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +122,10 @@ public class MainActivity extends BaseActivity implements
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
+        // 申请权限
+        if (!hasPermission(needPermissions))
+            requestPermission(PERMISSIONS_REQUEST_OPER_FILE, needPermissions);
 
         // 初始化
         init();
@@ -134,6 +158,13 @@ public class MainActivity extends BaseActivity implements
     // 保存文章成功事件
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void executeSaveArticleSuccessEvent(SaveArticleSuccessEvent event) {
+        // 保存相关数据到数据中
+        SQLiteDao sqLiteDao = new SQLiteDaoImpl(this);
+        sqLiteDao.updateLocalFileById(event.getFileInfoBean(), event.get_id());
+
+        // 刷新界面
+        if (event.isIsflashData())
+            onRefresh();
 
         EventBus.getDefault().removeStickyEvent(event);
     }
@@ -274,11 +305,18 @@ public class MainActivity extends BaseActivity implements
     // 下拉刷新
     @Override
     public void onRefresh() {
-        page = 1;
         ryScrollListener.setLoadingMore(false);
         if (0 == dataRes) {// 加载本地数据
-
+            localPage = 1;
+            if (sqLiteDao == null)
+                sqLiteDao = new SQLiteDaoImpl(this);
+            if (localEntities.size() > 0)
+                localEntities.clear();
+            ArrayList<FileInfoBean> localFileList = sqLiteDao.selectLocalFilesByTimePager(localPage);
+            localEntities = localFileListToEntities(localFileList);
+            setaLocalAdapter();
         } else if (1 == dataRes) {// 加载推荐数据
+            recommendPage = 1;
             if (getRecommendArticleListSubscriber != null && !getRecommendArticleListSubscriber.isUnsubscribed())
                 getRecommendArticleListSubscriber.unsubscribe();
             getRecommendArticleList();
@@ -289,10 +327,16 @@ public class MainActivity extends BaseActivity implements
     @Override
     public void onLoad() {
         if (0 == dataRes) {// 加载本地数据
-
+            swipeRefreshLayout.setRefreshing(false);
+            localPage++;
+            if (sqLiteDao == null)
+                sqLiteDao = new SQLiteDaoImpl(this);
+            ArrayList<FileInfoBean> localFileList = sqLiteDao.selectLocalFilesByTimePager(localPage);
+            localEntities.addAll(localFileListToEntities(localFileList));
+            setaLocalAdapter();
         } else if (1 == dataRes) {// 加载推荐数据
             if (isCanLoadMore && articleUserDataList.size() >= PAGE_SIZE_RECOMMEND_ARTICLE) {
-                page++;
+                recommendPage++;
                 swipeRefreshLayout.setRefreshing(false);
                 if (getRecommendArticleListSubscriber != null && !getRecommendArticleListSubscriber.isUnsubscribed())
                     getRecommendArticleListSubscriber.unsubscribe();
@@ -461,7 +505,7 @@ public class MainActivity extends BaseActivity implements
                         } else {
                             if (articleUserDataList == null)
                                 articleUserDataList = new ArrayList<>();
-                            if (page == 1)
+                            if (recommendPage == 1)
                                 articleUserDataList.clear();
                             articleUserDataList.addAll(arrayListResultData.getData());
                             setaRecommendAdapter();
@@ -473,7 +517,7 @@ public class MainActivity extends BaseActivity implements
                     }
                 }
             };
-            HttpMethods.getInstance().getRecommendArticleList(getRecommendArticleListSubscriber, page);
+            HttpMethods.getInstance().getRecommendArticleList(getRecommendArticleListSubscriber, recommendPage);
             if (mSubscription == null)
                 mSubscription = new CompositeSubscription();
             mSubscription.add(getRecommendArticleListSubscriber);
@@ -507,5 +551,25 @@ public class MainActivity extends BaseActivity implements
             if (dataRes == 1)
                 getRecommendArticleList();
         }
+    }
+
+    /**
+     * 将ArrayList<FileInfoBean>转化为ArrayList<LocalEntity>
+     *
+     * @param list 待转化数据
+     */
+    private ArrayList<LocalEntity> localFileListToEntities(ArrayList<FileInfoBean> list) {
+        ArrayList<LocalEntity> localList = new ArrayList<>();
+        for (FileInfoBean fileInfoBean : list) {
+            LocalEntity data = new LocalEntity();
+            data.setaId(fileInfoBean.getId());
+            data.setaFilePath(fileInfoBean.getFilePath());
+            data.setaTitle(fileInfoBean.getFileName());
+            data.setaTime(fileInfoBean.getFileCreateTime());
+            data.setaFormatTime(DateUtil.getFormatTimeStampToDateTime(fileInfoBean.getFileCreateTime()));
+            data.setaFormatSize(FileUtil.formatFileSize(fileInfoBean.getFileSize()));
+            localList.add(data);
+        }
+        return localList;
     }
 }

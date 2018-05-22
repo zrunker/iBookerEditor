@@ -19,7 +19,7 @@ class SQLiteHelper extends SQLiteOpenHelper {
     private static SQLiteHelper SQLiteHelper;
 
     /**
-     * 获取MySqliteHelper，单列模式
+     * 获取SQLiteHelper，单列模式
      *
      * @param context 上下文对象
      */
@@ -73,9 +73,7 @@ class SQLiteHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         // 创建数据表
-        db.execSQL(SQLiteConstant.SQL_CREATE_TABLE_USER);
-        db.execSQL(SQLiteConstant.SQL_CREATE_TABLE_SEARCH_HISTORY);
-        db.execSQL(SQLiteConstant.SQL_CREATE_TABLE_NEW_GIFT_BAG_DIALOG);
+        db.execSQL(SQLiteConstant.SQL_CREATE_TABLE_LOCALFILE);
     }
 
     /**
@@ -90,12 +88,8 @@ class SQLiteHelper extends SQLiteOpenHelper {
         if (oldVersion < newVersion) {
             db.beginTransaction();
             try {// 升级数据库
-                db.execSQL(SQLiteConstant.SQL_DROP_TABLE_USER);
-                db.execSQL(SQLiteConstant.SQL_CREATE_TABLE_USER);
-                db.execSQL(SQLiteConstant.SQL_DROP_TABLE_SEARCH_HISTORY);
-                db.execSQL(SQLiteConstant.SQL_CREATE_TABLE_SEARCH_HISTORY);
-                db.execSQL(SQLiteConstant.SQL_DROP_TABLE_NEW_GIFT_BAG_DIALOG);
-                db.execSQL(SQLiteConstant.SQL_CREATE_TABLE_NEW_GIFT_BAG_DIALOG);
+                db.execSQL(SQLiteConstant.SQL_DROP_TABLE_LOCALFILE);
+                db.execSQL(SQLiteConstant.SQL_CREATE_TABLE_LOCALFILE);
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();

@@ -1,6 +1,9 @@
 package cc.ibooker.ibookereditor.base;
 
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -8,9 +11,11 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
+import android.view.WindowManager;
 
 import cc.ibooker.ibookereditor.broadcastreceiver.NetBroadcastReceiver;
 import cc.ibooker.ibookereditor.utils.ActivityUtil;
+import cc.ibooker.ibookereditor.utils.ConstantUtil;
 
 /**
  * BaseActivity是所有Activity的基类，把一些公共的方法放到里面，如基础样式设置，权限封装，网络状态监听等
@@ -27,17 +32,41 @@ public abstract class BaseActivity extends AppCompatActivity implements NetBroad
         if (getSupportActionBar() != null)
             getSupportActionBar().hide();
 
+        // 沉浸效果
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            // 透明状态栏
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            // 透明导航栏
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        }
+
         // 添加到Activity工具类
         ActivityUtil.getInstance().addActivity(this);
 
         // 初始化netEvent
         netEvent = this;
+
+        // 执行初始化方法
+//        init();
+    }
+
+    // 抽象 - 初始化方法，可以对数据进行初始化
+//    protected abstract void init();
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Resources resources = this.getResources();
+        Configuration configuration = resources.getConfiguration();
+        configuration.fontScale = ConstantUtil.TEXTVIEWSIZE;
+        resources.updateConfiguration(configuration, resources.getDisplayMetrics());
     }
 
     @Override
     protected void onDestroy() {
         // Activity销毁时，提示系统回收
-        System.gc();
+        // System.gc();
+        netEvent = null;
         // 移除Activity
         ActivityUtil.getInstance().removeActivity(this);
         super.onDestroy();
@@ -47,6 +76,8 @@ public abstract class BaseActivity extends AppCompatActivity implements NetBroad
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         // 点击手机上的返回键，返回上一层
         if (keyCode == KeyEvent.KEYCODE_BACK) {
+            // 移除Activity
+            ActivityUtil.getInstance().removeActivity(this);
             this.finish();
         }
         return super.onKeyDown(keyCode, event);

@@ -21,6 +21,38 @@ public class RegularExpressionUtil {
         return Pattern.matches(regex, domainName);
     }
 
+    // URL验证
+    public static boolean isURL(String str) {
+        // 转换为小写
+        str = str.toLowerCase();
+        String regex = "^((https|http|ftp|rtsp|mms)?://)"
+                + "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" // ftp的user@
+                + "(([0-9]{1,3}\\.){3}[0-9]{1,3}" // IP形式的URL- 199.194.52.184
+                + "|" // 允许IP和DOMAIN（域名）
+                + "([0-9a-z_!~*'()-]+\\.)*" // 域名- www.
+                + "([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]\\." // 二级域名
+                + "[a-z]{2,6})" // first level domain- .com or .museum
+                + "(:[0-9]{1,4})?" // 端口- :80
+                + "((/?)|" // a slash isn't required if there is no file name
+                + "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$";
+        return Pattern.matches(regex, str);
+    }
+
+    // URL验证2
+    public static boolean isURL2(String str) {
+        String regex = "^((https|http|ftp|rtsp|mms)?://)"
+                + "?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" // ftp的user@
+                + "(([0-9]{1,3}\\.){3}[0-9]{1,3}" // IP形式的URL- 199.194.52.184
+                + "|" // 允许IP和DOMAIN（域名）
+                + "([0-9a-z_!~*'()-]+\\.)*" // 域名- www.
+                // + "([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]\\." // 二级域名
+                + "[a-z]{2,6})" // first level domain- .com or .museum
+                + "(:[0-9]{1,4})?" // 端口- :80
+                + "((/?)|" // a slash isn't required if there is no file name
+                + "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$";
+        return Pattern.matches(regex, str);
+    }
+
     // InternetURL验证
     public static boolean isInternetURL(String intentUrl) {
         // http://github.com/
@@ -31,14 +63,14 @@ public class RegularExpressionUtil {
     // 手机号码验证
     public static boolean isPhone(String phone) {
         /*
-         * 要更加准确的匹配手机号码只匹配11位数字是不够的，比如说就没有以144开始的号码段， 　　
-		 * 故先要整清楚现在已经开放了多少个号码段，国家号码段分配如下：
-		 * 移动：134、135、136、137、138、139、147、150、151、157(TD)、158、159、178、182、183、184、187、188
-		 * 联通：130、131、132、152、155、156、185、186
-		 * 电信：133、153、（1349卫通）、173、177、180、181、189
-		 * 阿里通信：170、171、172
-		 * 腾讯通信：
-		 */
+         * 要更加准确的匹配手机号码只匹配11位数字是不够的，比如说就没有以144开始的号码段，
+         * 故先要整清楚现在已经开放了多少个号码段，国家号码段分配如下：
+         * 移动：134、135、136、137、138、139、147、150、151、157(TD)、158、159、178、182、183、184、187、188
+         * 联通：130、131、132、152、155、156、185、186
+         * 电信：133、153、（1349卫通）、173、177、180、181、189
+         * 阿里通信：170、171、172
+         * 腾讯通信：
+         */
         String regex = "^((13[0-9])|(147)|(15[^4,\\D])|(17[6-8])|(17[0-3])|(18[0-9]))\\d{8}$";
         return Pattern.matches(regex, phone);
     }
@@ -63,6 +95,12 @@ public class RegularExpressionUtil {
         return Pattern.matches(regex, account);
     }
 
+    // 密码(只能包含字母、数字和下划线)
+    public static boolean isPasswd(String password) {
+        String regex = "^\\w{3,19}$";
+        return Pattern.matches(regex, password);
+    }
+
     // 密码(以字母开头，长度在4~20之间，只能包含字母、数字和下划线)
     public static boolean isPassword(String password) {
         String regex = "^[a-zA-Z]\\w{3,19}$";
@@ -79,6 +117,13 @@ public class RegularExpressionUtil {
     public static boolean isDate(String date) {
         String regex = "^\\d{4}-\\d{1,2}-\\d{1,2}";
         return Pattern.matches(regex, date);
+    }
+
+    // 时间格式：mm:ss/HH:mm:ss
+    public static boolean isTime(String time) {
+        String HHmm = "^(?:[01]\\d|2[0-3])(?::[0-5]\\d)$";
+        String HHmmss = "^(?:[01]\\d|2[0-3])(?::[0-5]\\d){2}$";
+        return Pattern.matches(HHmm, time) || Pattern.matches(HHmmss, time);
     }
 
     // 中国邮政编码(中国邮政编码为6位数字)
@@ -105,9 +150,9 @@ public class RegularExpressionUtil {
         return Pattern.matches(regex, chinese);
     }
 
-    // 字符串是否为数字
-    public static boolean isNumeric(String numer) {
-        String regex = "[0-9]*";
-        return Pattern.matches(regex, numer);
+    // 判断字符串是否为大于0的数字
+    public static boolean isNumeric(String str) {
+        String regex = "^[1-9]\\d*$";
+        return Pattern.matches(regex, str);
     }
 }

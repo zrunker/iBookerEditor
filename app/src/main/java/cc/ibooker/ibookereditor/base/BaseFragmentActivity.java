@@ -1,6 +1,8 @@
 package cc.ibooker.ibookereditor.base;
 
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,6 +16,7 @@ import android.view.WindowManager;
 
 import cc.ibooker.ibookereditor.broadcastreceiver.NetBroadcastReceiver;
 import cc.ibooker.ibookereditor.utils.ActivityUtil;
+import cc.ibooker.ibookereditor.utils.ConstantUtil;
 
 /**
  * BaseFragmentActivity是所有FragmentActivity的基类，把一些公共的方法放到里面，如基础样式设置，权限封装，网络状态监听等
@@ -44,16 +47,26 @@ public abstract class BaseFragmentActivity extends FragmentActivity implements N
         netEvent = this;
 
         // 执行初始化方法
-        init();
+//        init();
     }
 
     // 抽象 - 初始化方法，可以对控件进行初始化，也可以对数据进行初始化
-    protected abstract void init();
+//    protected abstract void init();
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Resources resources = this.getResources();
+        Configuration configuration = resources.getConfiguration();
+        configuration.fontScale = ConstantUtil.TEXTVIEWSIZE;
+        resources.updateConfiguration(configuration, resources.getDisplayMetrics());
+    }
 
     @Override
     protected void onDestroy() {
         // Activity销毁时，提示系统回收
-        System.gc();
+//        System.gc();
+        netEvent = null;
         // 移除Activity
         ActivityUtil.getInstance().removeActivity(this);
         super.onDestroy();
@@ -63,6 +76,8 @@ public abstract class BaseFragmentActivity extends FragmentActivity implements N
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         // 点击手机上的返回键，返回上一层
         if (keyCode == KeyEvent.KEYCODE_BACK) {
+            // 移除Activity
+            ActivityUtil.getInstance().removeActivity(this);
             this.finish();
         }
         return super.onKeyDown(keyCode, event);

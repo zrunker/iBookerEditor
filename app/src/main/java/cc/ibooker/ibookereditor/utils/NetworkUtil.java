@@ -11,9 +11,9 @@ import android.text.TextUtils;
  * create by 邹峰立 on 2016/9/18
  */
 public class NetworkUtil {
-    public static final int NETTYPE_WIFI = 0x01;
-    public static final int NETTYPE_CMWAP = 0x02;
-    public static final int NETTYPE_CMNET = 0x03;
+    private static final int NETTYPE_WIFI = 0x01;
+    private static final int NETTYPE_CMWAP = 0x02;
+    private static final int NETTYPE_CMNET = 0x03;
 
     /**
      * 检测网络是否可用

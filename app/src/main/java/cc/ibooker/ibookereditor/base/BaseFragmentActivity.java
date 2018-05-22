@@ -32,13 +32,13 @@ public abstract class BaseFragmentActivity extends FragmentActivity implements N
         // 隐藏标题栏
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        // 沉浸效果
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            // 透明状态栏
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            // 透明导航栏
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-        }
+//        // 沉浸效果
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//            // 透明状态栏
+//            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+//            // 透明导航栏
+//            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+//        }
 
         // 添加到Activity工具类
         ActivityUtil.getInstance().addActivity(this);

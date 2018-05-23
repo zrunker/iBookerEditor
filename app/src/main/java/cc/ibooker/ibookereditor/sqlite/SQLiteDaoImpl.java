@@ -122,10 +122,11 @@ public class SQLiteDaoImpl implements SQLiteDao {
      */
     @Override
     public ArrayList<FileInfoBean> selectLocalFilesByTimePager(int page) {
-        int limit = (page - 1) * PAGE_SIZE_LOCAL_ARTICLE;
+        int startLimit = (page - 1) * PAGE_SIZE_LOCAL_ARTICLE;
+        int endLimit = page * PAGE_SIZE_LOCAL_ARTICLE;
         SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可读的数据库
         ArrayList<FileInfoBean> list = new ArrayList<>();
-        Cursor cursor = db.rawQuery("select * from t_local_file order by lf_create_time desc limit ? offset ?", new String[]{limit + "", PAGE_SIZE_LOCAL_ARTICLE + ""});
+        Cursor cursor = db.rawQuery("select * from t_local_file order by lf_create_time desc limit ?, ?", new String[]{startLimit + "", endLimit + ""});
         while (cursor.moveToNext()) {
             FileInfoBean data = new FileInfoBean();
             int id = cursor.getInt(cursor.getColumnIndex("_id"));

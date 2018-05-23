@@ -66,40 +66,62 @@ public class FileUtil {
     }
 
     /**
-     * 创建文件-根据当前年月日时分秒（时间戳）生成
+     * 创建文件-根据当前年月日时分秒（时间戳）生成 - 前提条件是目录存在
      */
     public static File createTimeMillisFile() {
-        try {
-            long timeMillis = System.currentTimeMillis();
-            String filePath = SDPATH + File.separator + timeMillis;
-            File file = new File(filePath);
-            boolean bool = file.createNewFile();
-            if (!bool)
-                return null;
-            else
-                return file;
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            try {
+                // 创建目录
+                createSDDirs(SDPATH);
+                // 创建文件
+                long timeMillis = System.currentTimeMillis();
+                String filePath = SDPATH + File.separator + timeMillis;
+                File file = new File(filePath);
+                boolean bool = file.createNewFile();
+                if (bool) return file;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return null;
     }
 
     /**
-     * 创建文件-根据文件名生成
+     * 创建文件-根据文件名生成 - 前提条件是目录存在
      *
      * @param fileName 文件名（带后缀）
      */
     public static File createNameFile(String fileName) {
-        try {
-            String filePath = SDPATH + File.separator + fileName;
-            File file = new File(filePath);
-            boolean bool = file.createNewFile();
-            if (!bool)
-                return null;
-            else
-                return file;
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            try {
+                // 创建目录
+                createSDDirs(SDPATH);
+                // 创建文件
+                String filePath = SDPATH + File.separator + fileName;
+                File file = new File(filePath);
+                boolean bool = file.createNewFile();
+                if (bool) return file;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 根据文件路径创建文件 - 前提条件是目录存在
+     *
+     * @param filePath 文件路径
+     */
+    public static File createFile(String filePath) {
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            try {
+                File file = new File(filePath);
+                boolean bool = file.createNewFile();
+                if (bool) return file;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         return null;
     }

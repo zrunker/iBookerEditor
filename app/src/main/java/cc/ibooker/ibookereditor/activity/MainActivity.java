@@ -27,6 +27,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import cc.ibooker.ibookereditor.R;
@@ -61,6 +62,8 @@ import static cc.ibooker.ibookereditor.utils.ConstantUtil.PERMISSIONS_REQUEST_OP
 
 /**
  * 书客编辑器开源项目
+ * <p>
+ * 本地文件一次性全部加载，推荐文章分页加载
  *
  * @author 邹峰立
  */
@@ -133,6 +136,11 @@ public class MainActivity extends BaseActivity implements
         // 初始化侧边栏数据
         initData();
         setSideAdapter();
+
+        // 加载数据
+        dataRes = 0;
+        swipeRefreshLayout.autoRefresh();
+        onRefresh();
 
         EventBus.getDefault().register(this);
     }
@@ -300,6 +308,9 @@ public class MainActivity extends BaseActivity implements
             }
         });
         updateStateLayout(false, -1, null);
+
+        // 初始化sqLiteDao
+        sqLiteDao = new SQLiteDaoImpl(this);
     }
 
     // 下拉刷新
@@ -307,14 +318,7 @@ public class MainActivity extends BaseActivity implements
     public void onRefresh() {
         ryScrollListener.setLoadingMore(false);
         if (0 == dataRes) {// 加载本地数据
-            localPage = 1;
-            if (sqLiteDao == null)
-                sqLiteDao = new SQLiteDaoImpl(this);
-            if (localEntities.size() > 0)
-                localEntities.clear();
-            ArrayList<FileInfoBean> localFileList = sqLiteDao.selectLocalFilesByTimePager(localPage);
-            localEntities = localFileListToEntities(localFileList);
-            setaLocalAdapter();
+            getLocalArticleList();
         } else if (1 == dataRes) {// 加载推荐数据
             recommendPage = 1;
             if (getRecommendArticleListSubscriber != null && !getRecommendArticleListSubscriber.isUnsubscribed())
@@ -327,13 +331,7 @@ public class MainActivity extends BaseActivity implements
     @Override
     public void onLoad() {
         if (0 == dataRes) {// 加载本地数据
-            swipeRefreshLayout.setRefreshing(false);
-            localPage++;
-            if (sqLiteDao == null)
-                sqLiteDao = new SQLiteDaoImpl(this);
-            ArrayList<FileInfoBean> localFileList = sqLiteDao.selectLocalFilesByTimePager(localPage);
-            localEntities.addAll(localFileListToEntities(localFileList));
-            setaLocalAdapter();
+            ryScrollListener.setLoadingMore(false);
         } else if (1 == dataRes) {// 加载推荐数据
             if (isCanLoadMore && articleUserDataList.size() >= PAGE_SIZE_RECOMMEND_ARTICLE) {
                 recommendPage++;
@@ -479,6 +477,28 @@ public class MainActivity extends BaseActivity implements
     }
 
     /**
+     * 获取本地文章相关信息
+     */
+    private void getLocalArticleList() {
+        if (sqLiteDao == null)
+            sqLiteDao = new SQLiteDaoImpl(this);
+        ArrayList<FileInfoBean> localFileList = sqLiteDao.selectLocalFilesByTime();
+        if (localEntities.size() > 0)
+            localEntities.clear();
+        localEntities = localFileListToEntities(localFileList);
+
+        // 刷新界面
+        swipeRefreshLayout.setRefreshing(false);
+        ryScrollListener.setLoadingMore(false);
+        if (localEntities.size() <= 0)
+            updateStateLayout(true, 4, null);
+        else {
+            updateStateLayout(false, -1, null);
+            setaLocalAdapter();
+        }
+    }
+
+    /**
      * 获取推荐文章相关信息
      */
     private void getRecommendArticleList() {
@@ -562,13 +582,20 @@ public class MainActivity extends BaseActivity implements
         ArrayList<LocalEntity> localList = new ArrayList<>();
         for (FileInfoBean fileInfoBean : list) {
             LocalEntity data = new LocalEntity();
-            data.setaId(fileInfoBean.getId());
-            data.setaFilePath(fileInfoBean.getFilePath());
-            data.setaTitle(fileInfoBean.getFileName());
-            data.setaTime(fileInfoBean.getFileCreateTime());
-            data.setaFormatTime(DateUtil.getFormatTimeStampToDateTime(fileInfoBean.getFileCreateTime()));
-            data.setaFormatSize(FileUtil.formatFileSize(fileInfoBean.getFileSize()));
-            localList.add(data);
+            int _id = fileInfoBean.getId();
+            File file = FileUtil.createFile(fileInfoBean.getFilePath());
+            if (file != null && file.exists()) {// 文件存在
+                data.setFile(file);
+                data.setaFormatSize(FileUtil.formatFileSize(FileUtil.getFileSize(file)));
+                data.setaId(_id);
+                data.setaFilePath(fileInfoBean.getFilePath());
+                data.setaTitle(fileInfoBean.getFileName());
+                data.setaTime(fileInfoBean.getFileCreateTime());
+                data.setaFormatTime(DateUtil.getFormatTimeStampToDateTime(fileInfoBean.getFileCreateTime()));
+                localList.add(data);
+            } else {// 文件不存在 - 删除数据库中数据
+                sqLiteDao.deleteLocalFileById(_id);
+            }
         }
         return localList;
     }

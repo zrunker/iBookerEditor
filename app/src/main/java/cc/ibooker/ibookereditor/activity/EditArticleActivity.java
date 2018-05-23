@@ -50,7 +50,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
     private SQLiteDao sqLiteDao;
     private FileInfoBean fileInfoBean;
     private int _id;
-    private String title, content;
+    private String preContent;
 
     // 线程池保存文件
     private ExecutorService executorService = Executors.newCachedThreadPool();
@@ -99,28 +99,29 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
 
             @Override
             public void onTextChanged(final CharSequence charSequence, int i, int i1, int i2) {
-                // 5s更新一次
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        String fileName = charSequence.toString().trim();
-                        if (!TextUtils.isEmpty(fileName) && !title.equals(fileName)) {
-                            title = fileName;
+                final String fileName = charSequence.toString().trim();
+                if (!TextUtils.isEmpty(fileName)) {
+                    // 创建文件
+                    if (currentFile == null || !currentFile.exists()) {
+                        // 创建目录
+                        FileUtil.createSDDirs(FileUtil.LOCALFILE_PATH);
+                        // 创建文件
+                        currentFile = FileUtil.createFile(currentFilePath);
+                    }
 
+                    // 3s更新一次
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
                             // 更新数据库
                             fileInfoBean.setFileName(fileName);
                             if (_id <= 0)
                                 _id = sqLiteDao.insertLocalFile2(fileInfoBean);
                             else
                                 sqLiteDao.updateLocalFileById(fileInfoBean, _id);
-
-                            // 创建文件
-                            if (currentFile == null) {
-                                currentFile = FileUtil.createSDDirs(currentFilePath);
-                            }
                         }
-                    }
-                }, 5000);
+                    }, 3000);
+                }
             }
 
             @Override
@@ -137,16 +138,19 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
 
             @Override
             public void onTextChanged(final CharSequence charSequence, int i, int i1, int i2) {
-                // 5s更新一次
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (!TextUtils.isEmpty(charSequence) && !content.equals(charSequence.toString())) {
-                            // 创建文件
-                            if (currentFile == null) {
-                                currentFile = FileUtil.createSDDirs(currentFilePath);
-                            }
+                if (!TextUtils.isEmpty(charSequence) && !charSequence.equals(preContent)) {
+                    // 创建文件
+                    if (currentFile == null || !currentFile.exists()) {
+                        // 创建目录
+                        FileUtil.createSDDirs(FileUtil.LOCALFILE_PATH);
+                        // 创建文件
+                        currentFile = FileUtil.createFile(currentFilePath);
+                    }
 
+                    // 5s更新一次
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
                             // 修改文件内容
                             if (currentFile != null) {
                                 // 开启子线程保存
@@ -154,7 +158,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
                                     @Override
                                     public void run() {
                                         boolean bool = writeSdData(charSequence.toString(), currentFile);
-                                        if (bool) content = charSequence.toString();
+                                        if (bool) preContent = charSequence.toString();
                                     }
                                 });
                                 if (executorService == null)
@@ -162,8 +166,8 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
                                 executorService.execute(thread);
                             }
                         }
-                    }
-                }, 5000);
+                    }, 5000);
+                }
             }
 
             @Override

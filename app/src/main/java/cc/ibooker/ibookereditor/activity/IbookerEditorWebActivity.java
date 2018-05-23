@@ -48,7 +48,7 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ibookereditor);
+        setContentView(R.layout.activity_ibookereditor_preview);
 
         aId = getIntent().getLongExtra("aId", 0);
         title = getIntent().getStringExtra("title");

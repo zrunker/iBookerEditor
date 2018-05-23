@@ -14,9 +14,11 @@ import android.view.View;
 import android.widget.ImageView;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -52,8 +54,11 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
     private int _id;
     private String preContent;
 
+    private IbookerEditorView ibookerEditerView;
+
     // 线程池保存文件
-    private ExecutorService executorService = Executors.newCachedThreadPool();
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private boolean lock = false;
 
     // 权限组
     private String[] needPermissions = new String[]{
@@ -73,6 +78,19 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
 
         // 初始化
         init();
+
+        // 获取传递数据
+        String title = getIntent().getStringExtra("title");
+        String filePath = getIntent().getStringExtra("filePath");
+        if (!TextUtils.isEmpty(title)) {
+            ibookerEditerView.getIbookerEditorVpView().getEditView().getIbookerTitleEd().setText(title);
+        }
+        if (!TextUtils.isEmpty(filePath)) {
+            String content = readSdData(filePath);
+            if (!TextUtils.isEmpty(content)) {
+                ibookerEditerView.getIbookerEditorVpView().getEditView().getIbookerEd().setText(content);
+            }
+        }
     }
 
     @Override
@@ -89,7 +107,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
         fileInfoBean.setFileCreateTime(currentStamp);
         fileInfoBean.setFilePath(currentFilePath);
 
-        IbookerEditorView ibookerEditerView = findViewById(R.id.ibookereditorview);
+        ibookerEditerView = findViewById(R.id.ibookereditorview);
         ibookerEditerView.setOnIbookerTitleEdTextChangedListener(new IbookerEditorEditView.OnIbookerTitleEdTextChangedListener() {
             // 设置主题改变监听
             @Override
@@ -139,34 +157,38 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
             @Override
             public void onTextChanged(final CharSequence charSequence, int i, int i1, int i2) {
                 if (!TextUtils.isEmpty(charSequence) && !charSequence.equals(preContent)) {
-                    // 创建文件
-                    if (currentFile == null || !currentFile.exists()) {
-                        // 创建目录
-                        FileUtil.createSDDirs(FileUtil.LOCALFILE_PATH);
+                    if (!lock) {
+                        lock = true;
                         // 创建文件
-                        currentFile = FileUtil.createFile(currentFilePath);
-                    }
-
-                    // 5s更新一次
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            // 修改文件内容
-                            if (currentFile != null) {
-                                // 开启子线程保存
-                                Thread thread = new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        boolean bool = writeSdData(charSequence.toString(), currentFile);
-                                        if (bool) preContent = charSequence.toString();
-                                    }
-                                });
-                                if (executorService == null)
-                                    executorService = Executors.newCachedThreadPool();
-                                executorService.execute(thread);
-                            }
+                        if (currentFile == null || !currentFile.exists()) {
+                            // 创建目录
+                            FileUtil.createSDDirs(FileUtil.LOCALFILE_PATH);
+                            // 创建文件
+                            currentFile = FileUtil.createFile(currentFilePath);
                         }
-                    }, 5000);
+
+                        // 5s更新一次
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                // 修改文件内容
+                                if (currentFile != null) {
+                                    // 开启子线程保存
+                                    Thread thread = new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            boolean bool = writeSdData(charSequence.toString(), currentFile);
+                                            if (bool) preContent = charSequence.toString();
+                                            lock = false;
+                                        }
+                                    });
+                                    if (executorService == null || executorService.isShutdown())
+                                        executorService = Executors.newSingleThreadExecutor();
+                                    executorService.execute(thread);
+                                }
+                            }
+                        }, 5000);
+                    }
                 }
             }
 
@@ -234,5 +256,37 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
             }
         }
         return bool;
+    }
+
+    /**
+     * 读取SD卡文件内容
+     */
+    private String readSdData(String filePath) {
+        StringBuilder sb = new StringBuilder();
+        // 创建文件
+        File file = FileUtil.createFile(filePath);
+        if (file != null && file.exists()) {
+            InputStream is = null;
+            try {
+                is = new FileInputStream(file);
+                int len;
+                byte[] buffer = new byte[1024];
+                while ((len = is.read(buffer)) != -1) {
+                    sb.append(new String(buffer, 0, len));
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    if (is != null)
+                        is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return sb.toString();
     }
 }

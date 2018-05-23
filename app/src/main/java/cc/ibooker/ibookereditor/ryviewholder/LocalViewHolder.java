@@ -1,11 +1,13 @@
 package cc.ibooker.ibookereditor.ryviewholder;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
 import cc.ibooker.ibookereditor.R;
+import cc.ibooker.ibookereditor.activity.EditArticleActivity;
 import cc.ibooker.ibookereditor.bean.LocalEntity;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
 
@@ -28,7 +30,7 @@ public class LocalViewHolder extends RecyclerView.ViewHolder {
         this.sizeTv = itemView.findViewById(R.id.tv_size);
     }
 
-    public void onBindData(LocalEntity data) {
+    public void onBindData(final LocalEntity data) {
         if (data != null) {
             timeTv.setText(data.getaFormatTime());
             titleTv.setText(data.getaTitle());
@@ -38,7 +40,10 @@ public class LocalViewHolder extends RecyclerView.ViewHolder {
                 public void onClick(View view) {
                     if (ClickUtil.isFastClick()) return;
                     // 进入编辑界面
-
+                    Intent intent = new Intent(context, EditArticleActivity.class);
+                    intent.putExtra("title", data.getaTitle());
+                    intent.putExtra("filePath", data.getaFilePath());
+                    context.startActivity(intent);
                 }
             });
         }

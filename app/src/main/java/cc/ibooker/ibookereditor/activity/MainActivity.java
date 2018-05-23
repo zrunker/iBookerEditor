@@ -75,7 +75,6 @@ public class MainActivity extends BaseActivity implements
         RecyclerViewScrollListener.OnLoadListener {
     private DrawerLayout drawer;
     private TextView topTv, nameTv, phoneTv;
-    private ImageButton editImgBtn;
     private ImageView picImg;
     private ListView sideListview;
     private SideMenuAdapter sideMenuAdapter;
@@ -99,7 +98,7 @@ public class MainActivity extends BaseActivity implements
     private TextView stateTv;
 
     private int dataRes = 0;// 数据来源，0来自本地，1来自推荐。
-    private int recommendPage = 1, localPage = 1;
+    private int recommendPage = 1;
     private Subscriber<ResultData<ArrayList<ArticleUserData>>> getRecommendArticleListSubscriber;
     private CompositeSubscription mSubscription;
 
@@ -204,7 +203,7 @@ public class MainActivity extends BaseActivity implements
     // 初始化方法
     private void init() {
         topTv = findViewById(R.id.tv_top);
-        editImgBtn = findViewById(R.id.ibtn_edit);
+        ImageButton editImgBtn = findViewById(R.id.ibtn_edit);
         editImgBtn.setOnClickListener(this);
 
         swipeRefreshLayout = findViewById(R.id.swiperefreshlayout);
@@ -240,7 +239,6 @@ public class MainActivity extends BaseActivity implements
                     case 1:// 本地
                         if (dataRes != 0) {
                             topTv.setText("本地");
-
                             // 加载数据
                             dataRes = 0;
                             swipeRefreshLayout.autoRefresh();
@@ -251,7 +249,6 @@ public class MainActivity extends BaseActivity implements
                     case 2:// 推荐
                         if (dataRes != 1) {
                             topTv.setText("推荐");
-
                             // 加载数据
                             dataRes = 1;
                             swipeRefreshLayout.autoRefresh();

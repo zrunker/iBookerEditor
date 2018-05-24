@@ -6,7 +6,7 @@ import java.io.File;
  * 本地数据
  */
 public class LocalEntity {
-    private long aId;
+    private int aId;
     private long aTime;
     private String aTitle;
     private String aFilePath;
@@ -20,7 +20,7 @@ public class LocalEntity {
         super();
     }
 
-    public LocalEntity(long aId, long aTime, String aTitle, String aFilePath, String aFormatSize, String aFormatTime, String aFormatContent, File file) {
+    public LocalEntity(int aId, long aTime, String aTitle, String aFilePath, String aFormatSize, String aFormatTime, String aFormatContent, File file) {
         this.aId = aId;
         this.aTime = aTime;
         this.aTitle = aTitle;
@@ -31,11 +31,11 @@ public class LocalEntity {
         this.file = file;
     }
 
-    public long getaId() {
+    public int getaId() {
         return aId;
     }
 
-    public void setaId(long aId) {
+    public void setaId(int aId) {
         this.aId = aId;
     }
 

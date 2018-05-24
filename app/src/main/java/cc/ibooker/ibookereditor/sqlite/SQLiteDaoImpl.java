@@ -48,12 +48,16 @@ public class SQLiteDaoImpl implements SQLiteDao {
     public synchronized int insertLocalFile2(FileInfoBean data) {
         SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
 
+        // 首先查找是否有该文件
+        int _id = selectIdByFilePath(data.getFilePath());
+        if (_id > 0) {
+            deleteLocalFileById(_id);
+        }
         // 插入数据
         String sql = "insert into t_local_file(lf_name, lf_path, lf_size, lf_create_time) values(?,?,?,?)";
         db.execSQL(sql, new Object[]{data.getFileName(), data.getFilePath(), data.getFileSize(), data.getFileCreateTime()});
 
         // 查询插入的ID
-        int _id = 0;
         Cursor cursor = db.rawQuery("select last_insert_rowid() from t_local_file", null);
         if (cursor.moveToFirst())
             _id = cursor.getInt(0);
@@ -86,6 +90,24 @@ public class SQLiteDaoImpl implements SQLiteDao {
         SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
         db.execSQL("update t_local_file set lf_name = ?, lf_path = ?, lf_size = ? where _id=?", new Object[]{data.getFileName(), data.getFilePath(), data.getFileSize(), _id});
         dbHelper.closeDatabase();
+    }
+
+    /**
+     * 通过文件地址查询ID
+     *
+     * @param filePath 文件地址
+     */
+    @Override
+    public int selectIdByFilePath(String filePath) {
+        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可读的数据库
+        int _id = 0;
+        Cursor cursor = db.rawQuery("select _id from t_local_file where lf_path=?", new String[]{filePath});
+        if (cursor.moveToFirst()) {
+            _id = cursor.getInt(cursor.getColumnIndex("_id"));
+        }
+        cursor.close();
+        dbHelper.closeDatabase();
+        return _id;
     }
 
     /**

@@ -162,15 +162,15 @@ public class MainActivity extends BaseActivity implements
         }
     }
 
-    // 保存文章成功事件
+    // 保存本地文章成功事件
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void executeSaveArticleSuccessEvent(SaveArticleSuccessEvent event) {
         // 保存相关数据到数据中
         SQLiteDao sqLiteDao = new SQLiteDaoImpl(this);
         sqLiteDao.updateLocalFileById(event.getFileInfoBean(), event.get_id());
 
-        // 刷新界面
-        if (event.isIsflashData())
+        // 刷新界面-只刷新本地
+        if (event.isIsflashData() && 0 == dataRes)
             onRefresh();
 
         EventBus.getDefault().removeStickyEvent(event);
@@ -239,6 +239,7 @@ public class MainActivity extends BaseActivity implements
                     case 1:// 本地
                         if (dataRes != 0) {
                             topTv.setText("本地");
+                            setaLocalAdapter();
                             // 加载数据
                             dataRes = 0;
                             swipeRefreshLayout.autoRefresh();
@@ -249,6 +250,7 @@ public class MainActivity extends BaseActivity implements
                     case 2:// 推荐
                         if (dataRes != 1) {
                             topTv.setText("推荐");
+                            setaRecommendAdapter();
                             // 加载数据
                             dataRes = 1;
                             swipeRefreshLayout.autoRefresh();
@@ -401,22 +403,20 @@ public class MainActivity extends BaseActivity implements
 
     // 刷新本地文章列表
     private void setaLocalAdapter() {
-        if (aLocalAdapter == null) {
+        if (aLocalAdapter == null)
             aLocalAdapter = new ALocalAdapter(this, localEntities);
-            recyclerView.setAdapter(aLocalAdapter);
-        } else {
+        else
             aLocalAdapter.reflashData(localEntities);
-        }
+        recyclerView.setAdapter(aLocalAdapter);
     }
 
     // 刷新推荐文章列表
     private void setaRecommendAdapter() {
-        if (aRecommendAdapter == null) {
+        if (aRecommendAdapter == null)
             aRecommendAdapter = new ARecommendAdapter(this, articleUserDataList, footerData);
-            recyclerView.setAdapter(aRecommendAdapter);
-        } else {
+        else
             aRecommendAdapter.reflashData(articleUserDataList);
-        }
+        recyclerView.setAdapter(aRecommendAdapter);
 
         stateLayout.setVisibility(View.GONE);
         swipeRefreshLayout.setVisibility(View.VISIBLE);
@@ -580,8 +580,8 @@ public class MainActivity extends BaseActivity implements
         for (FileInfoBean fileInfoBean : list) {
             LocalEntity data = new LocalEntity();
             int _id = fileInfoBean.getId();
-            File file = FileUtil.createFile(fileInfoBean.getFilePath());
-            if (file != null && file.exists()) {// 文件存在
+            File file = new File(fileInfoBean.getFilePath());
+            if (file.exists()) {// 文件存在
                 data.setFile(file);
                 data.setaFormatSize(FileUtil.formatFileSize(FileUtil.getFileSize(file)));
                 data.setaId(_id);

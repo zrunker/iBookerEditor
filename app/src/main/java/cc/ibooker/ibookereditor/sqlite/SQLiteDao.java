@@ -39,6 +39,13 @@ public interface SQLiteDao {
     void updateLocalFileById(FileInfoBean data, int _id);
 
     /**
+     * 通过文件地址查询ID
+     *
+     * @param filePath 文件地址
+     */
+    int selectIdByFilePath(String filePath);
+
+    /**
      * 根据时间查询所有本地文件
      */
     ArrayList<FileInfoBean> selectLocalFilesByTime();

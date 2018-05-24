@@ -43,6 +43,8 @@ public class LocalViewHolder extends RecyclerView.ViewHolder {
                     Intent intent = new Intent(context, EditArticleActivity.class);
                     intent.putExtra("title", data.getaTitle());
                     intent.putExtra("filePath", data.getaFilePath());
+                    intent.putExtra("_id", data.getaId());
+                    intent.putExtra("createTime", data.getaTime());
                     context.startActivity(intent);
                 }
             });

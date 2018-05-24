@@ -190,7 +190,6 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
 
                 @Override
                 public void onNext(ResultData<ArticleUserData> articleUserDataResultData) {
-                    Log.d("articleUserDataResult", articleUserDataResultData.toString());
                     if (articleUserDataResultData.getResultCode() == 0) {// 成功
                         if (articleUserDataResultData.getData() == null) {
                             updateStateLayout(true, 4, null);

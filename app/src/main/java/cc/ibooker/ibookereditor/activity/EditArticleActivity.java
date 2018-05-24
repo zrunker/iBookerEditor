@@ -82,15 +82,18 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
         // 获取传递数据
         String title = getIntent().getStringExtra("title");
         String filePath = getIntent().getStringExtra("filePath");
+        // 赋值
         if (!TextUtils.isEmpty(title)) {
-            ibookerEditerView.getIbookerEditorVpView().getEditView().getIbookerTitleEd().setText(title);
+            ibookerEditerView.setIEEditViewIbookerTitleEdText(title);
         }
         if (!TextUtils.isEmpty(filePath)) {
             String content = readSdData(filePath);
             if (!TextUtils.isEmpty(content)) {
-                ibookerEditerView.getIbookerEditorVpView().getEditView().getIbookerEd().setText(content);
+                ibookerEditerView.setIEEditViewIbookerEdText(content);
             }
         }
+        // 切换预览
+        ibookerEditerView.changeVpUpdateIbookerEditorTopView(1);
     }
 
     @Override

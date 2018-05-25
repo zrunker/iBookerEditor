@@ -6,7 +6,9 @@ import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
 
+import cc.ibooker.ibookereditor.bean.UserEntity;
 import cc.ibooker.ibookereditor.dto.FileInfoBean;
+import cc.ibooker.ibookereditor.dto.UserDto;
 
 import static cc.ibooker.ibookereditor.utils.ConstantUtil.PAGE_SIZE_LOCAL_ARTICLE;
 
@@ -143,7 +145,7 @@ public class SQLiteDaoImpl implements SQLiteDao {
      * @param page 当前页
      */
     @Override
-    public ArrayList<FileInfoBean> selectLocalFilesByTimePager(int page) {
+    public synchronized ArrayList<FileInfoBean> selectLocalFilesByTimePager(int page) {
         int startLimit = (page - 1) * PAGE_SIZE_LOCAL_ARTICLE;
         int endLimit = page * PAGE_SIZE_LOCAL_ARTICLE;
         SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可读的数据库
@@ -166,6 +168,65 @@ public class SQLiteDaoImpl implements SQLiteDao {
         cursor.close();
         dbHelper.closeDatabase();
         return list;
+    }
+
+    /**
+     * 插入用户表
+     *
+     * @param data 待插入数据
+     */
+    @Override
+    public synchronized void insertUser(UserDto data) {
+        deleteUser(data);
+
+        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
+        String sql = "insert into t_user(u_id, u_phone, u_pic, u_nickname, u_introduce, u_ua, u_token) values(?,?,?,?,?,?,?)";
+        db.execSQL(sql, new Object[]{data.getUser().getuId(), data.getUser().getuPhone(), data.getUser().getuPic(),
+                data.getUser().getuNickname(), data.getUser().getuIntroduce(), data.getUa(), data.getToken()});
+        dbHelper.closeDatabase();
+    }
+
+    /**
+     * 根据账号或者用户ID删除用户信息
+     *
+     * @param data 待删除数据
+     */
+    @Override
+    public synchronized void deleteUser(UserDto data) {
+        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
+        db.execSQL("delete from t_user where u_id=? or u_phone=?", new Object[]{data.getUser().getuId(), data.getUser().getuPhone()});
+        dbHelper.closeDatabase();
+    }
+
+    /**
+     * 查询用户信息
+     */
+    @Override
+    public UserDto selectUser() {
+        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可读的数据库
+        UserDto userDto = new UserDto();
+        Cursor cursor = db.rawQuery("select * from t_user", null);
+        if (cursor.moveToFirst()) {
+            UserEntity userEntity = new UserEntity();
+            long u_id = cursor.getLong(cursor.getColumnIndex("u_id"));
+            userEntity.setuId(u_id);
+            long u_phone = cursor.getLong(cursor.getColumnIndex("u_phone"));
+            userEntity.setuPhone(u_phone);
+            String u_pic = cursor.getString(cursor.getColumnIndex("u_pic"));
+            userEntity.setuPic(u_pic);
+            String u_nickname = cursor.getString(cursor.getColumnIndex("u_nickname"));
+            userEntity.setuNickname(u_nickname);
+            String u_introduce = cursor.getString(cursor.getColumnIndex("u_introduce"));
+            userEntity.setuIntroduce(u_introduce);
+            userDto.setUser(userEntity);
+            String u_ua = cursor.getString(cursor.getColumnIndex("u_ua"));
+            userDto.setUa(u_ua);
+            String u_token = cursor.getString(cursor.getColumnIndex("u_token"));
+            userDto.setToken(u_token);
+        }
+        cursor.close();
+        dbHelper.closeDatabase();
+        return userDto;
     }
 
 }

@@ -41,4 +41,7 @@
     <string name="suggest">建议</string>
     <string name="complain">投诉</string>
     <string name="message">留言</string>
+
+    <string name="account_hint">请输入书客创作账号</string>
+    <string name="passwd_hint">请输入密码</string>
 </resources>

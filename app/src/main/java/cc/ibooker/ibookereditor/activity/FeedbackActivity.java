@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
@@ -18,6 +17,7 @@ import cc.ibooker.ibookereditor.net.service.HttpMethods;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
 import cc.ibooker.ibookereditor.utils.RegularExpressionUtil;
+import cc.ibooker.zdialoglib.ProDialog;
 import rx.Subscriber;
 import rx.subscriptions.CompositeSubscription;
 
@@ -27,13 +27,13 @@ import rx.subscriptions.CompositeSubscription;
  * Created by 邹峰立 on 2018/3/28.
  */
 public class FeedbackActivity extends BaseActivity implements View.OnClickListener {
-    private LinearLayout contentLayout;
     private EditText emailEd, contentEd;
     private RadioGroup styleRg;
     private String stStyle = "0", stContent, stEmail;
 
     private Subscriber<ResultData<Boolean>> insertSuggestSubscriber;
     private CompositeSubscription mSubscription;
+    private ProDialog proDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,6 +48,7 @@ public class FeedbackActivity extends BaseActivity implements View.OnClickListen
         super.onStop();
         if (insertSuggestSubscriber != null)
             insertSuggestSubscriber.unsubscribe();
+        closeProDialog();
     }
 
     @Override
@@ -61,7 +62,6 @@ public class FeedbackActivity extends BaseActivity implements View.OnClickListen
 
     // 初始化
     private void init() {
-        contentLayout = findViewById(R.id.layout_content);
         ImageView backImg = findViewById(R.id.img_back);
         backImg.setOnClickListener(this);
         emailEd = findViewById(R.id.ed_email);
@@ -129,29 +129,31 @@ public class FeedbackActivity extends BaseActivity implements View.OnClickListen
      */
     private void insertSuggest() {
         if (NetworkUtil.isNetworkConnected(this)) {
+            showProDialog();
             insertSuggestSubscriber = new Subscriber<ResultData<Boolean>>() {
                 @Override
                 public void onCompleted() {
-
+                    closeProDialog();
                 }
 
                 @Override
                 public void onError(Throwable e) {
                     Toast.makeText(FeedbackActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    closeProDialog();
                 }
 
                 @Override
                 public void onNext(ResultData<Boolean> booleanResultData) {
                     if (booleanResultData.getResultCode() == 0) {// 成功
                         if (booleanResultData.getData() == null) {
-//                            updateStateLayout(true, 4, null);
+                            Toast.makeText(FeedbackActivity.this, "获取数据失败！", Toast.LENGTH_SHORT).show();
                         } else {
                             initData();
-
-//                            updateStateLayout(false, -1, null);
+                            Toast.makeText(FeedbackActivity.this, "提交数据成功！", Toast.LENGTH_SHORT).show();
+                            finish();
                         }
                     } else {// 失败
-//                        updateStateLayout(true, 3, articleUserDataResultData.getResultMsg());
+                        Toast.makeText(FeedbackActivity.this, booleanResultData.getResultMsg(), Toast.LENGTH_SHORT).show();
                     }
                 }
             };
@@ -160,7 +162,20 @@ public class FeedbackActivity extends BaseActivity implements View.OnClickListen
                 mSubscription = new CompositeSubscription();
             mSubscription.add(insertSuggestSubscriber);
         } else {// 无网络
-
+            Toast.makeText(this, "当前网络不给力！", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    // 展示Dialog
+    private void showProDialog() {
+        if (proDialog == null)
+            proDialog = new ProDialog(this);
+        proDialog.showProDialog();
+    }
+
+    // 关闭Dialog
+    private void closeProDialog() {
+        if (proDialog != null)
+            proDialog.closeProDialog();
     }
 }

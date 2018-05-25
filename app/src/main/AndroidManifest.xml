@@ -84,6 +84,15 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
 
+        <!--登录-->
+        <activity
+            android:name=".activity.LoginActivity"
+            android:alwaysRetainTaskState="true"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan" />
+
         <!--注册广播-->
         <receiver android:name=".broadcastreceiver.NetBroadcastReceiver">
             <intent-filter>

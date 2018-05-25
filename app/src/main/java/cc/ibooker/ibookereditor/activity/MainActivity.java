@@ -48,9 +48,12 @@ import cc.ibooker.ibookereditor.sqlite.SQLiteDaoImpl;
 import cc.ibooker.ibookereditor.utils.ActivityUtil;
 import cc.ibooker.ibookereditor.utils.AppUtil;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
+import cc.ibooker.ibookereditor.utils.ConstantUtil;
 import cc.ibooker.ibookereditor.utils.DateUtil;
 import cc.ibooker.ibookereditor.utils.FileUtil;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
+import cc.ibooker.ibookereditor.zglide.GlideApp;
+import cc.ibooker.ibookereditor.zglide.GlideCircleTransform;
 import cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout;
 import cc.ibooker.ibookereditor.zrecycleview.MyLinearLayoutManager;
 import cc.ibooker.ibookereditor.zrecycleview.RecyclerViewScrollListener;
@@ -136,12 +139,28 @@ public class MainActivity extends BaseActivity implements
         initData();
         setSideAdapter();
 
+        // 获取用户信息
+        if (sqLiteDao == null)
+            sqLiteDao = new SQLiteDaoImpl(this);
+        ConstantUtil.userDto = sqLiteDao.selectUser();
+        if (ConstantUtil.userDto != null && ConstantUtil.userDto.getUser() != null) {
+            nameTv.setText(ConstantUtil.userDto.getUser().getuNickname());
+            phoneTv.setText(ConstantUtil.userDto.getUser().getuIntroduce());
+            GlideApp.with(this)
+                    .load(ConstantUtil.userDto.getUser().getuPic())
+                    .transforms(new GlideCircleTransform())
+                    .into(picImg);
+        }
+
         // 加载数据
         dataRes = 0;
         swipeRefreshLayout.autoRefresh();
         onRefresh();
 
         EventBus.getDefault().register(this);
+
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
     }
 
     @Override

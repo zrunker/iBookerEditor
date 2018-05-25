@@ -3,6 +3,7 @@ package cc.ibooker.ibookereditor.sqlite;
 import java.util.ArrayList;
 
 import cc.ibooker.ibookereditor.dto.FileInfoBean;
+import cc.ibooker.ibookereditor.dto.UserDto;
 
 /**
  * 数据库访问接口
@@ -57,4 +58,22 @@ public interface SQLiteDao {
      */
     ArrayList<FileInfoBean> selectLocalFilesByTimePager(int page);
 
+    /**
+     * 插入用户表
+     *
+     * @param data 待插入数据
+     */
+    void insertUser(UserDto data);
+
+    /**
+     * 根据账号或者用户ID删除用户信息
+     *
+     * @param data 待删除数据
+     */
+    void deleteUser(UserDto data);
+
+    /**
+     * 查询用户信息
+     */
+    UserDto selectUser();
 }

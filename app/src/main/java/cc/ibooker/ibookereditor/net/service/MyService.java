@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import cc.ibooker.ibookereditor.bean.ArticleUserData;
 import cc.ibooker.ibookereditor.dto.ResultData;
+import cc.ibooker.ibookereditor.dto.UserDto;
 import okhttp3.ResponseBody;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
@@ -42,4 +43,10 @@ interface MyService {
     @Streaming
     @GET
     Observable<ResponseBody> downloadFile(@Url String url);
+
+    /**
+     * 用户登录
+     */
+    @POST("user/login")
+    Observable<ResultData<UserDto>> userLogin(@Query("values") String values);
 }

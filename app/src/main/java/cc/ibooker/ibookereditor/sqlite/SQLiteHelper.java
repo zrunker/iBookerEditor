@@ -74,6 +74,7 @@ class SQLiteHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         // 创建数据表
         db.execSQL(SQLiteConstant.SQL_CREATE_TABLE_LOCALFILE);
+        db.execSQL(SQLiteConstant.SQL_CREATE_TABLE_USER);
     }
 
     /**
@@ -90,6 +91,8 @@ class SQLiteHelper extends SQLiteOpenHelper {
             try {// 升级数据库
                 db.execSQL(SQLiteConstant.SQL_DROP_TABLE_LOCALFILE);
                 db.execSQL(SQLiteConstant.SQL_CREATE_TABLE_LOCALFILE);
+                db.execSQL(SQLiteConstant.SQL_DROP_TABLE_USER);
+                db.execSQL(SQLiteConstant.SQL_CREATE_TABLE_USER);
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();

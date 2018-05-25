@@ -1,11 +1,15 @@
 package cc.ibooker.ibookereditor.net.service;
 
+import android.annotation.TargetApi;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.util.ArrayMap;
 
 import java.util.ArrayList;
 
 import cc.ibooker.ibookereditor.bean.ArticleUserData;
 import cc.ibooker.ibookereditor.dto.ResultData;
+import cc.ibooker.ibookereditor.dto.UserDto;
 import cc.ibooker.ibookereditor.net.request.MyGsonConverterFactory;
 import cc.ibooker.ibookereditor.net.request.MyOkHttpClient;
 import cc.ibooker.ibookereditor.utils.AESUtil;
@@ -21,6 +25,7 @@ import rx.schedulers.Schedulers;
  * Okhttp 弊端适合对键值对缓存（Get），不能对加密数据直接缓存
  * Created by 邹峰立 on 2016/9/17.
  */
+@TargetApi(Build.VERSION_CODES.KITKAT)
 public class HttpMethods {
     // 测试服
 //    private static final String BASE_URL = "http://47.93.239.223:808/mobile/";
@@ -122,12 +127,28 @@ public class HttpMethods {
 
     }
 
-
     /**
      * 下载文件
      */
     public void downloadFile(Subscriber<ResponseBody> subscriber, String url) {
         myService.downloadFile(url)
+                //指定subscribe()发生在io调度器（读写文件、读写数据库、网络信息交互等）
+                .subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                //指定subscriber的回调发生在子线程
+                .observeOn(Schedulers.newThread())
+                //实现订阅关系
+                .subscribe(subscriber);
+    }
+
+    /**
+     * 下载文件
+     */
+    public void userLogin(Subscriber<ResultData<UserDto>> subscriber, String account, String uPasswd) {
+        ArrayMap<String, Object> map = new ArrayMap<>();
+        map.put("account", account);
+        map.put("uPasswd", uPasswd);
+        myService.userLogin(AESUtil.encrypt(map.toString()))
                 //指定subscribe()发生在io调度器（读写文件、读写数据库、网络信息交互等）
                 .subscribeOn(Schedulers.io())
                 .unsubscribeOn(Schedulers.io())

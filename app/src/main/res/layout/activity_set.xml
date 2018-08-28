@@ -150,9 +150,16 @@
                 tools:ignore="RelativeOverlap" />
 
             <TextView
+                android:id="@+id/tv_cache"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:gravity="end|center_vertical"
+                android:paddingEnd="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingStart="5dp"
+                android:textColor="#aaa" />
         </LinearLayout>
 
         <View
@@ -179,9 +186,16 @@
                 tools:ignore="RelativeOverlap" />
 
             <TextView
+                android:id="@+id/tv_version"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1" />
+                android:layout_weight="1"
+                android:gravity="end|center_vertical"
+                android:paddingEnd="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingStart="5dp"
+                android:textColor="#aaa" />
         </LinearLayout>
     </LinearLayout>
 

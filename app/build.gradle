@@ -12,7 +12,14 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            // 不显示Log
+            buildConfigField("boolean", "LEO_DEBUG", "false")
+            // 是否zip对齐
+            zipAlignEnabled true
+            // 缩减resource文件
+            shrinkResources true
+            // 混淆
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {

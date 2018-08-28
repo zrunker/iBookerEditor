@@ -21,7 +21,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -46,12 +45,12 @@ import cc.ibooker.ibookereditor.net.service.HttpMethods;
 import cc.ibooker.ibookereditor.sqlite.SQLiteDao;
 import cc.ibooker.ibookereditor.sqlite.SQLiteDaoImpl;
 import cc.ibooker.ibookereditor.utils.ActivityUtil;
-import cc.ibooker.ibookereditor.utils.AppUtil;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
 import cc.ibooker.ibookereditor.utils.ConstantUtil;
 import cc.ibooker.ibookereditor.utils.DateUtil;
 import cc.ibooker.ibookereditor.utils.FileUtil;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
+import cc.ibooker.ibookereditor.utils.ToastUtil;
 import cc.ibooker.ibookereditor.zglide.GlideApp;
 import cc.ibooker.ibookereditor.zglide.GlideCircleTransform;
 import cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout;
@@ -74,7 +73,6 @@ import static cc.ibooker.ibookereditor.utils.ConstantUtil.PERMISSIONS_REQUEST_OP
 public class MainActivity extends BaseActivity implements
         View.OnClickListener,
         SwipeRefreshLayout.OnRefreshListener,
-        RecyclerViewScrollListener.OnScrollDistanceListener,
         RecyclerViewScrollListener.OnLoadListener {
     private DrawerLayout drawer;
     private TextView topTv, nameTv, phoneTv;
@@ -159,8 +157,8 @@ public class MainActivity extends BaseActivity implements
 
         EventBus.getDefault().register(this);
 
-        Intent intent = new Intent(this, LoginActivity.class);
-        startActivity(intent);
+//        Intent intent = new Intent(this, LoginActivity.class);
+//        startActivity(intent);
     }
 
     @Override
@@ -238,7 +236,6 @@ public class MainActivity extends BaseActivity implements
         recyclerView.setLayoutManager(new MyLinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
         ryScrollListener = new RecyclerViewScrollListener();
-        ryScrollListener.setOnScrollDistanceListener(this);
         ryScrollListener.setOnLoadListener(this);
         recyclerView.addOnScrollListener(ryScrollListener);
 
@@ -279,7 +276,12 @@ public class MainActivity extends BaseActivity implements
                         break;
                     case 3:// 语法参考
                         drawer.closeDrawer(GravityCompat.START, true);
-                        Intent intentGrammer = new Intent(MainActivity.this, IbookerEditorWebActivity.class);
+//                        Intent intentGrammer = new Intent(MainActivity.this, IbookerEditorWebActivity.class);
+//                        intentGrammer.putExtra("aId", 1L);
+//                        intentGrammer.putExtra("title", "语法参考");
+//                        startActivity(intentGrammer);
+
+                        Intent intentGrammer = new Intent(MainActivity.this, ArticleDetailActivity.class);
                         intentGrammer.putExtra("aId", 1L);
                         intentGrammer.putExtra("title", "语法参考");
                         startActivity(intentGrammer);
@@ -295,14 +297,29 @@ public class MainActivity extends BaseActivity implements
                         startActivity(intentFeedback);
                         break;
                     case 6:// 评分
-                        String mAddress = "market://details?id=" + AppUtil.getVersion(MainActivity.this);
-                        Intent marketIntent = new Intent("android.intent.action.VIEW");
+//                        String mAddress = "market://details?id=" + AppUtil.getVersion(MainActivity.this);
+//                        Intent marketIntent = new Intent("android.intent.action.VIEW");
+//                        marketIntent.setData(Uri.parse(mAddress));
+//                        startActivity(marketIntent);
+
+                        String mAddress = "market://details?id=" + getPackageName();
+                        Intent marketIntent = new Intent(Intent.ACTION_VIEW);
                         marketIntent.setData(Uri.parse(mAddress));
-                        startActivity(marketIntent);
+                        if (marketIntent.resolveActivity(getPackageManager()) != null) {
+                            startActivity(marketIntent);
+                        } else {
+                            // 要调起的应用不存在时的处理
+                            ToastUtil.shortToast(MainActivity.this, "没有可以打开的应用市场！");
+                        }
                         break;
                     case 7:// 关于
                         drawer.closeDrawer(GravityCompat.START, true);
-                        Intent intentAbout = new Intent(MainActivity.this, IbookerEditorWebActivity.class);
+//                        Intent intentAbout = new Intent(MainActivity.this, IbookerEditorWebActivity.class);
+//                        intentAbout.putExtra("aId", 182L);
+//                        intentAbout.putExtra("title", "关于");
+//                        startActivity(intentAbout);
+
+                        Intent intentAbout = new Intent(MainActivity.this, ArticleDetailActivity.class);
                         intentAbout.putExtra("aId", 182L);
                         intentAbout.putExtra("title", "关于");
                         startActivity(intentAbout);
@@ -365,28 +382,6 @@ public class MainActivity extends BaseActivity implements
         }
     }
 
-    // 滚动距离判断
-    private boolean isHidden = false;
-    private long preTime = 0;
-
-    @Override
-    public void onScrollDistance(int dy) {
-        if (System.currentTimeMillis() - preTime > 1000)
-            if (dy > 0) {// 向上滚动
-                if (!isHidden) {
-                    topTv.setVisibility(View.GONE);
-                    isHidden = !isHidden;
-                    preTime = System.currentTimeMillis();
-                }
-            } else {
-                if (isHidden) {
-                    topTv.setVisibility(View.VISIBLE);
-                    isHidden = !isHidden;
-                    preTime = System.currentTimeMillis();
-                }
-            }
-    }
-
     // 更新状态布局
     private void updateStateLayout(boolean isShow, int state, String stateTip) {
         if (isShow) {
@@ -426,7 +421,9 @@ public class MainActivity extends BaseActivity implements
             aLocalAdapter = new ALocalAdapter(this, localEntities);
         else
             aLocalAdapter.reflashData(localEntities);
-        recyclerView.setAdapter(aLocalAdapter);
+
+        if (recyclerView.getAdapter() != aLocalAdapter)
+            recyclerView.setAdapter(aLocalAdapter);
     }
 
     // 刷新推荐文章列表
@@ -435,7 +432,9 @@ public class MainActivity extends BaseActivity implements
             aRecommendAdapter = new ARecommendAdapter(this, articleUserDataList, footerData);
         else
             aRecommendAdapter.reflashData(articleUserDataList);
-        recyclerView.setAdapter(aRecommendAdapter);
+
+        if (recyclerView.getAdapter() != aRecommendAdapter)
+            recyclerView.setAdapter(aRecommendAdapter);
 
         stateLayout.setVisibility(View.GONE);
         swipeRefreshLayout.setVisibility(View.VISIBLE);
@@ -528,7 +527,7 @@ public class MainActivity extends BaseActivity implements
 
                 @Override
                 public void onError(Throwable e) {
-                    Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    ToastUtil.shortToast(MainActivity.this, e.getMessage());
                     swipeRefreshLayout.setRefreshing(false);
                     ryScrollListener.setLoadingMore(false);
                 }
@@ -570,7 +569,7 @@ public class MainActivity extends BaseActivity implements
         if (keyCode == KeyEvent.KEYCODE_BACK || event.getAction() == KeyEvent.ACTION_DOWN) {
             if (System.currentTimeMillis() - exitTime > 5000) {
                 exitTime = System.currentTimeMillis();
-                Toast.makeText(getApplicationContext(), "再按一次退出程序", Toast.LENGTH_LONG).show();
+                ToastUtil.shortToast(getApplicationContext(), "再按一次退出程序");
             } else {
                 ActivityUtil.getInstance().exitSystem();
             }

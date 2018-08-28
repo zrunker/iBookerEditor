@@ -6,8 +6,8 @@
     android:background="#EEE"
     android:gravity="center"
     android:orientation="horizontal"
-    android:paddingBottom="10dp"
-    android:paddingTop="10dp">
+    android:paddingBottom="15dp"
+    android:paddingTop="15dp">
 
     <ProgressBar
         android:id="@+id/footer_progressbar"

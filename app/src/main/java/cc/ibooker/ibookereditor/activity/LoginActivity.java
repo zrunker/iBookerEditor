@@ -6,7 +6,6 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.base.BaseActivity;
@@ -18,6 +17,7 @@ import cc.ibooker.ibookereditor.sqlite.SQLiteDaoImpl;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
 import cc.ibooker.ibookereditor.utils.ConstantUtil;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
+import cc.ibooker.ibookereditor.utils.ToastUtil;
 import cc.ibooker.zdialoglib.ProDialog;
 import rx.Subscriber;
 import rx.subscriptions.CompositeSubscription;
@@ -76,11 +76,11 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 String uPhone = accountEd.getText().toString().trim();
                 String uPasswd = passwdEd.getText().toString().trim();
                 if (TextUtils.isEmpty(uPhone)) {
-                    Toast.makeText(this, "请输入书客创作账号", Toast.LENGTH_SHORT).show();
+                    ToastUtil.shortToast(this, "请输入书客创作账号");
                 } else if (uPhone.length() != 11) {
-                    Toast.makeText(this, "请输入正确格式的手机号", Toast.LENGTH_SHORT).show();
+                    ToastUtil.shortToast(this, "请输入正确格式的手机号");
                 } else if (TextUtils.isEmpty(uPasswd)) {
-                    Toast.makeText(this, "请输入密码", Toast.LENGTH_SHORT).show();
+                    ToastUtil.shortToast(this, "请输入密码");
                 } else {
                     // 提交到后台实现登录
                     userLogin(uPhone, uPasswd);
@@ -103,7 +103,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
                 @Override
                 public void onError(Throwable e) {
-                    Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    ToastUtil.shortToast(LoginActivity.this, e.getMessage());
                     closeProDialog();
                 }
 
@@ -111,7 +111,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 public void onNext(ResultData<UserDto> userDtoResultData) {
                     if (userDtoResultData.getResultCode() == 0) {// 成功
                         if (userDtoResultData.getData() == null) {
-                            Toast.makeText(LoginActivity.this, "获取数据失败！", Toast.LENGTH_SHORT).show();
+                            ToastUtil.shortToast(LoginActivity.this, "获取数据失败！");
                         } else {
                             // 静态赋值
                             ConstantUtil.userDto = userDtoResultData.getData();
@@ -122,7 +122,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                             finish();
                         }
                     } else {// 失败
-                        Toast.makeText(LoginActivity.this, userDtoResultData.getResultMsg(), Toast.LENGTH_SHORT).show();
+                        ToastUtil.shortToast(LoginActivity.this, userDtoResultData.getResultMsg());
                     }
                 }
             };
@@ -131,7 +131,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 mSubscription = new CompositeSubscription();
             mSubscription.add(userLoginSubscriber);
         } else {// 无网络
-            Toast.makeText(this, "当前网络不给力！", Toast.LENGTH_SHORT).show();
+            ToastUtil.shortToast(this, "当前网络不给力！");
         }
     }
 

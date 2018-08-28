@@ -2,7 +2,6 @@ package cc.ibooker.ibookereditor.net.service;
 
 import android.annotation.TargetApi;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.util.ArrayMap;
 
 import java.util.ArrayList;
@@ -92,7 +91,7 @@ public class HttpMethods {
     }
 
     /**
-     * 获取推荐文章列表
+     * 获取特定文章
      */
     public void getArticleUserDataById(Subscriber<ResultData<ArticleUserData>> subscriber, long aId) {
         ArrayMap<String, Object> map = new ArrayMap<>();

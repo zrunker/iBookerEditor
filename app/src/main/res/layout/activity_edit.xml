@@ -4,4 +4,6 @@
     android:id="@+id/ibookereditorview"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:IbookerEditorToolView_EmojiIBtn_Visible="false" />
+    android:fitsSystemWindows="true"
+    app:IbookerEditorToolView_EmojiIBtn_Visible="false"
+    app:IbookerEditorTopView_ElseIBtn_Visible="false" />

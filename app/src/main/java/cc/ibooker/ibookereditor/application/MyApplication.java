@@ -1,6 +1,10 @@
 package cc.ibooker.ibookereditor.application;
 
 import android.app.Application;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+
+import static cc.ibooker.ibookereditor.utils.ConstantUtil.TEXTVIEWSIZE;
 
 /**
  * Application设置全局变量
@@ -27,4 +31,17 @@ public class MyApplication extends Application {
         return instance;
     }
 
+    // 设置字体大小
+    @Override
+    public Resources getResources() {
+        Resources res = super.getResources();
+//        Configuration config = new Configuration();
+//        config.setToDefaults();
+//        res.updateConfiguration(config, res.getDisplayMetrics());
+
+        Configuration config = res.getConfiguration();
+        config.fontScale = TEXTVIEWSIZE;// 1 设置正常字体大小的倍数
+        res.updateConfiguration(config, res.getDisplayMetrics());
+        return res;
+    }
 }

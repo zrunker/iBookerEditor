@@ -10,6 +10,7 @@ import android.widget.TextView;
 import java.text.MessageFormat;
 
 import cc.ibooker.ibookereditor.R;
+import cc.ibooker.ibookereditor.activity.ArticleDetailActivity;
 import cc.ibooker.ibookereditor.activity.IbookerEditorWebActivity;
 import cc.ibooker.ibookereditor.bean.ArticleUserData;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
@@ -21,7 +22,6 @@ import cc.ibooker.ibookereditor.zglide.GlideRoundRectTransform;
  * 推荐文章ViewHolder
  */
 public class ARecommendViewHolder extends RecyclerView.ViewHolder {
-    private float pxValue = 20;
     private Context context;
     private View view;
     private ImageView picImg, identifyStateImg, acoverImg;
@@ -68,7 +68,7 @@ public class ARecommendViewHolder extends RecyclerView.ViewHolder {
                     .placeholder(R.drawable.img_picture)
                     .error(R.drawable.img_picture)
                     .centerCrop()
-                    .transform(new GlideRoundRectTransform(pxValue))
+                    .transform(new GlideRoundRectTransform(20))
                     .into(acoverImg);
             labelTv.setText(String.format("%s·%s", data.getaBookType().getAtName(), data.getaBookTypeSecond().getAtsName()));
             if ("0".equals(data.getaStyle())) {
@@ -90,7 +90,12 @@ public class ARecommendViewHolder extends RecyclerView.ViewHolder {
                 @Override
                 public void onClick(View view) {
                     if (ClickUtil.isFastClick()) return;
-                    Intent intent = new Intent(context, IbookerEditorWebActivity.class);
+//                    Intent intent = new Intent(context, IbookerEditorWebActivity.class);
+//                    intent.putExtra("aId", data.getaId());
+//                    intent.putExtra("title", data.getaTitle());
+//                    context.startActivity(intent);
+
+                    Intent intent = new Intent(context, ArticleDetailActivity.class);
                     intent.putExtra("aId", data.getaId());
                     intent.putExtra("title", data.getaTitle());
                     context.startActivity(intent);

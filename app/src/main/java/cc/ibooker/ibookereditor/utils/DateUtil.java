@@ -532,7 +532,7 @@ public class DateUtil {
         // 当前日期时间
         Calendar ca = Calendar.getInstance(TimeZone.getDefault());
         int yearNow = ca.get(Calendar.YEAR);
-        int mouthNow = ca.get(Calendar.MONTH);
+        int mouthNow = ca.get(Calendar.MONTH) + 1;
         int dayNow = ca.get(Calendar.DATE);
         int hourNow = ca.get(Calendar.HOUR);
         int mimuteNow = ca.get(Calendar.MINUTE);

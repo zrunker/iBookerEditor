@@ -4,12 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -20,6 +18,7 @@ import cc.ibooker.ibookereditor.dto.ResultData;
 import cc.ibooker.ibookereditor.net.service.HttpMethods;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
+import cc.ibooker.ibookereditor.utils.ToastUtil;
 import cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout;
 import cc.ibooker.ibookereditorlib.IbookerEditorWebView;
 import rx.Subscriber;
@@ -184,7 +183,7 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
 
                 @Override
                 public void onError(Throwable e) {
-                    Toast.makeText(IbookerEditorWebActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    ToastUtil.shortToast(IbookerEditorWebActivity.this, e.getMessage());
                     swipeRefreshLayout.setRefreshing(false);
                 }
 
@@ -195,7 +194,6 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
                             updateStateLayout(true, 4, null);
                         } else {
                             preWebView.ibookerHtmlCompile(articleUserDataResultData.getData().getaHtml());
-
                             updateStateLayout(false, -1, null);
                         }
                     } else {// 失败

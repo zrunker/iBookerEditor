@@ -6,7 +6,7 @@ package cc.ibooker.ibookereditor.dto;
  */
 public class FileInfoBean {
     private int id;
-    private String fileName;// 文件名
+    private String fileName;// 文件名-文章标题
     private String filePath;// 文件路径
     private long fileSize;// 文件大小 - 字节为单位
     private long fileCreateTime;// 文件创建时间

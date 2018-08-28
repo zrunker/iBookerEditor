@@ -2,7 +2,11 @@ package cc.ibooker.ibookereditor.activity;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,7 +15,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextUtils;
-import android.widget.Toast;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -33,12 +39,13 @@ import cc.ibooker.ibookereditor.sqlite.SQLiteDao;
 import cc.ibooker.ibookereditor.sqlite.SQLiteDaoImpl;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
 import cc.ibooker.ibookereditor.utils.FileUtil;
+import cc.ibooker.ibookereditor.utils.ToastUtil;
 import cc.ibooker.ibookereditorlib.IbookerEditorEditView;
 import cc.ibooker.ibookereditorlib.IbookerEditorTopView;
 import cc.ibooker.ibookereditorlib.IbookerEditorView;
 
 import static cc.ibooker.ibookereditor.utils.ConstantUtil.PERMISSIONS_REQUEST_OPER_FILE;
-import static cc.ibooker.ibookereditorlib.IbookerEditorEnum.TOOLVIEW_TAG.IBTN_ABOUT;
+import static cc.ibooker.ibookereditorlib.IbookerEditorEnum.TOOLVIEW_TAG.IBTN_ELSE;
 
 /**
  * 编辑文章
@@ -55,14 +62,16 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
     private SQLiteDao sqLiteDao;
     private FileInfoBean fileInfoBean;
     private int _id;
-    private String preContent;
+    private String preTitle, preContent;
 
     private IbookerEditorView ibookerEditerView;
 
     // 线程池保存文件
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
-    private boolean lock = false;
-    private Handler titleHandler = new Handler(), contentHandler = new Handler(), myHandler = new MyHandler(this);
+    private boolean titleLock = false, contentLock = false;
+    private Handler titleHandler = new Handler(),
+            contentHandler = new Handler(),
+            myHandler = new MyHandler(this);
 
     // 权限组
     private String[] needPermissions = new String[]{
@@ -75,6 +84,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit);
+        setStatusBarColor(R.color.colorEFEFEF);
 
         // 申请权限
         if (!hasPermission(needPermissions))
@@ -102,25 +112,27 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
             currentStamp = createTime;
             fileInfoBean.setFileCreateTime(createTime);
         }
-        // 赋值
         if (!TextUtils.isEmpty(filePath)) {
             currentFilePath = filePath;
             fileInfoBean.setFilePath(filePath);
             currentFile = new File(filePath);
+        }
+        if (!TextUtils.isEmpty(title)) {
+            preTitle = title;
+            fileInfoBean.setFileName(title);
+            ibookerEditerView.setIEEditViewIbookerTitleEdText(title);
+            ibookerEditerView.getIbookerEditorVpView().getEditView().getIbookerTitleEd().setSelection(title.length());
+        }
+        // 读取文件内容并赋值
+        if (currentFile != null && currentFile.exists() && currentFile.isFile()) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     String content = readSdData(currentFile);
-                    if (!TextUtils.isEmpty(content)) {
-                        sendFirstMessage(content);
-                    }
+                    preContent = content;
+                    sendFirstMessage(content);
                 }
             }).start();
-        }
-        if (!TextUtils.isEmpty(title)) {
-            fileInfoBean.setFileName(title);
-            ibookerEditerView.setIEEditViewIbookerTitleEdText(title);
-            sendFirstMessage(null);
         }
 
     }
@@ -138,6 +150,31 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
 
     @Override
     public void finish() {
+        if (currentFile != null && currentFile.exists() && currentFile.isFile()) {
+            // 保存最后信息
+            String title = ibookerEditerView.getIbookerEditorVpView()
+                    .getEditView()
+                    .getIbookerTitleEd()
+                    .getText()
+                    .toString()
+                    .trim();
+            if (!TextUtils.isEmpty(title) && !title.equals(preTitle)) {
+                if (_id <= 0)
+                    _id = sqLiteDao.insertLocalFile2(fileInfoBean);
+                else
+                    sqLiteDao.updateLocalFileById(fileInfoBean, _id);
+            }
+            String content = ibookerEditerView.getIbookerEditorVpView()
+                    .getEditView()
+                    .getIbookerEd()
+                    .getText()
+                    .toString();
+            if (!TextUtils.isEmpty(content) && !content.equals(preContent)) {
+                ToastUtil.shortToast(this, "文件保存中...");
+                writeSdData(content, currentFile);
+            }
+        }
+
         EventBus.getDefault().postSticky(new SaveArticleSuccessEvent(true, _id, fileInfoBean));
         super.finish();
     }
@@ -145,6 +182,12 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (titleHandler != null)
+            titleHandler = null;
+        if (contentHandler != null)
+            contentHandler = null;
+        if (myHandler != null)
+            myHandler = null;
         if (executorService != null)
             executorService.shutdownNow();
     }
@@ -162,32 +205,38 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
             }
 
             @Override
-            public void onTextChanged(final CharSequence charSequence, int i, int i1, int i2) {
-                final String fileName = charSequence.toString().trim();
-                if (!TextUtils.isEmpty(fileName)) {
-                    // 创建文件
-                    if (currentFile == null || !currentFile.exists()) {
-                        // 创建目录
-                        FileUtil.createSDDirs(FileUtil.LOCALFILE_PATH);
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                final String title = charSequence.toString().trim();
+                if (!TextUtils.isEmpty(title) && !title.equals(preTitle)) {
+                    if (!titleLock) {
+                        titleLock = true;
                         // 创建文件
-                        currentFile = FileUtil.createFile(currentFilePath);
-                    }
-                    if (currentFile != null && currentFile.exists()) {
-                        // 0.5s更新一次
-                        if (titleHandler == null)
-                            titleHandler = new Handler();
-                        titleHandler.removeCallbacksAndMessages(null);
-                        titleHandler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                // 更新数据库
-                                fileInfoBean.setFileName(fileName);
-                                if (_id <= 0)
-                                    _id = sqLiteDao.insertLocalFile2(fileInfoBean);
-                                else
-                                    sqLiteDao.updateLocalFileById(fileInfoBean, _id);
-                            }
-                        }, 500);
+                        if (currentFile == null || !currentFile.exists()) {
+                            // 创建目录
+                            FileUtil.createSDDirs(FileUtil.LOCALFILE_PATH);
+                            // 创建文件
+                            currentFile = FileUtil.createFile(currentFilePath);
+                        }
+                        if (currentFile != null && currentFile.exists()) {
+                            // 0.5s更新一次
+                            if (titleHandler == null)
+                                titleHandler = new Handler();
+                            titleHandler.removeCallbacksAndMessages(null);
+                            titleHandler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // 更新数据库
+                                    preTitle = title;
+                                    fileInfoBean.setFileName(title);
+                                    if (_id <= 0)// 当前文件不存在
+                                        _id = sqLiteDao.insertLocalFile2(fileInfoBean);
+                                    else
+                                        sqLiteDao.updateLocalFileById(fileInfoBean, _id);
+
+                                    titleLock = false;
+                                }
+                            }, 500);
+                        }
                     }
                 }
             }
@@ -207,8 +256,8 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
             @Override
             public void onTextChanged(final CharSequence charSequence, int i, int i1, int i2) {
                 if (!TextUtils.isEmpty(charSequence) && !charSequence.equals(preContent)) {
-                    if (!lock) {
-                        lock = true;
+                    if (!contentLock) {
+                        contentLock = true;
                         // 创建文件
                         if (currentFile == null || !currentFile.exists()) {
                             // 创建目录
@@ -216,9 +265,8 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
                             // 创建文件
                             currentFile = FileUtil.createFile(currentFilePath);
                         }
-
                         if (currentFile != null && currentFile.exists()) {
-                            // 2s更新一次
+                            // 1s更新一次
                             if (contentHandler == null)
                                 contentHandler = new Handler();
                             contentHandler.removeCallbacksAndMessages(null);
@@ -231,15 +279,16 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
                                         @Override
                                         public void run() {
                                             boolean bool = writeSdData(charSequence.toString(), currentFile);
-                                            if (bool) preContent = charSequence.toString();
-                                            lock = false;
+                                            if (bool)
+                                                preContent = charSequence.toString();
+                                            contentLock = false;
                                         }
                                     });
                                     if (executorService == null || executorService.isShutdown())
                                         executorService = Executors.newSingleThreadExecutor();
                                     executorService.execute(thread);
                                 }
-                            }, 2000);
+                            }, 1000);
                         }
                     }
                 }
@@ -250,14 +299,30 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
 
             }
         });
+        ibookerEditerView.setIEEditViewBackgroundColor(Color.parseColor("#DDDDDD"));
+        ibookerEditerView.getIbookerEditorTopView().getShareIBtn().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ClickUtil.isFastClick()) return;
+//                Intent sendIntent = new Intent();
+//                sendIntent.setAction(Intent.ACTION_SEND);
+//                sendIntent.setType("text/*");
+//                sendIntent.putExtra(Intent.EXTRA_TEXT, contentEditText.getText().toString());
+//                startActivity(sendIntent);
+
+                File file = ibookerEditerView.generateFile();
+                sharePicture(EditArticleActivity.this, file,
+                        ibookerEditerView.getIbookerEditorVpView().getEditView().getIbookerTitleEd().getText().toString().trim());
+            }
+        });
     }
 
     // 设置书客编辑器顶部按钮点击事件
     @Override
     public void onTopClick(Object tag) {
         if (ClickUtil.isFastClick()) return;
-        if (tag.equals(IBTN_ABOUT)) {// 关于 - 改成保存
-            Toast.makeText(EditArticleActivity.this, "保存1", Toast.LENGTH_SHORT).show();
+        if (tag.equals(IBTN_ELSE)) {// 其他
+            ToastUtil.shortToast(this, "保存1");
         }
     }
 
@@ -266,8 +331,10 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
     public void doRequestPermissionsResult(int requestCode, @NonNull int[] grantResults) {
         super.doRequestPermissionsResult(requestCode, grantResults);
         if (requestCode == PERMISSIONS_REQUEST_OPER_FILE) {
-            if (grantResults[0] != PackageManager.PERMISSION_GRANTED)
+            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                ToastUtil.shortToast(this, "获取读取文件权限失败！");
                 finish();
+            }
         }
     }
 
@@ -369,5 +436,41 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
                 }
             }, 100);
         }
+    }
+
+    // 修改状态栏的颜色
+    private void setStatusBarColor(int color) {
+        try {
+            Window window = getWindow();
+            // 取消设置透明状态栏,使 ContentView 内容不再覆盖状态栏
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            }
+            // 需要设置这个 flag 才能调用 setStatusBarColor 来设置状态栏颜色
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            }
+            // 设置状态栏颜色
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                window.setStatusBarColor(getResources().getColor(color));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 分享图片
+     */
+    public static void sharePicture(Context context, File file, String Kdescription) {
+        Intent intent = new Intent();
+        intent.setAction("android.intent.action.SEND_MULTIPLE");
+        Uri uri = Uri.fromFile(file);
+        intent.putExtra(Intent.EXTRA_TEXT, Kdescription);
+        intent.setType("image/*");
+        intent.putExtra(Intent.EXTRA_STREAM, uri); // 图片数据(支持本地图片的Uri形式)
+        intent.putExtra(Intent.EXTRA_TEXT, Kdescription);
+        intent.putExtra("Kdescription", Kdescription); // 分享页面，图片上边的描述
+        context.startActivity(intent);
     }
 }

@@ -14,5 +14,9 @@
     <color name="colorLightGray">#F5F5F5</color>
     <!--灰色-->
     <color name="colorGray">#DEDEDE</color>
+    <!--黑色-->
+    <color name="colorBlank">#000000</color>
+
+    <color name="colorEFEFEF">#EFEFEF</color>
 
 </resources>

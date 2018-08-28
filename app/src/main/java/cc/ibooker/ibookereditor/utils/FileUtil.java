@@ -402,15 +402,15 @@ public class FileUtil {
         try {
             DecimalFormat df = new DecimalFormat("#.00");
             if (fileSize <= 0) {
-                fileSizeStr = "0B";
+                fileSizeStr = "0 B";
             } else if (fileSize < 1024) {
-                fileSizeStr = df.format((double) fileSize) + "B";
+                fileSizeStr = df.format((double) fileSize) + " B";
             } else if (fileSize < 1048576) {
-                fileSizeStr = df.format((double) fileSize / 1024) + "KB";
+                fileSizeStr = df.format((double) fileSize / 1024) + " KB";
             } else if (fileSize < 1073741824) {
-                fileSizeStr = df.format((double) fileSize / 1048576) + "MB";
+                fileSizeStr = df.format((double) fileSize / 1048576) + " MB";
             } else {
-                fileSizeStr = df.format((double) fileSize / 1073741824) + "GB";
+                fileSizeStr = df.format((double) fileSize / 1073741824) + " GB";
             }
         } catch (Exception e) {
             e.printStackTrace();

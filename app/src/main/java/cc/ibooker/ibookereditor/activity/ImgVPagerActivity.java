@@ -1,31 +1,32 @@
 package cc.ibooker.ibookereditor.activity;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
 import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.adapter.ImgVPagerAdapter;
+import cc.ibooker.ibookereditor.base.BaseActivity;
+import cc.ibooker.ibookereditor.utils.ToastUtil;
 import cc.ibooker.ibookereditor.view.DownLoadImgPopuwindow;
 import cc.ibooker.ibookereditor.zglide.GlideApp;
 import cc.ibooker.ibookereditorlib.IbookerEditorScaleImageView;
-import cc.ibooker.zpopupwindowlib.ZPopupWindow;
-import cc.ibooker.zpopupwindowlib.ZPopupWindowUtil;
 
 /**
  * 图片预览Activity
  * <p>
  * Created by 邹峰立 on 2018/3/13 0013.
  */
-public class ImgVPagerActivity extends AppCompatActivity implements View.OnClickListener {
+public class ImgVPagerActivity extends BaseActivity implements View.OnClickListener {
     private String currentPath;
     private int currentPosition;
     private ArrayList<String> imgAllPathList;
@@ -38,6 +39,7 @@ public class ImgVPagerActivity extends AppCompatActivity implements View.OnClick
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_imgvpger);
+        setStatusBarColor(R.color.colorBlank);
 
         // 获取上一个界面传值
         currentPath = getIntent().getStringExtra("currentPath");
@@ -109,7 +111,7 @@ public class ImgVPagerActivity extends AppCompatActivity implements View.OnClick
                     @Override
                     public void onMyLongClick(View v) {// 长按事件
                         String imgPath = imgAllPathList.get(finalI);
-                        Toast.makeText(ImgVPagerActivity.this, "图片长按事件：" + imgPath, Toast.LENGTH_LONG).show();
+                        ToastUtil.shortToast(ImgVPagerActivity.this, "图片长按事件：" + imgPath);
                         new DownLoadImgPopuwindow(ImgVPagerActivity.this, imgPath).showBottom();
                     }
                 });
@@ -137,7 +139,7 @@ public class ImgVPagerActivity extends AppCompatActivity implements View.OnClick
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.img_share:// 分享
-                Toast.makeText(ImgVPagerActivity.this, "执行分享", Toast.LENGTH_LONG).show();
+                ToastUtil.shortToast(getApplicationContext(), "执行分享");
                 break;
             case R.id.img_left:// 左移图片
                 mViewPager.setCurrentItem(currentPosition == 0 ? imgAllPathList.size() - 1 : currentPosition - 1);
@@ -145,6 +147,27 @@ public class ImgVPagerActivity extends AppCompatActivity implements View.OnClick
             case R.id.img_right:// 右移事件
                 mViewPager.setCurrentItem(currentPosition == imgAllPathList.size() - 1 ? 0 : currentPosition + 1);
                 break;
+        }
+    }
+
+    // 修改状态栏的颜色
+    private void setStatusBarColor(int color) {
+        try {
+            Window window = getWindow();
+            // 取消设置透明状态栏,使 ContentView 内容不再覆盖状态栏
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            }
+            // 需要设置这个 flag 才能调用 setStatusBarColor 来设置状态栏颜色
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            }
+            // 设置状态栏颜色
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                window.setStatusBarColor(getResources().getColor(color));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

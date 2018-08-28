@@ -8,7 +8,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
-import android.widget.Toast;
 
 import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.base.BaseActivity;
@@ -17,6 +16,7 @@ import cc.ibooker.ibookereditor.net.service.HttpMethods;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
 import cc.ibooker.ibookereditor.utils.RegularExpressionUtil;
+import cc.ibooker.ibookereditor.utils.ToastUtil;
 import cc.ibooker.zdialoglib.ProDialog;
 import rx.Subscriber;
 import rx.subscriptions.CompositeSubscription;
@@ -110,13 +110,13 @@ public class FeedbackActivity extends BaseActivity implements View.OnClickListen
                 stContent = contentEd.getText().toString();
                 stEmail = emailEd.getText().toString();
                 if (TextUtils.isEmpty(stStyle)) {
-                    Toast.makeText(this, "请选择反馈类型", Toast.LENGTH_SHORT).show();
+                    ToastUtil.shortToast(this, "请选择反馈类型");
                 } else if (TextUtils.isEmpty(stEmail)) {
-                    Toast.makeText(this, "请输入联系邮箱", Toast.LENGTH_SHORT).show();
+                    ToastUtil.shortToast(this, "请输入联系邮箱");
                 } else if (!RegularExpressionUtil.isEmail(stEmail)) {
-                    Toast.makeText(this, "请输入正确的联系邮箱", Toast.LENGTH_SHORT).show();
+                    ToastUtil.shortToast(this, "请输入正确的联系邮箱");
                 } else if (TextUtils.isEmpty(stContent)) {
-                    Toast.makeText(this, "请输入反馈内容", Toast.LENGTH_SHORT).show();
+                    ToastUtil.shortToast(this, "请输入反馈内容");
                 } else {
                     insertSuggest();
                 }
@@ -138,7 +138,7 @@ public class FeedbackActivity extends BaseActivity implements View.OnClickListen
 
                 @Override
                 public void onError(Throwable e) {
-                    Toast.makeText(FeedbackActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    ToastUtil.shortToast(FeedbackActivity.this, e.getMessage());
                     closeProDialog();
                 }
 
@@ -146,14 +146,14 @@ public class FeedbackActivity extends BaseActivity implements View.OnClickListen
                 public void onNext(ResultData<Boolean> booleanResultData) {
                     if (booleanResultData.getResultCode() == 0) {// 成功
                         if (booleanResultData.getData() == null) {
-                            Toast.makeText(FeedbackActivity.this, "获取数据失败！", Toast.LENGTH_SHORT).show();
+                            ToastUtil.shortToast(FeedbackActivity.this, "获取数据失败！");
                         } else {
                             initData();
-                            Toast.makeText(FeedbackActivity.this, "提交数据成功！", Toast.LENGTH_SHORT).show();
+                            ToastUtil.shortToast(FeedbackActivity.this, "提交数据成功！");
                             finish();
                         }
                     } else {// 失败
-                        Toast.makeText(FeedbackActivity.this, booleanResultData.getResultMsg(), Toast.LENGTH_SHORT).show();
+                        ToastUtil.shortToast(FeedbackActivity.this, booleanResultData.getResultMsg());
                     }
                 }
             };
@@ -162,7 +162,7 @@ public class FeedbackActivity extends BaseActivity implements View.OnClickListen
                 mSubscription = new CompositeSubscription();
             mSubscription.add(insertSuggestSubscriber);
         } else {// 无网络
-            Toast.makeText(this, "当前网络不给力！", Toast.LENGTH_SHORT).show();
+            ToastUtil.shortToast(this, "当前网络不给力！");
         }
     }
 

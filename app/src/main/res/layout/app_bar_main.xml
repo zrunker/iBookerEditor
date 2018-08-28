@@ -24,12 +24,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/colorAccent"
-            android:paddingBottom="15dp"
+            android:paddingBottom="10dp"
             android:paddingEnd="20dp"
             android:paddingLeft="20dp"
             android:paddingRight="20dp"
             android:paddingStart="20dp"
-            android:paddingTop="15dp"
+            android:paddingTop="5dp"
             android:text="@string/local"
             android:textColor="#FFFFFF" />
     </android.support.design.widget.AppBarLayout>

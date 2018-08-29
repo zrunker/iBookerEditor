@@ -74,4 +74,7 @@ dependencies {
     implementation 'com.github.zrunker:ZDialog:v1.0.1'
     implementation 'com.github.zrunker:ZPopupWindow:v1.03'
     implementation 'com.github.zrunker:ZEditText:v1.0.2'
+
+    /*bugly*/
+    implementation 'com.tencent.bugly:crashreport:2.6.6'
 }

@@ -111,7 +111,14 @@
                     tools:ignore="BatteryLife" />
             </intent-filter>
         </receiver>
+
+        <!--下载服务-->
         <service android:name=".service.DownLoadService" />
+
+        <!--启动APP加速服务-->
+        <service
+            android:name=".application.InitializeService"
+            android:exported="false" />
     </application>
 
 </manifest>

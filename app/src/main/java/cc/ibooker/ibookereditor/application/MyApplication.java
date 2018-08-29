@@ -4,6 +4,11 @@ import android.app.Application;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 
+import com.tencent.bugly.crashreport.CrashReport;
+
+import cc.ibooker.ibookereditor.BuildConfig;
+import cc.ibooker.ibookereditor.utils.AppUtil;
+
 import static cc.ibooker.ibookereditor.utils.ConstantUtil.TEXTVIEWSIZE;
 
 /**
@@ -21,9 +26,13 @@ public class MyApplication extends Application {
         super.onCreate();
         // 全局上下文赋值
         instance = this;
+
         // 应用程序捕获异常
 //        CrashHandler crashHandler = CrashHandler.getInstance();
 //        crashHandler.init(getApplicationContext());
+
+        // 启动服务执行耗时操作
+        InitializeService.start(this);
     }
 
     // 获取全局上下文对象

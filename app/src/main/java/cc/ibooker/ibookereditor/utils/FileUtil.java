@@ -162,6 +162,33 @@ public class FileUtil {
     }
 
     /**
+     * 删除文件夹（目录）/文件，以及内部所有文件
+     *
+     * @param path 完整文件路径
+     */
+    public static boolean deleteDirs(String path) {
+        try {
+            File dirs = new File(path);
+            if (!dirs.exists())
+                return false;
+            if (dirs.isDirectory()) {
+                for (File file : dirs.listFiles()) {
+                    if (file != null) {
+                        if (file.isFile()) {// 删除所有文件
+                            if (!file.delete()) return false;
+                        } else if (file.isDirectory()) {// 递规的方式删除文件夹
+                            deleteDir(file.getAbsolutePath());
+                        }
+                    }
+                }
+            }
+            return dirs.delete();// 删除目录本身
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
      * 读取文件-将应用内文件读到内存-输入流（流向内存）-子线程
      * 文件路径如：/data/data/cc.ibooker.zfile/files/test.txt
      *

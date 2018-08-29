@@ -463,14 +463,14 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
      * 分享图片
      */
     public static void sharePicture(Context context, File file, String Kdescription) {
-        Intent intent = new Intent();
-        intent.setAction("android.intent.action.SEND_MULTIPLE");
-        Uri uri = Uri.fromFile(file);
-        intent.putExtra(Intent.EXTRA_TEXT, Kdescription);
-        intent.setType("image/*");
-        intent.putExtra(Intent.EXTRA_STREAM, uri); // 图片数据(支持本地图片的Uri形式)
-        intent.putExtra(Intent.EXTRA_TEXT, Kdescription);
-        intent.putExtra("Kdescription", Kdescription); // 分享页面，图片上边的描述
-        context.startActivity(intent);
+        if (file.exists() && file.isFile()) {
+            Uri uri = Uri.fromFile(file);
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_SEND);
+            intent.setType("image/*");
+            intent.putExtra(Intent.EXTRA_STREAM, uri);
+            intent.putExtra(Intent.EXTRA_TEXT, Kdescription);
+            context.startActivity(intent);
+        }
     }
 }

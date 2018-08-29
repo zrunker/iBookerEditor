@@ -2,6 +2,7 @@ package cc.ibooker.ibookereditor.activity;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -14,6 +15,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
@@ -32,6 +34,7 @@ import java.util.ArrayList;
 import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.adapter.ALocalAdapter;
 import cc.ibooker.ibookereditor.adapter.ARecommendAdapter;
+import cc.ibooker.ibookereditor.adapter.LocalOperDialogLvAdapter;
 import cc.ibooker.ibookereditor.adapter.SideMenuAdapter;
 import cc.ibooker.ibookereditor.base.BaseActivity;
 import cc.ibooker.ibookereditor.bean.ArticleUserData;
@@ -40,6 +43,7 @@ import cc.ibooker.ibookereditor.bean.SideMenuItem;
 import cc.ibooker.ibookereditor.dto.FileInfoBean;
 import cc.ibooker.ibookereditor.dto.FooterData;
 import cc.ibooker.ibookereditor.dto.ResultData;
+import cc.ibooker.ibookereditor.event.LocalOperDialogEvent;
 import cc.ibooker.ibookereditor.event.SaveArticleSuccessEvent;
 import cc.ibooker.ibookereditor.net.service.HttpMethods;
 import cc.ibooker.ibookereditor.sqlite.SQLiteDao;
@@ -56,6 +60,8 @@ import cc.ibooker.ibookereditor.zglide.GlideCircleTransform;
 import cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout;
 import cc.ibooker.ibookereditor.zrecycleview.MyLinearLayoutManager;
 import cc.ibooker.ibookereditor.zrecycleview.RecyclerViewScrollListener;
+import cc.ibooker.zdialoglib.DiyDialog;
+import cc.ibooker.zdialoglib.TipDialog;
 import rx.Subscriber;
 import rx.subscriptions.CompositeSubscription;
 
@@ -113,6 +119,9 @@ public class MainActivity extends BaseActivity implements
 
     private SQLiteDao sqLiteDao;
 
+    private DiyDialog localOperDialog;
+    private TipDialog delDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -164,6 +173,8 @@ public class MainActivity extends BaseActivity implements
     @Override
     protected void onStop() {
         super.onStop();
+        closeLocalOperDialog();
+        closeDelDialog();
         if (getRecommendArticleListSubscriber != null)
             getRecommendArticleListSubscriber.unsubscribe();
     }
@@ -171,7 +182,8 @@ public class MainActivity extends BaseActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        EventBus.getDefault().register(SaveArticleSuccessEvent.class);
+        EventBus.getDefault().removeStickyEvent(SaveArticleSuccessEvent.class);
+        EventBus.getDefault().removeStickyEvent(LocalOperDialogEvent.class);
         EventBus.getDefault().unregister(this);
         if (mSubscription != null) {
             mSubscription.clear();
@@ -190,6 +202,15 @@ public class MainActivity extends BaseActivity implements
         if (event.isIsflashData() && 0 == dataRes)
             onRefresh();
 
+        EventBus.getDefault().removeStickyEvent(event);
+    }
+
+    // 展示本地文章相关操作事件
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    public void executeLocalOperDialogEvent(LocalOperDialogEvent event) {
+        int position = event.getPosition();
+        LocalEntity localEntity = event.getLocalEntity();
+        showLocalOperDialog(localEntity, position);
         EventBus.getDefault().removeStickyEvent(event);
     }
 
@@ -613,5 +634,97 @@ public class MainActivity extends BaseActivity implements
             }
         }
         return localList;
+    }
+
+    /**
+     * 展示本地操作Dialog
+     */
+    private ListView listView;
+
+    private void showLocalOperDialog(final LocalEntity localEntity, final int position) {
+        if (localOperDialog == null) {
+            View view = LayoutInflater.from(this).inflate(R.layout.layout_dialog_local_oper, null);
+            listView = view.findViewById(R.id.listview);
+            LocalOperDialogLvAdapter localOperDialogLvAdapter = new LocalOperDialogLvAdapter(this);
+            listView.setAdapter(localOperDialogLvAdapter);
+            localOperDialog = new DiyDialog(this, view);
+        }
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int i, long id) {
+                if (ClickUtil.isFastClick()) return;
+                closeLocalOperDialog();
+                if (i == 0) {// 分享
+                    shareFile(MainActivity.this, new File(localEntity.getaFilePath()), localEntity.getaTitle());
+                } else if (i == 1) {// 删除
+                    showDelDialog(localEntity.getaFilePath(), position);
+                }
+            }
+        });
+        localOperDialog.setDiyDialogWidth(70).showDiyDialog();
+    }
+
+    /**
+     * 关闭本地操作Dialog
+     */
+    private void closeLocalOperDialog() {
+        if (localOperDialog != null)
+            localOperDialog.closeDiyDialog();
+    }
+
+    /**
+     * 展示删除Dialog
+     */
+    private void showDelDialog(final String filePath, final int position) {
+        if (delDialog == null)
+            delDialog = new TipDialog(this);
+        delDialog.setEnsureColor("#FE7517")
+                .setOnTipEnsureListener(new TipDialog.OnTipEnsureListener() {
+                    @Override
+                    public void onEnsure() {
+                        if (ClickUtil.isFastClick()) return;
+                        // 删除文件
+                        boolean bool = FileUtil.deleteDirs(filePath);
+                        if (bool) {
+                            // 移除数据
+                            if (position >= 0 && position < localEntities.size())
+                                localEntities.remove(position);
+                            // 刷新列表
+                            aLocalAdapter.reflashData(localEntities);
+                        } else {
+                            ToastUtil.shortToast(MainActivity.this, "删除文件失败！");
+                        }
+                    }
+                });
+        delDialog.showTipDialog();
+    }
+
+    /**
+     * 关闭删除Dialog
+     */
+    private void closeDelDialog() {
+        if (delDialog != null)
+            delDialog.closeTipDialog();
+    }
+
+    /**
+     * 分享文件
+     */
+    public static void shareFile(Context context, File file, String Kdescription) {
+        if (file.exists() && file.isFile()) {
+            Uri uri = Uri.fromFile(file);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.putExtra("subject", Kdescription); //
+            intent.putExtra("body", ""); // 正文
+            intent.putExtra(Intent.EXTRA_STREAM, uri); // 添加附件，附件为file对象
+            if (uri.toString().endsWith(".gz")) {
+                intent.setType("application/x-gzip"); // 如果是gz使用gzip的mime
+            } else if (uri.toString().endsWith(".txt")) {
+                intent.setType("text/plain"); // 纯文本则用text/plain的mime
+            } else {
+                intent.setType("application/octet-stream"); // 其他的均使用流当做二进制数据来发送
+            }
+            context.startActivity(intent); // 调用系统的mail客户端进行发送
+        }
     }
 }

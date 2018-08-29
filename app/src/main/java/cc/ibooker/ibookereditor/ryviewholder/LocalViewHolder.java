@@ -3,12 +3,16 @@ package cc.ibooker.ibookereditor.ryviewholder;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+
+import org.greenrobot.eventbus.EventBus;
 
 import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.activity.EditArticleActivity;
 import cc.ibooker.ibookereditor.bean.LocalEntity;
+import cc.ibooker.ibookereditor.event.LocalOperDialogEvent;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
 
 /**
@@ -30,7 +34,7 @@ public class LocalViewHolder extends RecyclerView.ViewHolder {
         this.sizeTv = itemView.findViewById(R.id.tv_size);
     }
 
-    public void onBindData(final LocalEntity data) {
+    public void onBindData(final LocalEntity data, final int position) {
         if (data != null) {
             timeTv.setText(data.getaFormatTime());
             titleTv.setText(data.getaTitle());
@@ -46,6 +50,13 @@ public class LocalViewHolder extends RecyclerView.ViewHolder {
                     intent.putExtra("_id", data.getaId());
                     intent.putExtra("createTime", data.getaTime());
                     context.startActivity(intent);
+                }
+            });
+            view.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    EventBus.getDefault().postSticky(new LocalOperDialogEvent(data, position));
+                    return false;
                 }
             });
         }

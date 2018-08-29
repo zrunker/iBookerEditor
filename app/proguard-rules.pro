@@ -188,12 +188,6 @@
 
 
 #-----------处理第三方依赖库---------
-# FlexibleRichTextView
-#-keep class com.daquexian.flexiblerichtextview.** { *; }
-#-keep class org.scilab.forge.jlatexmath.** { *; }
-#
-#-keep class io.github.kexanie.library.** { *; }
-#-keep class com.x5.template.** { *; }
 
 
 # ARouter

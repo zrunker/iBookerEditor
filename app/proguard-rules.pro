@@ -184,44 +184,44 @@
 
 
 # JS混淆
--keep class com.xizhi_ai.aixizhi.commonlib.mevent.**{ *; }
+-keep class cc.ibooker.ibookereditorlib.**{ *; }
 
 
 #-----------处理第三方依赖库---------
 # FlexibleRichTextView
--keep class com.daquexian.flexiblerichtextview.** { *; }
--keep class org.scilab.forge.jlatexmath.** { *; }
-
--keep class io.github.kexanie.library.** { *; }
--keep class com.x5.template.** { *; }
+#-keep class com.daquexian.flexiblerichtextview.** { *; }
+#-keep class org.scilab.forge.jlatexmath.** { *; }
+#
+#-keep class io.github.kexanie.library.** { *; }
+#-keep class com.x5.template.** { *; }
 
 
 # ARouter
--keep public class com.alibaba.android.arouter.routes.**{*;}
--keep class * implements com.alibaba.android.arouter.facade.template.ISyringe{*;}
-# If you use the byType method to obtain Service, add the following rules to protect the interface:
--keep interface * implements com.alibaba.android.arouter.facade.template.IProvider
-# If single-type injection is used, that is, no interface is defined to implement IProvider, the following rules need to be added to protect the implementation
--keep class * implements com.alibaba.android.arouter.facade.template.IProvider
-# If @Autowired is used for injection in non-Activity classes, add the following rules to prevent injection failures
--keepnames class * {
-    @com.alibaba.android.arouter.facade.annotation.Autowired <fields>;
-}
+#-keep public class com.alibaba.android.arouter.routes.**{*;}
+#-keep class * implements com.alibaba.android.arouter.facade.template.ISyringe{*;}
+## If you use the byType method to obtain Service, add the following rules to protect the interface:
+#-keep interface * implements com.alibaba.android.arouter.facade.template.IProvider
+## If single-type injection is used, that is, no interface is defined to implement IProvider, the following rules need to be added to protect the implementation
+#-keep class * implements com.alibaba.android.arouter.facade.template.IProvider
+## If @Autowired is used for injection in non-Activity classes, add the following rules to prevent injection failures
+#-keepnames class * {
+#    @com.alibaba.android.arouter.facade.annotation.Autowired <fields>;
+#}
 
 
 
 
 # 讯飞语音
--keep class com.iflytek.**{*;}
--keepattributes Signature
+#-keep class com.iflytek.**{*;}
+#-keepattributes Signature
 
 
 
 
 # 七牛
--keep class com.qiniu.**{*;}
--keep class com.qiniu.**{public <init>();}
--ignorewarnings
+#-keep class com.qiniu.**{*;}
+#-keep class com.qiniu.**{public <init>();}
+#-ignorewarnings
 
 
 
@@ -275,7 +275,7 @@
 
 
 # Picasso
--dontwarn com.squareup.okhttp.**
+#-dontwarn com.squareup.okhttp.**
 
 
 ##---------------Begin: proguard configuration for Gson  ----------
@@ -290,9 +290,9 @@
 # Application classes that will be serialized/deserialized over Gson
 # 使用Gson时需要配置Gson的解析对象及变量都不混淆。不然Gson会找不到变量。
 # 将下面替换成自己的实体类
--keep class com.xizhi_ai.aixizhi.commonlib.dto.** { *; }
--keep class com.xizhi_ai.aixizhi.commonlib.dto.request.** { *; }
--keep class com.xizhi_ai.aixizhi.commonlib.bean.** { *; }
+-keep class cc.ibooker.ibookereditor.dto.** { *; }
+-keep class cc.ibooker.ibookereditor.dto.request.** { *; }
+-keep class cc.ibooker.ibookereditor.bean.** { *; }
 #-keep class com.xizhi_ai.aixizhi.commonlib.event.** { *; }
 # Prevent proguard from stripping interface information from TypeAdapterFactory,
 # JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)
@@ -335,95 +335,95 @@
 
 
 # 微信支付
--keep class com.tencent.mm.opensdk.** {*;}
--keep class com.tencent.wxop.** {*;}
--keep class com.tencent.mm.sdk.** {*;}
+#-keep class com.tencent.mm.opensdk.** {*;}
+#-keep class com.tencent.wxop.** {*;}
+#-keep class com.tencent.mm.sdk.** {*;}
 
 
 
 
 # 支付宝钱包
--keep class com.alipay.android.app.IAlixPay{*;}
--keep class com.alipay.android.app.IAlixPay$Stub{*;}
--keep class com.alipay.android.app.IRemoteServiceCallback{*;}
--keep class com.alipay.android.app.IRemoteServiceCallback$Stub{*;}
--keep class com.alipay.sdk.app.PayTask{ public *;}
--keep class com.alipay.sdk.app.AuthTask{ public *;}
--keep class com.alipay.sdk.app.H5PayCallback {
-    <fields>;
-    <methods>;
-}
--keep class com.alipay.android.phone.mrpc.core.** { *; }
--keep class com.alipay.apmobilesecuritysdk.** { *; }
--keep class com.alipay.mobile.framework.service.annotation.** { *; }
--keep class com.alipay.mobilesecuritysdk.face.** { *; }
--keep class com.alipay.tscenter.biz.rpc.** { *; }
--keep class org.json.alipay.** { *; }
--keep class com.alipay.tscenter.** { *; }
--keep class com.ta.utdid2.** { *;}
--keep class com.ut.device.** { *;}
+#-keep class com.alipay.android.app.IAlixPay{*;}
+#-keep class com.alipay.android.app.IAlixPay$Stub{*;}
+#-keep class com.alipay.android.app.IRemoteServiceCallback{*;}
+#-keep class com.alipay.android.app.IRemoteServiceCallback$Stub{*;}
+#-keep class com.alipay.sdk.app.PayTask{ public *;}
+#-keep class com.alipay.sdk.app.AuthTask{ public *;}
+#-keep class com.alipay.sdk.app.H5PayCallback {
+#    <fields>;
+#    <methods>;
+#}
+#-keep class com.alipay.android.phone.mrpc.core.** { *; }
+#-keep class com.alipay.apmobilesecuritysdk.** { *; }
+#-keep class com.alipay.mobile.framework.service.annotation.** { *; }
+#-keep class com.alipay.mobilesecuritysdk.face.** { *; }
+#-keep class com.alipay.tscenter.biz.rpc.** { *; }
+#-keep class org.json.alipay.** { *; }
+#-keep class com.alipay.tscenter.** { *; }
+#-keep class com.ta.utdid2.** { *;}
+#-keep class com.ut.device.** { *;}
 
 
 
 
 # SharedSDK
--keep class cn.sharesdk.**{*;}
--keep class com.sina.**{*;}
--keep class **.R$* {*;}
--keep class **.R{*;}
--keep class com.mob.**{*;}
--keep class m.framework.**{*;}
--dontwarn cn.sharesdk.**
--dontwarn com.sina.**
--dontwarn com.mob.**
--dontwarn **.R$*
+#-keep class cn.sharesdk.**{*;}
+#-keep class com.sina.**{*;}
+#-keep class **.R$* {*;}
+#-keep class **.R{*;}
+#-keep class com.mob.**{*;}
+#-keep class m.framework.**{*;}
+#-dontwarn cn.sharesdk.**
+#-dontwarn com.sina.**
+#-dontwarn com.mob.**
+#-dontwarn **.R$*
 
 
 
 
 # 友盟
--keep class com.umeng.** {*;}
--keepclassmembers class * {
-   public <init> (org.json.JSONObject);
-}
--keepclassmembers enum * {
-    public static **[] values();
-    public static ** valueOf(java.lang.String);
-}
-
--dontwarn com.umeng.**
--dontwarn com.taobao.**
--dontwarn anet.channel.**
--dontwarn anetwork.channel.**
--dontwarn org.android.**
--dontwarn org.apache.thrift.**
--dontwarn com.xiaomi.**
--dontwarn com.huawei.**
--dontwarn com.meizu.**
-
--keepattributes *Annotation*
-
--keep class com.taobao.** {*;}
--keep class org.android.** {*;}
--keep class anet.channel.** {*;}
--keep class com.umeng.** {*;}
--keep class com.xiaomi.** {*;}
--keep class com.huawei.** {*;}
--keep class com.meizu.** {*;}
--keep class org.apache.thrift.** {*;}
-
--keep class com.alibaba.sdk.android.**{*;}
--keep class com.ut.**{*;}
--keep class com.ta.**{*;}
-
--keep public class **.R$*{
-   public static final int *;
-}
+#-keep class com.umeng.** {*;}
+#-keepclassmembers class * {
+#   public <init> (org.json.JSONObject);
+#}
+#-keepclassmembers enum * {
+#    public static **[] values();
+#    public static ** valueOf(java.lang.String);
+#}
+#
+#-dontwarn com.umeng.**
+#-dontwarn com.taobao.**
+#-dontwarn anet.channel.**
+#-dontwarn anetwork.channel.**
+#-dontwarn org.android.**
+#-dontwarn org.apache.thrift.**
+#-dontwarn com.xiaomi.**
+#-dontwarn com.huawei.**
+#-dontwarn com.meizu.**
+#
+#-keepattributes *Annotation*
+#
+#-keep class com.taobao.** {*;}
+#-keep class org.android.** {*;}
+#-keep class anet.channel.** {*;}
+#-keep class com.umeng.** {*;}
+#-keep class com.xiaomi.** {*;}
+#-keep class com.huawei.** {*;}
+#-keep class com.meizu.** {*;}
+#-keep class org.apache.thrift.** {*;}
+#
+#-keep class com.alibaba.sdk.android.**{*;}
+#-keep class com.ut.**{*;}
+#-keep class com.ta.**{*;}
+#
+#-keep public class **.R$*{
+#   public static final int *;
+#}
 
 
 
 
 # bugly
--dontwarn com.tencent.bugly.**
--keep public class com.tencent.bugly.**{*;}
+#-dontwarn com.tencent.bugly.**
+#-keep public class com.tencent.bugly.**{*;}
 

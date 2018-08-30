@@ -173,6 +173,7 @@ public class MainActivity extends BaseActivity implements
     @Override
     protected void onStop() {
         super.onStop();
+        drawer.closeDrawer(GravityCompat.START, true);
         closeLocalOperDialog();
         closeDelDialog();
         if (getRecommendArticleListSubscriber != null)
@@ -274,6 +275,7 @@ public class MainActivity extends BaseActivity implements
                 if (ClickUtil.isFastClick()) return;
                 switch (position) {
                     case 1:// 本地
+                        drawer.closeDrawer(GravityCompat.START, true);
                         if (dataRes != 0) {
                             topTv.setText("本地");
                             setaLocalAdapter();
@@ -282,9 +284,9 @@ public class MainActivity extends BaseActivity implements
                             swipeRefreshLayout.autoRefresh();
                             onRefresh();
                         }
-                        drawer.closeDrawer(GravityCompat.START, true);
                         break;
                     case 2:// 推荐
+                        drawer.closeDrawer(GravityCompat.START, true);
                         if (dataRes != 1) {
                             topTv.setText("推荐");
                             setaRecommendAdapter();
@@ -293,7 +295,6 @@ public class MainActivity extends BaseActivity implements
                             swipeRefreshLayout.autoRefresh();
                             onRefresh();
                         }
-                        drawer.closeDrawer(GravityCompat.START, true);
                         break;
                     case 3:// 语法参考
                         drawer.closeDrawer(GravityCompat.START, true);

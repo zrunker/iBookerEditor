@@ -428,13 +428,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
                 currentActivity.ibookerEditerView.setIEEditViewIbookerEdText(content);
             }
             // 切换预览
-            currentActivity.ibookerEditerView.getIbookerEditorTopView().getPreviewIBtn().callOnClick();
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    currentActivity.ibookerEditerView.changeVpUpdateIbookerEditorTopView(1);
-                }
-            }, 100);
+            currentActivity.ibookerEditerView.getIbookerEditorVpView().setCurrentItem(1);
         }
     }
 

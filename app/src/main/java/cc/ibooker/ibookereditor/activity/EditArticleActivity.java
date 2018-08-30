@@ -28,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -43,6 +44,7 @@ import cc.ibooker.ibookereditor.utils.ToastUtil;
 import cc.ibooker.ibookereditorlib.IbookerEditorEditView;
 import cc.ibooker.ibookereditorlib.IbookerEditorTopView;
 import cc.ibooker.ibookereditorlib.IbookerEditorView;
+import cc.ibooker.ibookereditorlib.IbookerEditorWebView;
 
 import static cc.ibooker.ibookereditor.utils.ConstantUtil.PERMISSIONS_REQUEST_OPER_FILE;
 import static cc.ibooker.ibookereditorlib.IbookerEditorEnum.TOOLVIEW_TAG.IBTN_ELSE;
@@ -246,6 +248,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
 
             }
         });
+
         ibookerEditerView.setOnIbookerEdTextChangedListener(new IbookerEditorEditView.OnIbookerEdTextChangedListener() {
             // 设置内容改变监听
             @Override
@@ -299,7 +302,19 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
 
             }
         });
-        ibookerEditerView.setIEEditViewBackgroundColor(Color.parseColor("#DDDDDD"));
+
+        ibookerEditerView.setIEEditViewBackgroundColor(Color.parseColor("#DDDDDD"))
+                .setIbookerEditorImgPreviewListener(new IbookerEditorWebView.IbookerEditorImgPreviewListener() {
+                    @Override
+                    public void onIbookerEditorImgPreview(String currentPath, int position, ArrayList<String> imgAllPathList) {
+                        Intent intent = new Intent(EditArticleActivity.this, ImgVPagerActivity.class);
+                        intent.putExtra("currentPath", currentPath);
+                        intent.putExtra("position", position);
+                        intent.putStringArrayListExtra("imgAllPathList", imgAllPathList);
+                        startActivity(intent);
+                    }
+                });
+
         ibookerEditerView.getIbookerEditorTopView().getShareIBtn().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -462,7 +477,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
     /**
      * 分享图片
      */
-    public static void sharePicture(Context context, File file, String Kdescription) {
+    private void sharePicture(Context context, File file, String Kdescription) {
         if (file.exists() && file.isFile()) {
             Uri uri = Uri.fromFile(file);
             Intent intent = new Intent();

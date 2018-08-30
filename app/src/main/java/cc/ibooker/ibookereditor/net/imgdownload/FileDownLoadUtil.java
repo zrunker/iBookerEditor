@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import cc.ibooker.ibookereditor.utils.FileUtil;
 import okhttp3.ResponseBody;
 
 /**
@@ -33,16 +34,22 @@ public class FileDownLoadUtil {
      */
     public File fileDownLoad(String fileName, ResponseBody responseBody) {
         File file = null;
-        if (responseBody != null && responseBody.contentLength() <= 0) {
+        if (responseBody != null && responseBody.contentLength() > 0) {
             FileOutputStream os = null;
             InputStream is = null;
             try {
                 // 创建文件
-                String imgFilePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "Images" + File.separator + fileName;
-                file = new File(imgFilePath);
-                boolean bool = file.exists();
+                String filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "ibookerEditor" + File.separator + "Images" + File.separator;
+                // 创建文件
+                File dir = new File(filePath);
+                boolean bool = dir.exists();
                 if (!bool)
-                    bool = file.mkdirs();
+                    FileUtil.createSDDirs(filePath);
+                file = new File(filePath, fileName);
+                bool = file.exists() && file.isFile();
+                if (!bool) {
+                    bool = file.createNewFile();
+                }
                 if (bool) {
                     // 获取文件输出流
                     os = new FileOutputStream(file);
@@ -62,6 +69,9 @@ public class FileDownLoadUtil {
                     }
 
                     os.flush();
+
+                    if (onDownLoadListener != null)
+                        onDownLoadListener.downLoadComplete(file);
                 }
             } catch (java.io.IOException e) {
                 e.printStackTrace();
@@ -89,11 +99,14 @@ public class FileDownLoadUtil {
     // 下载监听器
     public interface OnDownLoadListener {
         void downLoadProgress(int record);
+
+        void downLoadComplete(File file);
     }
 
     private OnDownLoadListener onDownLoadListener;
 
-    public void setOnDownLoadListener(OnDownLoadListener onDownLoadListener) {
+    public FileDownLoadUtil setOnDownLoadListener(OnDownLoadListener onDownLoadListener) {
         this.onDownLoadListener = onDownLoadListener;
+        return this;
     }
 }

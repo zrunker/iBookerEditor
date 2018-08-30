@@ -6,13 +6,14 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.widget.Toast;
+import android.util.Log;
 
 import java.io.File;
 
 import cc.ibooker.ibookereditor.net.imgdownload.FileDownLoadUtil;
 import cc.ibooker.ibookereditor.net.service.HttpMethods;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
+import cc.ibooker.ibookereditor.utils.ToastUtil;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import rx.Subscriber;
@@ -38,9 +39,9 @@ public class DownLoadService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         url = intent.getStringExtra("url");
         if (TextUtils.isEmpty(url))
-            Toast.makeText(this, "找不到文件地址", Toast.LENGTH_SHORT).show();
+            ToastUtil.shortToast(this, "找不到文件地址");
         else {
-            Toast.makeText(this, "下载中...", Toast.LENGTH_SHORT).show();
+            ToastUtil.shortToast(this, "下载中...");
             downloadFile();
         }
         return super.onStartCommand(intent, flags, startId);
@@ -68,7 +69,7 @@ public class DownLoadService extends Service {
 
                 @Override
                 public void onError(Throwable e) {
-                    Toast.makeText(DownLoadService.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    ToastUtil.shortToast(DownLoadService.this, e.getMessage());
                 }
 
                 @Override
@@ -79,10 +80,10 @@ public class DownLoadService extends Service {
                             String type = mediaType.subtype();
                             String fileName = System.currentTimeMillis() + "." + type;
                             File file = FileDownLoadUtil.getInstance().fileDownLoad(fileName, responseBody);
-                            Toast.makeText(DownLoadService.this, "文件已保存：" + file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+                            ToastUtil.shortToast(DownLoadService.this, "文件已保存：" + file.getAbsolutePath());
                         }
                     } else {
-                        Toast.makeText(DownLoadService.this, "下载文件失败", Toast.LENGTH_SHORT).show();
+                        ToastUtil.shortToast(DownLoadService.this, "下载文件失败");
                     }
                 }
             };
@@ -91,7 +92,7 @@ public class DownLoadService extends Service {
                 mSubscription = new CompositeSubscription();
             mSubscription.add(downloadFileSubscriber);
         } else {
-            Toast.makeText(DownLoadService.this, "网络不给力！", Toast.LENGTH_SHORT).show();
+            ToastUtil.shortToast(this, "网络不给力！");
         }
     }
 }

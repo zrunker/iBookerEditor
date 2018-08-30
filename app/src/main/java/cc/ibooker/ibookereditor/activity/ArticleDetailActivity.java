@@ -2,11 +2,14 @@ package cc.ibooker.ibookereditor.activity;
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
@@ -17,8 +20,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.base.BaseActivity;
+import cc.ibooker.ibookereditor.jsevent.IbookerEditorJsCheckImgsEvent;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
 import cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout;
@@ -40,6 +46,11 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
 
     private String title;// 标记文章主题
     private String webUrl;
+
+    private ArrayList<String> imgPathList;// WebView所有图片地址
+    private IbookerEditorJsCheckImgsEvent ibookerEditorJsCheckImgsEvent;
+
+    private int fontSize = 1;// 用来控制字体
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -100,7 +111,7 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
     }
 
     // 初始化WebView
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface"})
     private void initWebView() {
         // 使页面获取焦点，防止点击无响应
         webView.requestFocus();
@@ -112,7 +123,7 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
             // 错误代码处理，一般是加载本地Html页面，或者使用TextView显示错误
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                // 当网页加载出错时，加载本地错误文件
+                addWebViewListener();
                 swipeRefreshLayout.setRefreshing(false);
 //                updateStateLayout(true, 3, "网页加载失败！");
             }
@@ -127,6 +138,7 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                addWebViewListener();
                 swipeRefreshLayout.setRefreshing(false);
                 updateStateLayout(false, -1, null);
             }
@@ -177,6 +189,23 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
 
         // 设置缓存，默认不使用缓存
         webSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);// 有缓存，使用缓存
+
+        // 添加js
+        ibookerEditorJsCheckImgsEvent = new IbookerEditorJsCheckImgsEvent(this);
+        webView.addJavascriptInterface(ibookerEditorJsCheckImgsEvent, "ibookerEditorJsCheckImgsEvent");
+
+        // 初始化字体
+        if (webSettings.getTextSize() == WebSettings.TextSize.SMALLEST) {
+            fontSize = 1;
+        } else if (webSettings.getTextSize() == WebSettings.TextSize.SMALLER) {
+            fontSize = 2;
+        } else if (webSettings.getTextSize() == WebSettings.TextSize.NORMAL) {
+            fontSize = 3;
+        } else if (webSettings.getTextSize() == WebSettings.TextSize.LARGER) {
+            fontSize = 4;
+        } else if (webSettings.getTextSize() == WebSettings.TextSize.LARGEST) {
+            fontSize = 5;
+        }
     }
 
     // 返回键监听
@@ -252,5 +281,44 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
         } else {// 无网络
             updateStateLayout(true, 1, null);
         }
+    }
+
+    // 给WebView添加相关监听
+    private void addWebViewListener() {
+        // 动态添加图片点击事件
+        webView.loadUrl("javascript:(function() {"
+                + "  var objs = document.getElementsByTagName(\"img\"); "
+                + "  for(var i = 0; i < objs.length; i++) {"
+                + "     objs[i].onclick = function() {"
+                + "          window.ibookerEditorJsCheckImgsEvent.onCheckImg(this.src);"
+                + "     }"
+                + "  }"
+                + "})()");
+
+        // 获取WebView中全部图片地址
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            webView.evaluateJavascript("javascript:getImgAllPaths()", new ValueCallback<String>() {
+
+                @Override
+                public void onReceiveValue(String value) {
+                    // value即为所有图片地址
+                    if (!TextUtils.isEmpty(value)) {
+                        value = value.replace("\"", "").replace("\"", "");
+                        if (!TextUtils.isEmpty(value)) {
+                            if (imgPathList == null)
+                                imgPathList = new ArrayList<>();
+                            imgPathList.clear();
+                            String[] imgPaths = value.split(";ibookerEditor;");
+                            for (String imgPath : imgPaths) {
+                                if (!TextUtils.isEmpty(imgPath))
+                                    imgPathList.add(imgPath);
+                            }
+                            ibookerEditorJsCheckImgsEvent.setmImgPathList(imgPathList);
+                        }
+                    }
+                }
+            });
+        }
+
     }
 }

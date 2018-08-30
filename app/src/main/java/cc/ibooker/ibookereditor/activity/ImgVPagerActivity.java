@@ -1,5 +1,8 @@
 package cc.ibooker.ibookereditor.activity;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,15 +14,24 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.adapter.ImgVPagerAdapter;
 import cc.ibooker.ibookereditor.base.BaseActivity;
+import cc.ibooker.ibookereditor.net.imgdownload.FileDownLoadUtil;
+import cc.ibooker.ibookereditor.net.service.HttpMethods;
+import cc.ibooker.ibookereditor.utils.NetworkUtil;
+import cc.ibooker.ibookereditor.utils.RegularExpressionUtil;
 import cc.ibooker.ibookereditor.utils.ToastUtil;
 import cc.ibooker.ibookereditor.view.DownLoadImgPopuwindow;
 import cc.ibooker.ibookereditor.zglide.GlideApp;
 import cc.ibooker.ibookereditorlib.IbookerEditorScaleImageView;
+import okhttp3.MediaType;
+import okhttp3.ResponseBody;
+import rx.Subscriber;
+import rx.subscriptions.CompositeSubscription;
 
 /**
  * 图片预览Activity
@@ -35,6 +47,10 @@ public class ImgVPagerActivity extends BaseActivity implements View.OnClickListe
     private ImgVPagerAdapter mAdapter;
     private TextView indicatorTv;
 
+    private DownLoadImgPopuwindow downLoadImgPopuwindow;
+    private Subscriber<ResponseBody> downloadFileSubscriber;
+    private CompositeSubscription mSubscription;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +65,24 @@ public class ImgVPagerActivity extends BaseActivity implements View.OnClickListe
         // 初始化
         if (imgAllPathList != null && imgAllPathList.size() > 0)
             init();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (downLoadImgPopuwindow != null)
+            downLoadImgPopuwindow.dismiss();
+        if (downloadFileSubscriber != null)
+            downloadFileSubscriber.unsubscribe();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mSubscription != null) {
+            mSubscription.clear();
+            mSubscription.unsubscribe();
+        }
     }
 
     // 初始化
@@ -74,6 +108,7 @@ public class ImgVPagerActivity extends BaseActivity implements View.OnClickListe
             @Override
             public void onPageSelected(int position) {
                 currentPosition = position;
+                currentPath = imgAllPathList.get(position);
                 updateIndicatorTv(position);
             }
 
@@ -111,8 +146,8 @@ public class ImgVPagerActivity extends BaseActivity implements View.OnClickListe
                     @Override
                     public void onMyLongClick(View v) {// 长按事件
                         String imgPath = imgAllPathList.get(finalI);
-                        ToastUtil.shortToast(ImgVPagerActivity.this, "图片长按事件：" + imgPath);
-                        new DownLoadImgPopuwindow(ImgVPagerActivity.this, imgPath).showBottom();
+                        downLoadImgPopuwindow = new DownLoadImgPopuwindow(ImgVPagerActivity.this, imgPath);
+                        downLoadImgPopuwindow.showBottom();
                     }
                 });
                 String imgPath = imgAllPathList.get(i);
@@ -139,7 +174,13 @@ public class ImgVPagerActivity extends BaseActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.img_share:// 分享
-                ToastUtil.shortToast(getApplicationContext(), "执行分享");
+                if (RegularExpressionUtil.isInternetURL(currentPath)) {// 下载文件在分享
+                    ToastUtil.shortToast(this, "图片保存中...");
+                    downloadFile(currentPath);
+                } else {// 本地文件直接分享
+                    File file = new File(currentPath);
+                    sharePicture(ImgVPagerActivity.this, file, file.getName());
+                }
                 break;
             case R.id.img_left:// 左移图片
                 mViewPager.setCurrentItem(currentPosition == 0 ? imgAllPathList.size() - 1 : currentPosition - 1);
@@ -168,6 +209,60 @@ public class ImgVPagerActivity extends BaseActivity implements View.OnClickListe
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * 分享图片
+     */
+    private void sharePicture(Context context, File file, String Kdescription) {
+        if (file.exists() && file.isFile()) {
+            Uri uri = Uri.fromFile(file);
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_SEND);
+            intent.setType("image/*");
+            intent.putExtra(Intent.EXTRA_STREAM, uri);
+            intent.putExtra(Intent.EXTRA_TEXT, Kdescription);
+            context.startActivity(intent);
+        }
+    }
+
+    // 下载文件
+    private void downloadFile(String url) {
+        if (NetworkUtil.isNetworkConnected(this)) {
+            downloadFileSubscriber = new Subscriber<ResponseBody>() {
+                @Override
+                public void onCompleted() {
+
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    ToastUtil.shortToast(ImgVPagerActivity.this, e.getMessage());
+                }
+
+                @Override
+                public void onNext(ResponseBody responseBody) {
+                    if (responseBody != null && responseBody.contentLength() > 0) {
+                        MediaType mediaType = responseBody.contentType();
+                        if (mediaType != null) {
+                            String type = mediaType.subtype();
+                            String fileName = System.currentTimeMillis() + "." + type;
+                            File file = FileDownLoadUtil.getInstance().fileDownLoad(fileName, responseBody);
+                            ToastUtil.shortToast(ImgVPagerActivity.this, "文件已保存：" + file.getAbsolutePath());
+                            sharePicture(ImgVPagerActivity.this, file, file.getName());
+                        }
+                    } else {
+                        ToastUtil.shortToast(ImgVPagerActivity.this, "下载文件失败");
+                    }
+                }
+            };
+            HttpMethods.getInstance().downloadFile(downloadFileSubscriber, url);
+            if (mSubscription == null)
+                mSubscription = new CompositeSubscription();
+            mSubscription.add(downloadFileSubscriber);
+        } else {
+            ToastUtil.shortToast(this, "网络不给力！");
         }
     }
 }

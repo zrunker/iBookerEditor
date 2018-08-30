@@ -711,7 +711,7 @@ public class MainActivity extends BaseActivity implements
     /**
      * 分享文件
      */
-    public static void shareFile(Context context, File file, String Kdescription) {
+    private void shareFile(Context context, File file, String Kdescription) {
         if (file.exists() && file.isFile()) {
             Uri uri = Uri.fromFile(file);
             Intent intent = new Intent(Intent.ACTION_SEND);

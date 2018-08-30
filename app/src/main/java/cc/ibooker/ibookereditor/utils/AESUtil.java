@@ -15,8 +15,8 @@ public class AESUtil {
     /*
      * 加密用的Key 可以用26个字母和数字组成 此处使用AES-128-CBC加密模式，key需要为16位。
      */
-    private static final String KEY = "ibooker179Runker";
-    private static final String VIPARA = "0102030405060708";
+    private static final String KEY = "";
+    private static final String VIPARA = "";
     private static final String bm = "UTF8";
 
     // KeyGenerator提供对称密钥生成器的功能，支持各种算法

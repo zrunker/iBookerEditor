@@ -589,6 +589,7 @@ public class MainActivity extends BaseActivity implements
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK || event.getAction() == KeyEvent.ACTION_DOWN) {
+            drawer.closeDrawer(GravityCompat.START, true);
             if (System.currentTimeMillis() - exitTime > 5000) {
                 exitTime = System.currentTimeMillis();
                 ToastUtil.shortToast(getApplicationContext(), "再按一次退出程序");

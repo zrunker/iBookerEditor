@@ -87,6 +87,7 @@ public class DownLoadService extends Service {
                             if (isPreImg) {
                                 // 进入图片预览
                                 Intent intent = new Intent(Intent.ACTION_VIEW);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 intent.setDataAndType(Uri.fromFile(file), "image/*");
                                 DownLoadService.this.startActivity(intent);
                             }

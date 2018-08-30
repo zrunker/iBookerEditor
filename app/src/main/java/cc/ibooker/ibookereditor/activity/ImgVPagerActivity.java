@@ -141,16 +141,14 @@ public class ImgVPagerActivity extends BaseActivity implements View.OnClickListe
                         finish();
                     }
                 });
-                final int finalI = i;
+                final String imgPath = imgAllPathList.get(i);
                 imageView.setOnMyLongClickListener(new IbookerEditorScaleImageView.OnMyLongClickListener() {
                     @Override
                     public void onMyLongClick(View v) {// 长按事件
-                        String imgPath = imgAllPathList.get(finalI);
                         downLoadImgPopuwindow = new DownLoadImgPopuwindow(ImgVPagerActivity.this, imgPath);
                         downLoadImgPopuwindow.showBottom();
                     }
                 });
-                String imgPath = imgAllPathList.get(i);
                 GlideApp.with(this).load(imgPath).into(imageView);
                 imageViews.add(imageView);
             }

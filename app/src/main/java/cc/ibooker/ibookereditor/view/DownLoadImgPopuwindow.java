@@ -44,6 +44,7 @@ public class DownLoadImgPopuwindow extends ZPopupWindow implements View.OnClickL
             case R.id.tv_save:// 保存 - 启动服务进行下载
                 Intent intent = new Intent(context, DownLoadService.class);
                 intent.putExtra("url", url);
+                intent.putExtra("isPreImg", true);
                 context.startService(intent);
 
                 dismiss();

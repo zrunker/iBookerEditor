@@ -2,11 +2,11 @@ package cc.ibooker.ibookereditor.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.io.File;
 
@@ -26,6 +26,7 @@ import rx.subscriptions.CompositeSubscription;
  */
 public class DownLoadService extends Service {
     private String url;
+    private boolean isPreImg;
     private Subscriber<ResponseBody> downloadFileSubscriber;
     private CompositeSubscription mSubscription;
 
@@ -38,6 +39,7 @@ public class DownLoadService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         url = intent.getStringExtra("url");
+        isPreImg = intent.getBooleanExtra("isPreImg", false);
         if (TextUtils.isEmpty(url))
             ToastUtil.shortToast(this, "找不到文件地址");
         else {
@@ -81,6 +83,13 @@ public class DownLoadService extends Service {
                             String fileName = System.currentTimeMillis() + "." + type;
                             File file = FileDownLoadUtil.getInstance().fileDownLoad(fileName, responseBody);
                             ToastUtil.shortToast(DownLoadService.this, "文件已保存：" + file.getAbsolutePath());
+
+                            if (isPreImg) {
+                                // 进入图片预览
+                                Intent intent = new Intent(Intent.ACTION_VIEW);
+                                intent.setDataAndType(Uri.fromFile(file), "image/*");
+                                DownLoadService.this.startActivity(intent);
+                            }
                         }
                     } else {
                         ToastUtil.shortToast(DownLoadService.this, "下载文件失败");

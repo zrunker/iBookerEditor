@@ -26,7 +26,7 @@ public class FileUtil {
     // 内存卡路径
     public static String SDPATH = Environment.getExternalStorageDirectory().getAbsolutePath();
     // 工程文件路径
-    public static String LOCALFILE_PATH = SDPATH + File.separator + "ibookereditor" + File.separator + "file" + File.separator + "local" + File.separator;
+    public static String LOCALFILE_PATH = SDPATH + File.separator + "ibookerEditor" + File.separator + "file" + File.separator + "local" + File.separator;
     // 文件大小单位
     public static final int SIZETYPE_B = 1;// 获取文件大小单位为B
     public static final int SIZETYPE_KB = 2;// 获取文件大小单位为KB

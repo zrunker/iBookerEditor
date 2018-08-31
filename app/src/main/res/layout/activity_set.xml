@@ -209,6 +209,7 @@
         android:padding="14dp"
         android:text="@string/quit_login"
         android:textColor="@color/colorAccent"
-        android:textSize="14sp" />
+        android:textSize="14sp"
+        android:visibility="gone" />
 
 </LinearLayout>

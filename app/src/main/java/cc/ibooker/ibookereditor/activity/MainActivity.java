@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -713,11 +714,22 @@ public class MainActivity extends BaseActivity implements
      * 分享文件
      */
     private void shareFile(Context context, File file, String Kdescription) {
-        if (file.exists() && file.isFile()) {
-            Uri uri = Uri.fromFile(file);
+        if (file != null && file.exists() && file.isFile()) {
+//            Uri uri = Uri.fromFile(file);
             Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.putExtra("subject", Kdescription); //
+            intent.putExtra("subject", Kdescription);
             intent.putExtra("body", ""); // 正文
+            Uri uri;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                uri = FileProvider.getUriForFile(context, "cc.ibooker.ibookereditor.fileProvider", file);
+//                intent.setDataAndType(uri, "application/vnd.android.package-archive");
+            } else {
+                uri = Uri.fromFile(file);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                intent.setDataAndType(uri, "application/vnd.android.package-archive");
+            }
+
             intent.putExtra(Intent.EXTRA_STREAM, uri); // 添加附件，附件为file对象
             if (uri.toString().endsWith(".gz")) {
                 intent.setType("application/x-gzip"); // 如果是gz使用gzip的mime
@@ -726,7 +738,7 @@ public class MainActivity extends BaseActivity implements
             } else {
                 intent.setType("application/octet-stream"); // 其他的均使用流当做二进制数据来发送
             }
-            context.startActivity(intent); // 调用系统的mail客户端进行发送
+            context.startActivity(intent);// 调用系统的mail客户端进行发送
         }
     }
 }

@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.FileProvider;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.view.View;
@@ -478,9 +479,16 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
      * 分享图片
      */
     private void sharePicture(Context context, File file, String Kdescription) {
-        if (file.exists() && file.isFile()) {
-            Uri uri = Uri.fromFile(file);
+        if (file != null && file.exists() && file.isFile()) {
             Intent intent = new Intent();
+            Uri uri;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                uri = FileProvider.getUriForFile(context, "cc.ibooker.ibookereditor.fileProvider", file);
+            } else {
+                uri = Uri.fromFile(file);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            }
             intent.setAction(Intent.ACTION_SEND);
             intent.setType("image/*");
             intent.putExtra(Intent.EXTRA_STREAM, uri);

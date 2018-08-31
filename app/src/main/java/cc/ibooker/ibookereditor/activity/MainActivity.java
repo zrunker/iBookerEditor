@@ -18,6 +18,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -84,6 +86,8 @@ public class MainActivity extends BaseActivity implements
     private DrawerLayout drawer;
     private TextView topTv, nameTv, phoneTv;
     private ImageView picImg;
+    private ImageButton editImgBtn;
+    private Animation showAnimation, hiddenAnimation;
     private ListView sideListview;
     private SideMenuAdapter sideMenuAdapter;
     private ArrayList<SideMenuItem> mSideMenuDatas;
@@ -243,7 +247,7 @@ public class MainActivity extends BaseActivity implements
     // 初始化方法
     private void init() {
         topTv = findViewById(R.id.tv_top);
-        ImageButton editImgBtn = findViewById(R.id.ibtn_edit);
+        editImgBtn = findViewById(R.id.ibtn_edit);
         editImgBtn.setOnClickListener(this);
 
         swipeRefreshLayout = findViewById(R.id.swiperefreshlayout);
@@ -285,6 +289,7 @@ public class MainActivity extends BaseActivity implements
                             swipeRefreshLayout.autoRefresh();
                             onRefresh();
                         }
+                        updateEditImgBtnVisibility();
                         break;
                     case 2:// 推荐
                         drawer.closeDrawer(GravityCompat.START, true);
@@ -296,6 +301,7 @@ public class MainActivity extends BaseActivity implements
                             swipeRefreshLayout.autoRefresh();
                             onRefresh();
                         }
+                        updateEditImgBtnVisibility();
                         break;
                     case 3:// 语法参考
                         drawer.closeDrawer(GravityCompat.START, true);
@@ -739,6 +745,29 @@ public class MainActivity extends BaseActivity implements
                 intent.setType("application/octet-stream"); // 其他的均使用流当做二进制数据来发送
             }
             context.startActivity(intent);// 调用系统的mail客户端进行发送
+        }
+    }
+
+    /**
+     * 修改editImgBtn显示状态
+     */
+    private void updateEditImgBtnVisibility() {
+        if (editImgBtn.getAnimation() != null)
+            editImgBtn.clearAnimation();
+        if (dataRes == 0) {
+            if (editImgBtn.getVisibility() != View.VISIBLE) {
+                if (showAnimation == null)
+                    showAnimation = AnimationUtils.loadAnimation(this, R.anim.editimgbtn_show);
+                editImgBtn.startAnimation(showAnimation);
+                editImgBtn.setVisibility(View.VISIBLE);
+            }
+        } else {
+            if (editImgBtn.getVisibility() != View.GONE) {
+                if (hiddenAnimation == null)
+                    hiddenAnimation = AnimationUtils.loadAnimation(this, R.anim.editimgbtn_hidden);
+                editImgBtn.startAnimation(hiddenAnimation);
+                editImgBtn.setVisibility(View.GONE);
+            }
         }
     }
 }

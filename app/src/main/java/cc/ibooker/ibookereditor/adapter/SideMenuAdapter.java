@@ -1,11 +1,11 @@
 package cc.ibooker.ibookereditor.adapter;
 
 import android.content.Context;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ import cc.ibooker.ibookereditor.bean.SideMenuItem;
 public class SideMenuAdapter extends BaseAdapter {
     private Context context;
     private LayoutInflater inflater;
-    private ArrayList<SideMenuItem> mDatas = new ArrayList<>();
+    private ArrayList<SideMenuItem> mDatas;
 
     public SideMenuAdapter(Context context, ArrayList<SideMenuItem> list) {
         this.context = context;
@@ -56,9 +56,10 @@ public class SideMenuAdapter extends BaseAdapter {
             holder = new ViewHolder();
             convertView = inflater.inflate(R.layout.layout_side_nav_bar_menu_item, parent, false);
             holder.textView = convertView.findViewById(R.id.textView);
+            holder.img = convertView.findViewById(R.id.img);
             holder.view = convertView.findViewById(R.id.view);
             if (position == 0) {
-                holder.textView.setPadding(holder.textView.getPaddingLeft(), (int) dpToPx(40), holder.textView.getPaddingRight(), (int) dpToPx(10));
+                holder.textView.setPadding(dpToPx(20), dpToPx(40), holder.textView.getPaddingRight(), dpToPx(10));
             }
             convertView.setTag(holder);
         } else {
@@ -66,7 +67,7 @@ public class SideMenuAdapter extends BaseAdapter {
         }
         SideMenuItem data = mDatas.get(position);
         holder.textView.setText(data.getName());
-        holder.textView.setCompoundDrawablesWithIntrinsicBounds(data.getRes(), 0, 0, 0);
+        holder.img.setImageResource(data.getRes());
         if (position == 2)
             holder.view.setVisibility(View.VISIBLE);
         else
@@ -75,12 +76,14 @@ public class SideMenuAdapter extends BaseAdapter {
     }
 
     static class ViewHolder {
+        ImageView img;
         TextView textView;
         View view;
     }
 
     // dp to px
-    private float dpToPx(float value) {
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, value, context.getResources().getDisplayMetrics());
+    private int dpToPx(float dpValue) {
+        float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
     }
 }

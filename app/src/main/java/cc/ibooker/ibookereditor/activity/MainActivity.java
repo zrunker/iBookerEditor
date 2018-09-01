@@ -163,6 +163,8 @@ public class MainActivity extends BaseActivity implements
                     .load(ConstantUtil.userDto.getUser().getuPic())
                     .transforms(new GlideCircleTransform())
                     .into(picImg);
+        } else {
+
         }
 
         // 加载数据

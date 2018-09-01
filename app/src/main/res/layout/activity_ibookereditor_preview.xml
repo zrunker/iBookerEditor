@@ -35,6 +35,14 @@
             android:textColor="@color/colorWhite"
             android:textSize="18sp" />
 
+        <ImageView
+            android:id="@+id/img_edit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@null"
+            android:padding="15dp"
+            android:src="@drawable/icon_edit_white" />
+
     </LinearLayout>
 
     <include

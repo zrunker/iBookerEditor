@@ -1,31 +1,35 @@
 package cc.ibooker.ibookereditor.activity;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.base.BaseActivity;
-import cc.ibooker.ibookereditor.bean.ArticleUserData;
-import cc.ibooker.ibookereditor.dto.ResultData;
-import cc.ibooker.ibookereditor.net.service.HttpMethods;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
-import cc.ibooker.ibookereditor.utils.NetworkUtil;
 import cc.ibooker.ibookereditor.utils.ToastUtil;
 import cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout;
 import cc.ibooker.ibookereditorlib.IbookerEditorWebView;
-import rx.Subscriber;
-import rx.subscriptions.CompositeSubscription;
 
 /**
- * 书客编辑器Web页面
+ * 书客编辑器Web页面 - 用来监听外界点击唤醒APP
  * <p>
  * Created by 邹峰立 on 2018/3/28.
  */
@@ -38,41 +42,62 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
     private ImageView stateImg;
     private TextView stateTv;
 
-    private long aId;// 标记文章ID
-    private String title;// 标记文章主题
-
-    private Subscriber<ResultData<ArticleUserData>> getArticleUserDataByIdSubscriber;
-    private CompositeSubscription mSubscription;
+    private File file;
+    private String title = "";// 标记文章主题
+    private MyHandler myHandler = new MyHandler(this);
+    private final static int FROM_WEB_EDIT_REQUST_CODE = 111;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ibookereditor_preview);
 
-        aId = getIntent().getLongExtra("aId", 0);
-        title = getIntent().getStringExtra("title");
+        String action = getIntent().getAction();
+        // 将文件复制到制定目录中
+        if (Intent.ACTION_VIEW.equals(action)) {
+            Uri uri = getIntent().getData();
+            String filePath = Uri.decode(uri != null ? uri.getEncodedPath() : "");
+            String lowerFilePath = filePath.toLowerCase();
+            if (!TextUtils.isEmpty(filePath) && (lowerFilePath.contains(".md")
+                    || lowerFilePath.contains(".txt") || lowerFilePath.contains(".pdf")
+                    || lowerFilePath.contains(".doc") || lowerFilePath.contains(".html")
+                    || lowerFilePath.contains(".htm") || lowerFilePath.contains(".docx")
+                    || lowerFilePath.contains(".epub") || lowerFilePath.contains(".xml")
+                    || lowerFilePath.contains(".java") || lowerFilePath.contains(".jsp")
+                    || lowerFilePath.contains(".cpp") || lowerFilePath.contains(".c")
+                    || lowerFilePath.contains(".php") || lowerFilePath.contains(".js")
+                    || lowerFilePath.contains(".conf") || lowerFilePath.contains(".py")
+                    || lowerFilePath.contains(".mm") || lowerFilePath.contains(".oc"))) {
 
-        // 初始化
-        init();
+                file = new File(filePath);
+                if (file.exists() && file.isFile()) {
+                    title = file.getName();
+                    // 初始化
+                    init();
 
-        swipeRefreshLayout.autoRefresh();
-        getArticleUserDataById();
+                    swipeRefreshLayout.autoRefresh();
+                    readFileContent(file);
+                } else {
+                    ToastUtil.shortToast(this, "打开文件失败！");
+                }
+            } else {
+                ToastUtil.shortToast(this, "打开文件失败！");
+            }
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (getArticleUserDataByIdSubscriber != null)
-            getArticleUserDataByIdSubscriber.unsubscribe();
+        if (myHandler != null)
+            myHandler.removeCallbacksAndMessages(null);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mSubscription != null) {
-            mSubscription.clear();
-            mSubscription.unsubscribe();
-        }
+        if (myHandler != null)
+            myHandler = null;
         preWebView.destroy();
     }
 
@@ -80,6 +105,8 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
     private void init() {
         ImageView backImg = findViewById(R.id.img_back);
         backImg.setOnClickListener(this);
+        ImageView editImg = findViewById(R.id.img_edit);
+        editImg.setOnClickListener(this);
         TextView titleTv = findViewById(R.id.tv_title);
         preWebView = findViewById(R.id.ibookerEditorPreView);
         preWebView.setIbookerEditorImgPreviewListener(new IbookerEditorWebView.IbookerEditorImgPreviewListener() {
@@ -161,52 +188,108 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
             case R.id.img_back:// 返回
                 finish();
                 break;
+            case R.id.img_edit:// 编辑
+                if (file != null && file.exists() && file.isFile()) {
+                    // 进入编辑界面
+                    Intent intent = new Intent(this, EditArticleActivity.class);
+                    intent.putExtra("title", title);
+                    intent.putExtra("_id", -1);
+                    intent.putExtra("filePath", file.getAbsolutePath());
+                    intent.putExtra("createTime", file.lastModified());
+                    startActivityForResult(intent, FROM_WEB_EDIT_REQUST_CODE);
+                }
+                break;
         }
     }
 
     // 下拉刷新
     @Override
     public void onRefresh() {
-        getArticleUserDataById();
+        readFileContent(file);
     }
 
     /**
-     * 根据文章ID文章详情
+     * 读取SD卡文件内容 - 子线程
      */
-    private void getArticleUserDataById() {
-        if (NetworkUtil.isNetworkConnected(this)) {
-            getArticleUserDataByIdSubscriber = new Subscriber<ResultData<ArticleUserData>>() {
-                @Override
-                public void onCompleted() {
-                    swipeRefreshLayout.setRefreshing(false);
+    private String readSdData(File file) {
+        StringBuilder sb = new StringBuilder();
+        if (file != null && file.exists()) {
+            InputStream is = null;
+            try {
+                is = new FileInputStream(file);
+                int len;
+                byte[] buffer = new byte[1024];
+                while ((len = is.read(buffer)) != -1) {
+                    sb.append(new String(buffer, 0, len));
                 }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    if (is != null)
+                        is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return sb.toString();
+    }
 
-                @Override
-                public void onError(Throwable e) {
-                    ToastUtil.shortToast(IbookerEditorWebActivity.this, e.getMessage());
-                    swipeRefreshLayout.setRefreshing(false);
-                }
+    /**
+     * 读取文件内容
+     */
+    private void readFileContent(final File currentFile) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String content = readSdData(currentFile);
+                if (myHandler == null)
+                    myHandler = new MyHandler(IbookerEditorWebActivity.this);
+                myHandler.removeCallbacksAndMessages(null);
+                Message message = Message.obtain();
+                message.obj = content;
+                myHandler.sendMessage(message);
+            }
+        }).start();
+    }
 
-                @Override
-                public void onNext(ResultData<ArticleUserData> articleUserDataResultData) {
-                    if (articleUserDataResultData.getResultCode() == 0) {// 成功
-                        if (articleUserDataResultData.getData() == null) {
-                            updateStateLayout(true, 4, null);
-                        } else {
-                            preWebView.ibookerHtmlCompile(articleUserDataResultData.getData().getaHtml());
-                            updateStateLayout(false, -1, null);
-                        }
-                    } else {// 失败
-                        updateStateLayout(true, 3, articleUserDataResultData.getResultMsg());
-                    }
+    /**
+     * 定义一个Handler处理UI
+     */
+    static class MyHandler extends Handler {
+        WeakReference<IbookerEditorWebActivity> mWeakRef;
+
+        MyHandler(IbookerEditorWebActivity activity) {
+            mWeakRef = new WeakReference<>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            IbookerEditorWebActivity currentActivity = mWeakRef.get();
+            if (msg.obj != null) {// 成功
+                String content = (String) msg.obj;
+                if (TextUtils.isEmpty(content)) {
+                    currentActivity.updateStateLayout(true, 4, null);
+                } else {
+                    currentActivity.preWebView.ibookerCompile(content);
+                    currentActivity.updateStateLayout(false, -1, null);
                 }
-            };
-            HttpMethods.getInstance().getArticleUserDataById(getArticleUserDataByIdSubscriber, aId);
-            if (mSubscription == null)
-                mSubscription = new CompositeSubscription();
-            mSubscription.add(getArticleUserDataByIdSubscriber);
-        } else {// 无网络
-            updateStateLayout(true, 1, null);
+            } else {// 失败
+                currentActivity.updateStateLayout(true, 3, "文件解析失败！");
+            }
+            currentActivity.swipeRefreshLayout.setRefreshing(false);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == FROM_WEB_EDIT_REQUST_CODE) {
+            swipeRefreshLayout.autoRefresh();
+            readFileContent(file);
         }
     }
 }

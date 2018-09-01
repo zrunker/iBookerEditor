@@ -15,10 +15,11 @@ public class FileInfoBean {
         super();
     }
 
-    public FileInfoBean(String fileName, String filePath, long fileSize) {
+    public FileInfoBean(String fileName, String filePath, long fileSize, long fileCreateTime) {
         this.fileName = fileName;
         this.filePath = filePath;
         this.fileSize = fileSize;
+        this.fileCreateTime = fileCreateTime;
     }
 
     public FileInfoBean(int id, String fileName, String filePath, long fileSize, long fileCreateTime) {

@@ -15,6 +15,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -374,7 +375,8 @@ public class MainActivity extends BaseActivity implements
         updateStateLayout(false, -1, null);
 
         // 初始化sqLiteDao
-        sqLiteDao = new SQLiteDaoImpl(this);
+        if (sqLiteDao == null)
+            sqLiteDao = new SQLiteDaoImpl(this);
     }
 
     // 下拉刷新
@@ -524,12 +526,51 @@ public class MainActivity extends BaseActivity implements
      * 获取本地文章相关信息
      */
     private void getLocalArticleList() {
-        if (sqLiteDao == null)
-            sqLiteDao = new SQLiteDaoImpl(this);
-        ArrayList<FileInfoBean> localFileList = sqLiteDao.selectLocalFilesByTime();
+        // 清空原有数据
         if (localEntities.size() > 0)
             localEntities.clear();
-        localEntities = localFileListToEntities(localFileList);
+        // 先从数据库中获取
+        if (sqLiteDao == null)
+            sqLiteDao = new SQLiteDaoImpl(this);
+        ArrayList<FileInfoBean> localFileList1 = sqLiteDao.selectLocalFilesByTime();
+        // 再从本地文件中获取
+        ArrayList<FileInfoBean> localFileList2 = FileUtil.getFileInfos(FileUtil.LOCALFILE_PATH);
+        // 重置数据
+        ArrayList<FileInfoBean> fileInfoBeans = new ArrayList<>(localFileList1);
+        if (fileInfoBeans.size() <= 0) {
+            fileInfoBeans.addAll(localFileList2);
+        }
+        // 合并数据
+        if (localFileList2 != null && localFileList2.size() > 0 && localFileList1.size() > 0) {
+            for (FileInfoBean data2 : localFileList2) {// 遍历本地
+                boolean isAdd = true;
+                for (FileInfoBean data1 : localFileList1) {// 遍历数据库
+                    // 通过地址判断 是否未同一个文件
+                    if (TextUtils.isEmpty(data2.getFilePath())
+                            || data2.getFilePath().equals(data1.getFilePath())) {
+                        isAdd = false;
+                        break;
+                    }
+                }
+                // 防止文件重复添加
+                if (isAdd) {
+                    String filePath = data2.getFilePath();
+                    for (FileInfoBean data3 : fileInfoBeans) {
+                        if (!filePath.equals(data3.getFilePath())) {
+                            // 插入数据库
+                            int _id = sqLiteDao.insertLocalFile2(data2);
+                            data2.setId(_id);
+                            fileInfoBeans.add(data2);
+                            break;
+                        }
+                    }
+                }
+
+            }
+        }
+
+        // 转换数据
+        localEntities = localFileListToEntities(fileInfoBeans);
 
         // 刷新界面
         swipeRefreshLayout.setRefreshing(false);
@@ -629,7 +670,7 @@ public class MainActivity extends BaseActivity implements
             LocalEntity data = new LocalEntity();
             int _id = fileInfoBean.getId();
             File file = new File(fileInfoBean.getFilePath());
-            if (file.exists()) {// 文件存在
+            if (file.exists() && file.isFile()) {// 文件存在
                 data.setFile(file);
                 data.setaFormatSize(FileUtil.formatFileSize(FileUtil.getFileSize(file)));
                 data.setaId(_id);

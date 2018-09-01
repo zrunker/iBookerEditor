@@ -1,10 +1,17 @@
 package cc.ibooker.ibookereditor.activity;
 
+import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
@@ -36,6 +43,7 @@ import cc.ibooker.ibookereditorlib.IbookerEditorWebView;
 public class IbookerEditorWebActivity extends BaseActivity implements View.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
     private AutoSwipeRefreshLayout swipeRefreshLayout;
     private IbookerEditorWebView preWebView;
+    private TextView titleTv;
 
     // 网络状态、数据加载状态
     private LinearLayout stateLayout;
@@ -43,7 +51,8 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
     private TextView stateTv;
 
     private File file;
-    private String title = "";// 标记文章主题
+    private String title = "";
+    private String currentFilePath = "";
     private MyHandler myHandler = new MyHandler(this);
     private final static int FROM_WEB_EDIT_REQUST_CODE = 111;
 
@@ -52,38 +61,11 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ibookereditor_preview);
 
-        String action = getIntent().getAction();
-        // 将文件复制到制定目录中
-        if (Intent.ACTION_VIEW.equals(action)) {
-            Uri uri = getIntent().getData();
-            String filePath = Uri.decode(uri != null ? uri.getEncodedPath() : "");
-            String lowerFilePath = filePath.toLowerCase();
-            if (!TextUtils.isEmpty(filePath) && (lowerFilePath.contains(".md")
-                    || lowerFilePath.contains(".txt") || lowerFilePath.contains(".pdf")
-                    || lowerFilePath.contains(".doc") || lowerFilePath.contains(".html")
-                    || lowerFilePath.contains(".htm") || lowerFilePath.contains(".docx")
-                    || lowerFilePath.contains(".epub") || lowerFilePath.contains(".xml")
-                    || lowerFilePath.contains(".java") || lowerFilePath.contains(".jsp")
-                    || lowerFilePath.contains(".cpp") || lowerFilePath.contains(".c")
-                    || lowerFilePath.contains(".php") || lowerFilePath.contains(".js")
-                    || lowerFilePath.contains(".conf") || lowerFilePath.contains(".py")
-                    || lowerFilePath.contains(".mm") || lowerFilePath.contains(".oc"))) {
+        // 初始化
+        init();
 
-                file = new File(filePath);
-                if (file.exists() && file.isFile()) {
-                    title = file.getName();
-                    // 初始化
-                    init();
+        getIntentFile(getIntent());
 
-                    swipeRefreshLayout.autoRefresh();
-                    readFileContent(file);
-                } else {
-                    ToastUtil.shortToast(this, "打开文件失败！");
-                }
-            } else {
-                ToastUtil.shortToast(this, "打开文件失败！");
-            }
-        }
     }
 
     @Override
@@ -101,13 +83,19 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
         preWebView.destroy();
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        getIntentFile(intent);
+    }
+
     // 初始化
     private void init() {
         ImageView backImg = findViewById(R.id.img_back);
         backImg.setOnClickListener(this);
         ImageView editImg = findViewById(R.id.img_edit);
         editImg.setOnClickListener(this);
-        TextView titleTv = findViewById(R.id.tv_title);
+        titleTv = findViewById(R.id.tv_title);
         preWebView = findViewById(R.id.ibookerEditorPreView);
         preWebView.setIbookerEditorImgPreviewListener(new IbookerEditorWebView.IbookerEditorImgPreviewListener() {
             @Override
@@ -239,6 +227,47 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
     }
 
     /**
+     * intent获取File
+     */
+    private void getIntentFile(Intent intent) {
+        String action = intent.getAction();
+        // 将文件复制到制定目录中
+        if (Intent.ACTION_VIEW.equals(action)) {
+            Uri uri = intent.getData();
+//            String filePath = Uri.decode(uri != null ? uri.getEncodedPath() : "");
+            String filePath = uri2Path(this, uri);
+            if (TextUtils.isEmpty(filePath) || filePath.equals(currentFilePath))
+                return;
+            String lowerFilePath = filePath.toLowerCase();
+            if (!TextUtils.isEmpty(filePath) && (lowerFilePath.contains(".md")
+                    || lowerFilePath.contains(".txt") || lowerFilePath.contains(".pdf")
+                    || lowerFilePath.contains(".doc") || lowerFilePath.contains(".html")
+                    || lowerFilePath.contains(".htm") || lowerFilePath.contains(".docx")
+                    || lowerFilePath.contains(".epub") || lowerFilePath.contains(".xml")
+                    || lowerFilePath.contains(".java") || lowerFilePath.contains(".jsp")
+                    || lowerFilePath.contains(".cpp") || lowerFilePath.contains(".c")
+                    || lowerFilePath.contains(".php") || lowerFilePath.contains(".js")
+                    || lowerFilePath.contains(".conf") || lowerFilePath.contains(".py")
+                    || lowerFilePath.contains(".mm") || lowerFilePath.contains(".oc"))) {
+
+                file = new File(filePath);
+                if (file.exists() && file.isFile()) {
+                    currentFilePath = filePath;
+                    title = file.getName();
+                    titleTv.setText(title);
+
+                    swipeRefreshLayout.autoRefresh();
+                    readFileContent(file);
+                } else {
+                    ToastUtil.shortToast(this, "打开文件失败！");
+                }
+            } else {
+                ToastUtil.shortToast(this, "打开文件失败！");
+            }
+        }
+    }
+
+    /**
      * 读取文件内容
      */
     private void readFileContent(final File currentFile) {
@@ -291,5 +320,134 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
             swipeRefreshLayout.autoRefresh();
             readFileContent(file);
         }
+    }
+
+    /**
+     * 将uri转化成真实文件路径path
+     */
+    public String uri2Path(Context context, Uri uri) {
+        String path;
+        if ("file".equalsIgnoreCase(uri.getScheme())) {// 使用第三方应用打开
+            path = uri.getPath();
+        } else {
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {// 4.4以后
+                path = getPath(context, uri);
+            } else {// 4.4以下下系统调用方法
+                path = getRealPathFromURI(uri);
+            }
+        }
+        return path;
+    }
+
+    /**
+     * 获取文件路径
+     */
+    private String getPath(final Context context, final Uri uri) {
+        // DocumentProvider
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && DocumentsContract.isDocumentUri(context, uri)) {
+            // ExternalStorageProvider
+            if (isExternalStorageDocument(uri)) {
+                final String docId = DocumentsContract.getDocumentId(uri);
+                final String[] split = docId.split(":");
+                final String type = split[0];
+                if ("primary".equalsIgnoreCase(type)) {
+                    return Environment.getExternalStorageDirectory() + "/" + split[1];
+                }
+            } else if (isDownloadsDocument(uri)) { // DownloadsProvider
+                final String id = DocumentsContract.getDocumentId(uri);
+                final Uri contentUri = ContentUris.withAppendedId(
+                        Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+                return getDataColumn(context, contentUri, null, null);
+            } else if (isMediaDocument(uri)) { // MediaProvider
+                final String docId = DocumentsContract.getDocumentId(uri);
+                final String[] split = docId.split(":");
+                final String type = split[0];
+                Uri contentUri = null;
+                if ("image".equals(type)) {
+                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                } else if ("video".equals(type)) {
+                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                } else if ("audio".equals(type)) {
+                    contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                }
+                final String selection = "_id=?";
+                final String[] selectionArgs = new String[]{split[1]};
+                return getDataColumn(context, contentUri, selection, selectionArgs);
+            }
+        } else if ("content".equalsIgnoreCase(uri.getScheme())) {// MediaStore (and general)
+            return getDataColumn(context, uri, null, null);
+        } else if ("file".equalsIgnoreCase(uri.getScheme())) {// File
+            return uri.getPath();
+        }
+        return null;
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is ExternalStorageProvider.
+     */
+    private boolean isExternalStorageDocument(Uri uri) {
+        return "com.android.externalstorage.documents".equals(uri.getAuthority());
+    }
+
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is DownloadsProvider.
+     */
+    private boolean isDownloadsDocument(Uri uri) {
+        return "com.android.providers.downloads.documents".equals(uri.getAuthority());
+    }
+
+
+    /**
+     * Get the value of the data column for this Uri. This is useful for
+     * MediaStore Uris, and other file-based ContentProviders.
+     *
+     * @param context       The context.
+     * @param uri           The Uri to query.
+     * @param selection     (Optional) Filter used in the query.
+     * @param selectionArgs (Optional) Selection arguments used in the query.
+     * @return The value of the _data column, which is typically a file path.
+     */
+    private String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
+        Cursor cursor = null;
+        final String column = "_data";
+        final String[] projection = {column};
+
+        try {
+            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                final int column_index = cursor.getColumnIndexOrThrow(column);
+                return cursor.getString(column_index);
+            }
+        } finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        return null;
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is MediaProvider.
+     */
+    private boolean isMediaDocument(Uri uri) {
+        return "com.android.providers.media.documents".equals(uri.getAuthority());
+    }
+
+    /**
+     * 4.4 以下获取文件真实路径
+     */
+    private String getRealPathFromURI(Uri contentUri) {
+        String res = null;
+        String[] pro = {MediaStore.Images.Media.DATA};
+        Cursor cursor = getContentResolver().query(contentUri, pro, null, null, null);
+        if (null != cursor && cursor.moveToFirst()) {
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            res = cursor.getString(column_index);
+            cursor.close();
+        }
+        return res;
     }
 }

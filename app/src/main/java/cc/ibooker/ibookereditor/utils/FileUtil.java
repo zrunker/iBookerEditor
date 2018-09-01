@@ -605,13 +605,15 @@ public class FileUtil {
                     String fileName = file1.getName();
                     String filePath = file1.getAbsolutePath();
                     long fileSize = getFileSizes(file1);
-                    fileInfoBeans.add(new FileInfoBean(fileName, filePath, fileSize));
+                    long createTime = file1.lastModified();
+                    fileInfoBeans.add(new FileInfoBean(fileName, filePath, fileSize, createTime));
                 }
             } else {// 非目录 或者 空目录
                 String fileName = files.getName();
                 String filePath = files.getAbsolutePath();
                 long fileSize = getFileSizes(files);
-                fileInfoBeans.add(new FileInfoBean(fileName, filePath, fileSize));
+                long createTime = files.lastModified();
+                fileInfoBeans.add(new FileInfoBean(fileName, filePath, fileSize, createTime));
             }
         }
         return fileInfoBeans;

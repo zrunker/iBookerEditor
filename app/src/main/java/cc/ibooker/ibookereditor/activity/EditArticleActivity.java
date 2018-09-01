@@ -16,6 +16,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
 import android.text.Editable;
 import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -82,6 +83,8 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE
     };
+
+    private final int FINISH_ACTIVITY_CODE = 111;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -153,31 +156,6 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
 
     @Override
     public void finish() {
-        if (currentFile != null && currentFile.exists() && currentFile.isFile()) {
-            // 保存最后信息
-            String title = ibookerEditerView.getIbookerEditorVpView()
-                    .getEditView()
-                    .getIbookerTitleEd()
-                    .getText()
-                    .toString()
-                    .trim();
-            if (!TextUtils.isEmpty(title) && !title.equals(preTitle)) {
-                if (_id <= 0)
-                    _id = sqLiteDao.insertLocalFile2(fileInfoBean);
-                else
-                    sqLiteDao.updateLocalFileById(fileInfoBean, _id);
-            }
-            String content = ibookerEditerView.getIbookerEditorVpView()
-                    .getEditView()
-                    .getIbookerEd()
-                    .getText()
-                    .toString();
-            if (!TextUtils.isEmpty(content) && !content.equals(preContent)) {
-                ToastUtil.shortToast(this, "文件保存中...");
-                writeSdData(content, currentFile);
-            }
-        }
-
         EventBus.getDefault().postSticky(new SaveArticleSuccessEvent(true, _id, fileInfoBean));
         super.finish();
     }
@@ -331,6 +309,14 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
                         ibookerEditerView.getIbookerEditorVpView().getEditView().getIbookerTitleEd().getText().toString().trim());
             }
         });
+
+        ibookerEditerView.getIbookerEditorTopView().getBackImg().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ClickUtil.isFastClick()) return;
+                saveFile();
+            }
+        });
     }
 
     // 设置书客编辑器顶部按钮点击事件
@@ -439,18 +425,22 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
         @Override
         public void handleMessage(Message msg) {
             final EditArticleActivity currentActivity = mWeakRef.get();
-            if (msg.obj != null) {
-                String content = (String) msg.obj;
-                currentActivity.ibookerEditerView.setIEEditViewIbookerEdText(content);
-            }
-            // 切换预览
-            currentActivity.ibookerEditerView.getIbookerEditorVpView().setCurrentItem(1);
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    currentActivity.ibookerEditerView.changeVpUpdateIbookerEditorTopView(1);
+            if (msg.what == currentActivity.FINISH_ACTIVITY_CODE) {
+                currentActivity.finish();
+            } else {
+                if (msg.obj != null) {
+                    String content = (String) msg.obj;
+                    currentActivity.ibookerEditerView.setIEEditViewIbookerEdText(content);
                 }
-            }, 100);
+                // 切换预览
+                currentActivity.ibookerEditerView.getIbookerEditorVpView().setCurrentItem(1);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        currentActivity.ibookerEditerView.changeVpUpdateIbookerEditorTopView(1);
+                    }
+                }, 100);
+            }
         }
     }
 
@@ -495,5 +485,64 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
             intent.putExtra(Intent.EXTRA_TEXT, Kdescription);
             context.startActivity(intent);
         }
+    }
+
+    /**
+     * 保存文件
+     */
+    private void saveFile() {
+        if (currentFile != null && currentFile.exists() && currentFile.isFile()) {
+            // 保存最后信息
+            String title = ibookerEditerView.getIbookerEditorVpView()
+                    .getEditView()
+                    .getIbookerTitleEd()
+                    .getText()
+                    .toString()
+                    .trim();
+            if (!TextUtils.isEmpty(title) && !title.equals(preTitle)) {
+                if (_id <= 0)
+                    _id = sqLiteDao.insertLocalFile2(fileInfoBean);
+                else
+                    sqLiteDao.updateLocalFileById(fileInfoBean, _id);
+            }
+            final String content = ibookerEditerView.getIbookerEditorVpView()
+                    .getEditView()
+                    .getIbookerEd()
+                    .getText()
+                    .toString();
+            if (!TextUtils.isEmpty(content) && !content.equals(preContent)) {
+                ToastUtil.shortToast(this, "文件保存中...");
+
+                // 开启子线程保存
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        boolean bool = writeSdData(content, currentFile);
+                        if (bool)
+                            preContent = content;
+                        // 发送消息关闭当前界面
+                        myHandler.sendEmptyMessage(FINISH_ACTIVITY_CODE);
+                    }
+                });
+                if (executorService == null || executorService.isShutdown())
+                    executorService = Executors.newSingleThreadExecutor();
+                executorService.execute(thread);
+                return;
+
+                // 开启子线程保存文件
+//                writeSdData(content, currentFile);
+            }
+        }
+        finish();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        // 点击手机上的返回键，返回上一层
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            saveFile();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

@@ -82,4 +82,23 @@
         <!--<item name="android:windowLightStatusBar" tools:targetApi="m">true</item>-->
     </style>
 
+    <!--启动页-->
+    <style name="AppTheme.Splash">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">@color/colorWhite</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorWhite</item>
+        <item name="colorPrimaryDark">@color/colorWhite</item>
+        <item name="colorAccent">@color/colorWhite</item>
+
+        <!--处理Mui 8.0-->
+        <!--<item name="android:windowIsTranslucent">true</item>-->
+        <item name="android:windowTranslucentStatus" tools:targetApi="kitkat">true</item>
+        <item name="android:windowDisablePreview">true</item>
+        <item name="android:windowIsTranslucent">false</item>
+    </style>
+
 </resources>

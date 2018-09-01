@@ -164,7 +164,8 @@ public class MainActivity extends BaseActivity implements
                     .transforms(new GlideCircleTransform())
                     .into(picImg);
         } else {
-
+//        Intent intent = new Intent(this, LoginActivity.class);
+//        startActivity(intent);
         }
 
         // 加载数据
@@ -173,9 +174,6 @@ public class MainActivity extends BaseActivity implements
         onRefresh();
 
         EventBus.getDefault().register(this);
-
-//        Intent intent = new Intent(this, LoginActivity.class);
-//        startActivity(intent);
     }
 
     @Override

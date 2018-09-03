@@ -59,7 +59,7 @@ public class SideMenuAdapter extends BaseAdapter {
             holder.img = convertView.findViewById(R.id.img);
             holder.view = convertView.findViewById(R.id.view);
             if (position == 0) {
-                holder.textView.setPadding(dpToPx(20), dpToPx(40), holder.textView.getPaddingRight(), dpToPx(10));
+                holder.textView.setPadding(dpToPx(20), dpToPx(20), holder.textView.getPaddingRight(), dpToPx(10));
             }
             convertView.setTag(holder);
         } else {

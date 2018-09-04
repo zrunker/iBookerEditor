@@ -269,6 +269,8 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
     // 下拉刷新
     @Override
     public void onRefresh() {
+        webView.clearHistory();
+        webView.clearCache(true);
         getArticleUserDataById();
     }
 

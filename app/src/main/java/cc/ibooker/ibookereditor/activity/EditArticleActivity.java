@@ -313,8 +313,33 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
         ibookerEditerView.getIbookerEditorTopView().getBackImg().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // 返回按钮覆写
                 if (ClickUtil.isFastClick()) return;
                 saveFile();
+            }
+        });
+
+        ibookerEditerView.getIbookerEditorTopView().getHelpIBtn().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 帮助按钮覆写
+                if (ClickUtil.isFastClick()) return;
+                Intent intentGrammer = new Intent(EditArticleActivity.this, ArticleDetailActivity.class);
+                intentGrammer.putExtra("aId", 1L);
+                intentGrammer.putExtra("title", "语法参考");
+                startActivity(intentGrammer);
+            }
+        });
+
+        ibookerEditerView.getIbookerEditorTopView().getAboutImg().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 关于按钮覆写
+                if (ClickUtil.isFastClick()) return;
+                Intent intentAbout = new Intent(EditArticleActivity.this, ArticleDetailActivity.class);
+                intentAbout.putExtra("aId", 182L);
+                intentAbout.putExtra("title", "关于");
+                startActivity(intentAbout);
             }
         });
     }

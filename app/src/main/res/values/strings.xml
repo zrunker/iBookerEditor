@@ -19,7 +19,7 @@
     <string name="write_article">写文章</string>
 
     <string name="save">保存</string>
-    <string name="article_auto_save">文章自动保存</string>
+    <string name="article_auto_save">自动保存</string>
     <string name="good_article_recommend">好文推荐</string>
     <string name="common_set">通用设置</string>
     <string name="clear_cache">清空缓存</string>
@@ -49,4 +49,7 @@
     <string name="share">分享</string>
     <string name="delete">删除</string>
     <string name="cancel">取消</string>
+
+    <string name="font_size_add">A+</string>
+    <string name="font_size_reduce">A-</string>
 </resources>

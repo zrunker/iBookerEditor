@@ -204,9 +204,10 @@ public class SQLiteDaoImpl implements SQLiteDao {
     @Override
     public UserDto selectUser() {
         SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可读的数据库
-        UserDto userDto = new UserDto();
+        UserDto userDto = null;
         Cursor cursor = db.rawQuery("select * from t_user", null);
         if (cursor.moveToFirst()) {
+            userDto = new UserDto();
             UserEntity userEntity = new UserEntity();
             long u_id = cursor.getLong(cursor.getColumnIndex("u_id"));
             userEntity.setuId(u_id);

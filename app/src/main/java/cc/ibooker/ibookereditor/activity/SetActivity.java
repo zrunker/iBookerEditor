@@ -1,14 +1,19 @@
 package cc.ibooker.ibookereditor.activity;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.ExecutorService;
@@ -18,7 +23,9 @@ import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.base.BaseActivity;
 import cc.ibooker.ibookereditor.utils.AppUtil;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
+import cc.ibooker.ibookereditor.utils.ConstantUtil;
 import cc.ibooker.ibookereditor.utils.FileUtil;
+import cc.ibooker.ibookereditor.utils.UserUtil;
 
 /**
  * 设置
@@ -26,7 +33,8 @@ import cc.ibooker.ibookereditor.utils.FileUtil;
  * Created by 邹峰立 on 2018/3/28.
  */
 public class SetActivity extends BaseActivity implements View.OnClickListener {
-    private TextView cacheTv;
+    private final int FROM_SET_TO_LOGIN_REQUEST_CDE = 1112;
+    private TextView cacheTv, logoutTv;
     private ExecutorService mExecutorService = Executors.newCachedThreadPool();
 
     @Override
@@ -56,6 +64,26 @@ public class SetActivity extends BaseActivity implements View.OnClickListener {
         TextView versionTv = findViewById(R.id.tv_version);
         versionTv.setText("V" + AppUtil.getVersion(this));
         versionTv.setOnClickListener(this);
+        logoutTv = findViewById(R.id.tv_logout);
+        logoutTv.setOnClickListener(this);
+        if (!UserUtil.isLogin(this))
+            logoutTv.setText("登 录");
+        ToggleButton saveToggleBtn = findViewById(R.id.togglebtn_save);
+        saveToggleBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                saveSharedPreferences(SetActivity.this, ConstantUtil.SHAREDPREFERENCES_SET_NAME,
+                        Context.MODE_PRIVATE, ConstantUtil.SHAREDPREFERENCES_ARTICLE_SAVE, isChecked);
+            }
+        });
+        ToggleButton recommendToggleBtn = findViewById(R.id.togglebtn_recommend);
+        recommendToggleBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                saveSharedPreferences(SetActivity.this, ConstantUtil.SHAREDPREFERENCES_SET_NAME,
+                        Context.MODE_PRIVATE, ConstantUtil.SHAREDPREFERENCES_ARTICLE_RECOMMEND, isChecked);
+            }
+        });
         cacheTv = findViewById(R.id.tv_cache);
         cacheTv.setOnClickListener(this);
         // 获取当前SD/缓存大小赋值-子线程
@@ -106,6 +134,12 @@ public class SetActivity extends BaseActivity implements View.OnClickListener {
                     mExecutorService = Executors.newCachedThreadPool();
                 mExecutorService.execute(thread);
                 break;
+            case R.id.tv_logout:// 退出登录/登录
+                UserUtil.logout(this);
+                Intent intent = new Intent(this, LoginActivity.class);
+                startActivityForResult(intent, FROM_SET_TO_LOGIN_REQUEST_CDE);
+                overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_bottom);
+                break;
         }
     }
 
@@ -137,5 +171,43 @@ public class SetActivity extends BaseActivity implements View.OnClickListener {
                     break;
             }
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case FROM_SET_TO_LOGIN_REQUEST_CDE:// 登录页面返回
+                    if (!UserUtil.isLogin(this))
+                        logoutTv.setText("登 录");
+                    else
+                        logoutTv.setText("退出登录");
+                    break;
+            }
+        }
+    }
+
+    /**
+     * 保存数据
+     **/
+    private void saveSharedPreferences(Context context, String name, int mode, String key, Object obj) {
+        if (mode != Context.MODE_PRIVATE && mode != Context.MODE_APPEND && mode != MODE_MULTI_PROCESS)
+            return;
+        SharedPreferences sharedPreferences = context.getSharedPreferences(name, mode);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        if (obj instanceof String)
+            editor.putString(key, obj.toString());
+        if (obj instanceof Boolean)
+            editor.putBoolean(key, (Boolean) obj);
+        if (obj instanceof Integer)
+            editor.putInt(key, (Integer) obj);
+        if (obj instanceof Float)
+            editor.putFloat(key, (Float) obj);
+        if (obj instanceof Long)
+            editor.putLong(key, (Long) obj);
+
+        editor.apply();
     }
 }

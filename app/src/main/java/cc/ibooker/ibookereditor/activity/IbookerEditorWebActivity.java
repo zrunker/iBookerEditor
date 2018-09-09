@@ -230,39 +230,41 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
      * intent获取File
      */
     private void getIntentFile(Intent intent) {
-        String action = intent.getAction();
-        // 将文件复制到制定目录中
-        if (Intent.ACTION_VIEW.equals(action)) {
-            Uri uri = intent.getData();
+        if (intent != null) {
+            String action = intent.getAction();
+            // 将文件复制到制定目录中
+            if (Intent.ACTION_VIEW.equals(action)) {
+                Uri uri = intent.getData();
 //            String filePath = Uri.decode(uri != null ? uri.getEncodedPath() : "");
-            String filePath = uri2Path(this, uri);
-            if (TextUtils.isEmpty(filePath) || filePath.equals(currentFilePath))
-                return;
-            String lowerFilePath = filePath.toLowerCase();
-            if (!TextUtils.isEmpty(filePath) && (lowerFilePath.contains(".md")
-                    || lowerFilePath.contains(".txt") || lowerFilePath.contains(".pdf")
-                    || lowerFilePath.contains(".doc") || lowerFilePath.contains(".html")
-                    || lowerFilePath.contains(".htm") || lowerFilePath.contains(".docx")
-                    || lowerFilePath.contains(".epub") || lowerFilePath.contains(".xml")
-                    || lowerFilePath.contains(".java") || lowerFilePath.contains(".jsp")
-                    || lowerFilePath.contains(".cpp") || lowerFilePath.contains(".c")
-                    || lowerFilePath.contains(".php") || lowerFilePath.contains(".js")
-                    || lowerFilePath.contains(".conf") || lowerFilePath.contains(".py")
-                    || lowerFilePath.contains(".mm") || lowerFilePath.contains(".oc"))) {
+                String filePath = uri2Path(this, uri);
+                if (TextUtils.isEmpty(filePath) || filePath.equals(currentFilePath))
+                    return;
+                String lowerFilePath = filePath.toLowerCase();
+                if (!TextUtils.isEmpty(filePath) && (lowerFilePath.contains(".md")
+                        || lowerFilePath.contains(".txt") || lowerFilePath.contains(".pdf")
+                        || lowerFilePath.contains(".doc") || lowerFilePath.contains(".html")
+                        || lowerFilePath.contains(".htm") || lowerFilePath.contains(".docx")
+                        || lowerFilePath.contains(".epub") || lowerFilePath.contains(".xml")
+                        || lowerFilePath.contains(".java") || lowerFilePath.contains(".jsp")
+                        || lowerFilePath.contains(".cpp") || lowerFilePath.contains(".c")
+                        || lowerFilePath.contains(".php") || lowerFilePath.contains(".js")
+                        || lowerFilePath.contains(".conf") || lowerFilePath.contains(".py")
+                        || lowerFilePath.contains(".mm") || lowerFilePath.contains(".oc"))) {
 
-                file = new File(filePath);
-                if (file.exists() && file.isFile()) {
-                    currentFilePath = filePath;
-                    title = file.getName();
-                    titleTv.setText(title);
+                    file = new File(filePath);
+                    if (file.exists() && file.isFile()) {
+                        currentFilePath = filePath;
+                        title = file.getName();
+                        titleTv.setText(title);
 
-                    swipeRefreshLayout.autoRefresh();
-                    readFileContent(file);
+                        swipeRefreshLayout.autoRefresh();
+                        readFileContent(file);
+                    } else {
+                        ToastUtil.shortToast(this, "打开文件失败！");
+                    }
                 } else {
                     ToastUtil.shortToast(this, "打开文件失败！");
                 }
-            } else {
-                ToastUtil.shortToast(this, "打开文件失败！");
             }
         }
     }
@@ -347,21 +349,21 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && DocumentsContract.isDocumentUri(context, uri)) {
             // ExternalStorageProvider
             if (isExternalStorageDocument(uri)) {
-                final String docId = DocumentsContract.getDocumentId(uri);
-                final String[] split = docId.split(":");
-                final String type = split[0];
+                String docId = DocumentsContract.getDocumentId(uri);
+                String[] split = docId.split(":");
+                String type = split[0];
                 if ("primary".equalsIgnoreCase(type)) {
                     return Environment.getExternalStorageDirectory() + "/" + split[1];
                 }
             } else if (isDownloadsDocument(uri)) { // DownloadsProvider
-                final String id = DocumentsContract.getDocumentId(uri);
-                final Uri contentUri = ContentUris.withAppendedId(
+                String id = DocumentsContract.getDocumentId(uri);
+                Uri contentUri = ContentUris.withAppendedId(
                         Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
                 return getDataColumn(context, contentUri, null, null);
             } else if (isMediaDocument(uri)) { // MediaProvider
-                final String docId = DocumentsContract.getDocumentId(uri);
-                final String[] split = docId.split(":");
-                final String type = split[0];
+                String docId = DocumentsContract.getDocumentId(uri);
+                String[] split = docId.split(":");
+                String type = split[0];
                 Uri contentUri = null;
                 if ("image".equals(type)) {
                     contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
@@ -370,8 +372,8 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
                 } else if ("audio".equals(type)) {
                     contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
                 }
-                final String selection = "_id=?";
-                final String[] selectionArgs = new String[]{split[1]};
+                String selection = "_id=?";
+                String[] selectionArgs = new String[]{split[1]};
                 return getDataColumn(context, contentUri, selection, selectionArgs);
             }
         } else if ("content".equalsIgnoreCase(uri.getScheme())) {// MediaStore (and general)
@@ -414,13 +416,14 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
         Cursor cursor = null;
         final String column = "_data";
         final String[] projection = {column};
-
         try {
             cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
             if (cursor != null && cursor.moveToFirst()) {
-                final int column_index = cursor.getColumnIndexOrThrow(column);
+                int column_index = cursor.getColumnIndexOrThrow(column);
                 return cursor.getString(column_index);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             if (cursor != null)
                 cursor.close();

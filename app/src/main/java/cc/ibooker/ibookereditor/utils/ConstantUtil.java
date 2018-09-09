@@ -32,4 +32,11 @@ public class ConstantUtil {
      * 用户信息
      */
     public static UserDto userDto;
+
+    /**
+     * SharedPreferences键名称
+     */
+    public final static String SHAREDPREFERENCES_SET_NAME = "SHAREDPREFERENCES_SET_NAME";
+    public final static String SHAREDPREFERENCES_ARTICLE_SAVE = "SHAREDPREFERENCES_ARTICLE_SAVE";
+    public final static String SHAREDPREFERENCES_ARTICLE_RECOMMEND = "SHAREDPREFERENCES_ARTICLE_RECOMMEND";
 }

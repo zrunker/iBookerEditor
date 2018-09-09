@@ -48,6 +48,7 @@ import cc.ibooker.ibookereditor.dto.FileInfoBean;
 import cc.ibooker.ibookereditor.dto.FooterData;
 import cc.ibooker.ibookereditor.dto.ResultData;
 import cc.ibooker.ibookereditor.event.LocalOperDialogEvent;
+import cc.ibooker.ibookereditor.event.MainReflashHeaderEvent;
 import cc.ibooker.ibookereditor.event.SaveArticleSuccessEvent;
 import cc.ibooker.ibookereditor.net.service.HttpMethods;
 import cc.ibooker.ibookereditor.sqlite.SQLiteDao;
@@ -59,6 +60,7 @@ import cc.ibooker.ibookereditor.utils.DateUtil;
 import cc.ibooker.ibookereditor.utils.FileUtil;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
 import cc.ibooker.ibookereditor.utils.ToastUtil;
+import cc.ibooker.ibookereditor.utils.UserUtil;
 import cc.ibooker.ibookereditor.zglide.GlideApp;
 import cc.ibooker.ibookereditor.zglide.GlideCircleTransform;
 import cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout;
@@ -84,6 +86,7 @@ public class MainActivity extends BaseActivity implements
         View.OnClickListener,
         SwipeRefreshLayout.OnRefreshListener,
         RecyclerViewScrollListener.OnLoadListener {
+    private final int FROM_MAIN_TO_LOGIN_REQUEST_CDE = 111;
     private DrawerLayout drawer;
     private TextView topTv, nameTv, phoneTv;
     private ImageView picImg;
@@ -153,20 +156,7 @@ public class MainActivity extends BaseActivity implements
         setSideAdapter();
 
         // 获取用户信息
-        if (sqLiteDao == null)
-            sqLiteDao = new SQLiteDaoImpl(this);
-        ConstantUtil.userDto = sqLiteDao.selectUser();
-        if (ConstantUtil.userDto != null && ConstantUtil.userDto.getUser() != null) {
-            nameTv.setText(ConstantUtil.userDto.getUser().getuNickname());
-            phoneTv.setText(ConstantUtil.userDto.getUser().getuIntroduce());
-            GlideApp.with(this)
-                    .load(ConstantUtil.userDto.getUser().getuPic())
-                    .transforms(new GlideCircleTransform())
-                    .into(picImg);
-        } else {
-//        Intent intent = new Intent(this, LoginActivity.class);
-//        startActivity(intent);
-        }
+        reflashHeaderLayout();
 
         // 加载数据
         dataRes = 0;
@@ -191,6 +181,7 @@ public class MainActivity extends BaseActivity implements
         super.onDestroy();
         EventBus.getDefault().removeStickyEvent(SaveArticleSuccessEvent.class);
         EventBus.getDefault().removeStickyEvent(LocalOperDialogEvent.class);
+        EventBus.getDefault().removeStickyEvent(MainReflashHeaderEvent.class);
         EventBus.getDefault().unregister(this);
         if (mSubscription != null) {
             mSubscription.clear();
@@ -221,6 +212,14 @@ public class MainActivity extends BaseActivity implements
         EventBus.getDefault().removeStickyEvent(event);
     }
 
+    // 执行首页用户信息刷新事件
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    public void executeMainReflashHeaderEvent(MainReflashHeaderEvent event) {
+        if (event.isReflash())
+            reflashHeaderLayout();
+        EventBus.getDefault().removeStickyEvent(event);
+    }
+
     // 返回按钮监听
     @Override
     public void onBackPressed() {
@@ -241,6 +240,14 @@ public class MainActivity extends BaseActivity implements
             case R.id.ibtn_edit:// 编辑
                 Intent intent_edit = new Intent(this, EditArticleActivity.class);
                 startActivity(intent_edit);
+                break;
+            case R.id.layout_side_nav_bar_header:
+                drawer.closeDrawer(GravityCompat.START, true);
+                if (!UserUtil.isLogin(this)) {
+                    Intent intent = new Intent(this, LoginActivity.class);
+                    startActivityForResult(intent, FROM_MAIN_TO_LOGIN_REQUEST_CDE);
+                    overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_bottom);
+                }
                 break;
         }
     }
@@ -270,6 +277,8 @@ public class MainActivity extends BaseActivity implements
         footerData = new FooterData(false, false, getResources().getString(R.string.load_more_before));
 
         // 侧边栏相关信息
+        LinearLayout headerLayout = findViewById(R.id.layout_side_nav_bar_header);
+        headerLayout.setOnClickListener(this);
         picImg = findViewById(R.id.img_pic);
         nameTv = findViewById(R.id.tv_name);
         phoneTv = findViewById(R.id.tv_phone);
@@ -808,6 +817,34 @@ public class MainActivity extends BaseActivity implements
                     hiddenAnimation = AnimationUtils.loadAnimation(this, R.anim.editimgbtn_hidden);
                 editImgBtn.startAnimation(hiddenAnimation);
                 editImgBtn.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    /**
+     * 刷新用户相关信息
+     */
+    private void reflashHeaderLayout() {
+        if (UserUtil.isLogin(this)) {
+            nameTv.setText(ConstantUtil.userDto.getUser().getuNickname());
+            phoneTv.setText(ConstantUtil.userDto.getUser().getuIntroduce());
+            GlideApp.with(this)
+                    .load(ConstantUtil.userDto.getUser().getuPic())
+                    .placeholder(R.drawable.icon_mepic)
+                    .error(R.drawable.icon_mepic)
+                    .transforms(new GlideCircleTransform())
+                    .into(picImg);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case FROM_MAIN_TO_LOGIN_REQUEST_CDE:// 登录返回-刷新界面
+                    reflashHeaderLayout();
+                    break;
             }
         }
     }

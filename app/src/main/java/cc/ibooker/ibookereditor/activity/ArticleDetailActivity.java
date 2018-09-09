@@ -1,9 +1,12 @@
 package cc.ibooker.ibookereditor.activity;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
@@ -21,12 +24,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.base.BaseActivity;
 import cc.ibooker.ibookereditor.jsevent.IbookerEditorJsCheckImgsEvent;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
+import cc.ibooker.ibookereditor.view.MyWebView;
 import cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout;
 
 /**
@@ -36,28 +41,33 @@ import cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout;
  */
 public class ArticleDetailActivity extends BaseActivity implements View.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
     private AutoSwipeRefreshLayout swipeRefreshLayout;
-    private WebView webView;
+    private MyWebView webView;
+    private WebSettings webSettings;
     private TextView titleTv;
+
+    private TextView fontSizeAddTv, fontSizeReduceTv;
 
     // 网络状态、数据加载状态
     private LinearLayout stateLayout;
     private ImageView stateImg;
     private TextView stateTv;
 
+    private long aId;
     private String title;// 标记文章主题
     private String webUrl;
 
     private ArrayList<String> imgPathList;// WebView所有图片地址
     private IbookerEditorJsCheckImgsEvent ibookerEditorJsCheckImgsEvent;
 
-    private int fontSize = 1;// 用来控制字体
+    private int currentFontSize;// 用来控制字体
+    private Handler handler;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_article_detail);
 
-        long aId = getIntent().getLongExtra("aId", 0);
+        aId = getIntent().getLongExtra("aId", -1);
         title = getIntent().getStringExtra("title");
         webUrl = "http://ibooker.cc/article/" + aId + "/detail";
 
@@ -65,8 +75,21 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
         init();
         initWebView();
 
-        swipeRefreshLayout.autoRefresh();
-        getArticleUserDataById();
+        // 第三方APP调用
+        receiveIntent(getIntent());
+        pushArticleIntent(getIntent());
+
+        if (aId != -1) {
+            swipeRefreshLayout.autoRefresh();
+            getArticleUserDataById();
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        receiveIntent(intent);
+        pushArticleIntent(intent);
     }
 
     @Override
@@ -74,6 +97,10 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
         super.onDestroy();
         if (webView != null)
             webView.destroy();
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
+            handler = null;
+        }
     }
 
     // 初始化
@@ -82,6 +109,22 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
         backImg.setOnClickListener(this);
         titleTv = findViewById(R.id.tv_title);
         webView = findViewById(R.id.webView);
+        webView.setOnScrollChangedCallback(new MyWebView.OnScrollChangedCallback() {
+            @Override
+            public void onScroll(final int dx, final int dy) {
+                if (handler == null)
+                    handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (Math.abs(dy) > 0) {
+                            fontSizeAddTv.setVisibility(View.GONE);
+                            fontSizeReduceTv.setVisibility(View.GONE);
+                        }
+                    }
+                }, 500);
+            }
+        });
 
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
@@ -92,6 +135,13 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
 
         // 赋值
         titleTv.setText(title);
+
+        LinearLayout setLayout = findViewById(R.id.layout_set);
+        setLayout.setOnClickListener(this);
+        fontSizeAddTv = findViewById(R.id.tv_font_size_add);
+        fontSizeAddTv.setOnClickListener(this);
+        fontSizeReduceTv = findViewById(R.id.tv_font_size_reduce);
+        fontSizeReduceTv.setOnClickListener(this);
 
         // 状态信息
         stateLayout = findViewById(R.id.layout_state);
@@ -157,7 +207,7 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
         });
 
         // 设置WebView支持JavaScript
-        WebSettings webSettings = webView.getSettings();
+        webSettings = webView.getSettings();
         webSettings.setSaveFormData(false);
         // 支持内容重新布局
         webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
@@ -196,15 +246,15 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
 
         // 初始化字体
         if (webSettings.getTextSize() == WebSettings.TextSize.SMALLEST) {
-            fontSize = 1;
+            currentFontSize = 1;
         } else if (webSettings.getTextSize() == WebSettings.TextSize.SMALLER) {
-            fontSize = 2;
+            currentFontSize = 2;
         } else if (webSettings.getTextSize() == WebSettings.TextSize.NORMAL) {
-            fontSize = 3;
+            currentFontSize = 3;
         } else if (webSettings.getTextSize() == WebSettings.TextSize.LARGER) {
-            fontSize = 4;
+            currentFontSize = 4;
         } else if (webSettings.getTextSize() == WebSettings.TextSize.LARGEST) {
-            fontSize = 5;
+            currentFontSize = 5;
         }
     }
 
@@ -262,6 +312,24 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
         switch (view.getId()) {
             case R.id.img_back:// 返回
                 finish();
+                break;
+            case R.id.layout_set:// 设置显示或隐藏
+                if (fontSizeAddTv.getVisibility() == View.VISIBLE
+                        || fontSizeReduceTv.getVisibility() == View.VISIBLE) {
+                    fontSizeAddTv.setVisibility(View.GONE);
+                    fontSizeReduceTv.setVisibility(View.GONE);
+                } else {
+                    fontSizeAddTv.setVisibility(View.VISIBLE);
+                    fontSizeReduceTv.setVisibility(View.VISIBLE);
+                }
+                break;
+            case R.id.tv_font_size_add:// 字体增加
+                currentFontSize++;
+                setWebViewFontSize(currentFontSize);
+                break;
+            case R.id.tv_font_size_reduce:// 字体减小
+                currentFontSize--;
+                setWebViewFontSize(currentFontSize);
                 break;
         }
     }
@@ -321,6 +389,81 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
                 }
             });
         }
+    }
 
+    /**
+     * 接收其他APP调用
+     */
+    private synchronized void receiveIntent(Intent intent) {
+        if (intent != null) {
+            Uri uri = intent.getData();
+            if (uri != null) {
+                aId = getIntent().getLongExtra("aId", 0);
+                title = getIntent().getStringExtra("title");
+                webUrl = "http://ibooker.cc/article/" + aId + "/detail";
+
+                if (aId != -1) {
+                    swipeRefreshLayout.autoRefresh();
+                    getArticleUserDataById();
+                }
+            }
+        }
+    }
+
+    /**
+     * 友盟推送文章
+     */
+    public synchronized void pushArticleIntent(Intent intent) {
+        if (intent != null) {
+            Bundle bun = intent.getExtras();
+            if (bun != null) {
+                Set<String> keySet = bun.keySet();
+                for (String key : keySet) {
+                    if ("aId".equals(key))
+                        aId = bun.getLong(key);
+                    if ("title".equals(key))
+                        title = bun.getString(key);
+                }
+
+                webUrl = "http://ibooker.cc/article/" + aId + "/detail";
+                if (aId != -1) {
+                    if (!TextUtils.isEmpty(title))
+                        titleTv.setText(title);
+                    swipeRefreshLayout.autoRefresh();
+                    getArticleUserDataById();
+                }
+            }
+        }
+    }
+
+    /**
+     * 设置当前字体大小
+     */
+    public void setWebViewFontSize(int fontSize) {
+        if (fontSize >= 1 && fontSize <= 5) {
+            currentFontSize = fontSize;
+            switch (fontSize) {
+                case 1:
+                    webSettings.setTextSize(WebSettings.TextSize.SMALLEST);
+                    break;
+                case 2:
+                    webSettings.setTextSize(WebSettings.TextSize.SMALLER);
+                    break;
+                case 3:
+                    webSettings.setTextSize(WebSettings.TextSize.NORMAL);
+                    break;
+                case 4:
+                    webSettings.setTextSize(WebSettings.TextSize.LARGER);
+                    break;
+                case 5:
+                    webSettings.setTextSize(WebSettings.TextSize.LARGEST);
+                    break;
+            }
+        }
+
+        if (fontSize < 1)
+            currentFontSize = 1;
+        if (fontSize > 5)
+            currentFontSize = 5;
     }
 }

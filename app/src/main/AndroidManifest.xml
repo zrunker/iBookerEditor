@@ -119,6 +119,7 @@
             android:hardwareAccelerated="true"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
+            android:theme="@style/EditArticleActivityTheme"
             android:windowSoftInputMode="adjustPan" />
 
         <!--显示文章详情-->
@@ -128,7 +129,17 @@
             android:hardwareAccelerated="true"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustPan">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="ibookereditor" />
+            </intent-filter>
+        </activity>
 
         <!--注册广播-->
         <receiver android:name=".broadcastreceiver.NetBroadcastReceiver">

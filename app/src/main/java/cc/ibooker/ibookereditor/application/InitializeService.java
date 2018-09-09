@@ -36,6 +36,10 @@ public class InitializeService extends IntentService {
     }
 
     private void performInit() {
+        // 应用程序捕获异常
+        CrashHandler crashHandler = CrashHandler.getInstance();
+        crashHandler.init(getApplicationContext());
+
         // Bugly
         CrashReport.UserStrategy strategy = new CrashReport.UserStrategy(getApplicationContext());
         strategy.setAppVersion(AppUtil.getVersion(getApplicationContext()));// App的版本

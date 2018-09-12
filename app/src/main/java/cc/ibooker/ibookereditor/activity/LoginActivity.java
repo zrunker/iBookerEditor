@@ -66,6 +66,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         EventBus.getDefault().postSticky(new MainReflashHeaderEvent(true));
         setResult(RESULT_OK);
         super.finish();
+        overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_bottom);
     }
 
     @Override

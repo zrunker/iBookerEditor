@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,6 +13,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
+import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
@@ -191,6 +193,19 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
                 addWebViewListener();
                 swipeRefreshLayout.setRefreshing(false);
                 updateStateLayout(false, -1, null);
+            }
+
+            @Override
+            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+                if (error.getPrimaryError() == SslError.SSL_DATE_INVALID
+                        || error.getPrimaryError() == SslError.SSL_EXPIRED
+                        || error.getPrimaryError() == SslError.SSL_INVALID
+                        || error.getPrimaryError() == SslError.SSL_UNTRUSTED) {
+                    handler.proceed();
+                } else {
+                    handler.cancel();
+                }
+                super.onReceivedSslError(view, handler, error);
             }
         });
 

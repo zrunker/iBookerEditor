@@ -7,7 +7,7 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="mepic">个人图像</string>
-
+    <string name="util">工具</string>
     <string name="article">文章</string>
     <string name="local">本地</string>
     <string name="recommend">推荐</string>
@@ -52,4 +52,10 @@
 
     <string name="font_size_add">A+</string>
     <string name="font_size_reduce">A-</string>
+
+    <string name="main_set">首页设置</string>
+    <string name="notes">笔记</string>
+    <string name="notes_tip">笔记 - 从某时某刻起你就云同步了</string>
+    <string name="reading">阅读</string>
+    <string name="reading_tip">阅读 - 有深度的不一定是文章</string>
 </resources>

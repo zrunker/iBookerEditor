@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -34,7 +35,7 @@ import cc.ibooker.ibookereditor.utils.UserUtil;
  */
 public class SetActivity extends BaseActivity implements View.OnClickListener {
     private final int FROM_SET_TO_LOGIN_REQUEST_CDE = 1112;
-    private TextView cacheTv, logoutTv;
+    private TextView cacheTv, logoutTv, notesTv, readingTv;
     private ExecutorService mExecutorService = Executors.newCachedThreadPool();
 
     @Override
@@ -64,6 +65,15 @@ public class SetActivity extends BaseActivity implements View.OnClickListener {
         TextView versionTv = findViewById(R.id.tv_version);
         versionTv.setText("V" + AppUtil.getVersion(this));
         versionTv.setOnClickListener(this);
+
+        notesTv = findViewById(R.id.tv_notes);
+        notesTv.setOnClickListener(this);
+        readingTv = findViewById(R.id.tv_reading);
+        readingTv.setOnClickListener(this);
+        SharedPreferences sharedPreferences = getSharedPreferences(ConstantUtil.SHAREDPREFERENCES_SET_NAME, Context.MODE_PRIVATE);
+        int index = sharedPreferences.getInt(ConstantUtil.SHAREDPREFERENCES_MAIN_SET, 0);
+        updateMainSetView(index);
+
         logoutTv = findViewById(R.id.tv_logout);
         logoutTv.setOnClickListener(this);
         if (!UserUtil.isLogin(this))
@@ -113,6 +123,12 @@ public class SetActivity extends BaseActivity implements View.OnClickListener {
             case R.id.img_back:// 返回
                 finish();
                 break;
+            case R.id.tv_notes:// 笔记
+                updateMainSetView(0);
+                break;
+            case R.id.tv_reading:// 阅读
+                updateMainSetView(1);
+                break;
             case R.id.tv_version:// 检测版本
 
                 break;
@@ -144,6 +160,29 @@ public class SetActivity extends BaseActivity implements View.OnClickListener {
     }
 
     /**
+     * 修改首页设置界面
+     *
+     * @param index 0-笔记 1-阅读
+     */
+    private void updateMainSetView(int index) {
+        if (index == 0) {// 笔记
+            notesTv.setBackgroundResource(R.drawable.bg_orange_shi_left_btn);
+            notesTv.setTextColor(Color.parseColor("#FFFFFF"));
+            readingTv.setBackgroundResource(R.drawable.bg_orange_right_btn);
+            readingTv.setTextColor(Color.parseColor("#FE7517"));
+            saveSharedPreferences(SetActivity.this, ConstantUtil.SHAREDPREFERENCES_SET_NAME,
+                    Context.MODE_PRIVATE, ConstantUtil.SHAREDPREFERENCES_MAIN_SET, 0);
+        } else {// 阅读
+            notesTv.setBackgroundResource(R.drawable.bg_orange_left_btn);
+            notesTv.setTextColor(Color.parseColor("#FE7517"));
+            readingTv.setBackgroundResource(R.drawable.bg_orange_shi_right_btn);
+            readingTv.setTextColor(Color.parseColor("#FFFFFF"));
+            saveSharedPreferences(SetActivity.this, ConstantUtil.SHAREDPREFERENCES_SET_NAME,
+                    Context.MODE_PRIVATE, ConstantUtil.SHAREDPREFERENCES_MAIN_SET, 1);
+        }
+    }
+
+    /**
      * 通过handler执行主线程
      */
     private MyHandler myHandler = new MyHandler(this);
@@ -165,7 +204,7 @@ public class SetActivity extends BaseActivity implements View.OnClickListener {
                     currentActivity.cacheTv.setText("");
                     if (msg.obj != null) {
                         String fileSize = msg.obj.toString();
-                        if (!"0B".equals(fileSize))
+                        if (TextUtils.isEmpty(fileSize) || !"0B".equals(fileSize.toUpperCase()))
                             currentActivity.cacheTv.setText(fileSize);
                     }
                     break;

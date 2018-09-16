@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -159,9 +160,9 @@ public class MainActivity extends BaseActivity implements
         reflashHeaderLayout();
 
         // 加载数据
-        dataRes = 0;
-        swipeRefreshLayout.autoRefresh();
-        onRefresh();
+        SharedPreferences sharedPreferences = getSharedPreferences(ConstantUtil.SHAREDPREFERENCES_SET_NAME, Context.MODE_PRIVATE);
+        dataRes = sharedPreferences.getInt(ConstantUtil.SHAREDPREFERENCES_MAIN_SET, 0);
+        updateMainSetView();
 
         EventBus.getDefault().register(this);
     }
@@ -289,29 +290,15 @@ public class MainActivity extends BaseActivity implements
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (ClickUtil.isFastClick()) return;
                 switch (position) {
-                    case 1:// 本地
+                    case 1:// 笔记
                         drawer.closeDrawer(GravityCompat.START, true);
-                        if (dataRes != 0) {
-                            topTv.setText("本地");
-                            setaLocalAdapter();
-                            // 加载数据
-                            dataRes = 0;
-                            swipeRefreshLayout.autoRefresh();
-                            onRefresh();
-                        }
-                        updateEditImgBtnVisibility();
+                        dataRes = 0;
+                        updateMainSetView();
                         break;
-                    case 2:// 推荐
+                    case 2:// 阅读
                         drawer.closeDrawer(GravityCompat.START, true);
-                        if (dataRes != 1) {
-                            topTv.setText("推荐");
-                            setaRecommendAdapter();
-                            // 加载数据
-                            dataRes = 1;
-                            swipeRefreshLayout.autoRefresh();
-                            onRefresh();
-                        }
-                        updateEditImgBtnVisibility();
+                        dataRes = 1;
+                        updateMainSetView();
                         break;
                     case 3:// 语法参考
                         drawer.closeDrawer(GravityCompat.START, true);
@@ -422,6 +409,27 @@ public class MainActivity extends BaseActivity implements
         }
     }
 
+    /**
+     * 修改首页设置界面
+     */
+    private void updateMainSetView() {
+        if (dataRes == 0) {// 笔记
+            topTv.setText(getString(R.string.notes_tip));
+            setaLocalAdapter();
+            // 加载数据
+            swipeRefreshLayout.autoRefresh();
+            onRefresh();
+            updateEditImgBtnVisibility();
+        } else {// 阅读
+            topTv.setText(getString(R.string.reading_tip));
+            setaRecommendAdapter();
+            // 加载数据
+            swipeRefreshLayout.autoRefresh();
+            onRefresh();
+            updateEditImgBtnVisibility();
+        }
+    }
+
     // 更新状态布局
     private void updateStateLayout(boolean isShow, int state, String stateTip) {
         if (isShow) {
@@ -511,9 +519,9 @@ public class MainActivity extends BaseActivity implements
         if (mSideMenuDatas == null)
             mSideMenuDatas = new ArrayList<>();
         mSideMenuDatas.clear();
-        mSideMenuDatas.add(new SideMenuItem(0, getString(R.string.article), false));
-        mSideMenuDatas.add(new SideMenuItem(R.drawable.icon_location, getString(R.string.local), false));
-        mSideMenuDatas.add(new SideMenuItem(R.drawable.icon_recommend, getString(R.string.recommend), true));
+        mSideMenuDatas.add(new SideMenuItem(0, getString(R.string.util), false));
+        mSideMenuDatas.add(new SideMenuItem(R.drawable.icon_location, getString(R.string.notes), false));
+        mSideMenuDatas.add(new SideMenuItem(R.drawable.icon_recommend, getString(R.string.reading), true));
         mSideMenuDatas.add(new SideMenuItem(R.drawable.icon_question, getString(R.string.grammar_reference), false));
         mSideMenuDatas.add(new SideMenuItem(R.drawable.icon_set, getString(R.string.set), false));
         mSideMenuDatas.add(new SideMenuItem(R.drawable.icon_feedback, getString(R.string.feedback), false));

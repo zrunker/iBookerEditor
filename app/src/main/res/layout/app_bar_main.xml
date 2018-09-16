@@ -30,7 +30,7 @@
             android:paddingRight="20dp"
             android:paddingStart="20dp"
             android:paddingTop="0dp"
-            android:text="@string/local"
+            android:text="@string/notes_tip"
             android:textColor="#FFFFFF" />
     </android.support.design.widget.AppBarLayout>
 

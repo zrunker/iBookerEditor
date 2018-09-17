@@ -1,12 +1,15 @@
 package cc.ibooker.ibookereditor.net.service;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 import cc.ibooker.ibookereditor.bean.ArticleUserData;
+import cc.ibooker.ibookereditor.bean.ArticleUserInfoData;
 import cc.ibooker.ibookereditor.dto.ResultData;
 import cc.ibooker.ibookereditor.dto.UserDto;
 import okhttp3.ResponseBody;
 import retrofit2.http.GET;
+import retrofit2.http.HeaderMap;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 import retrofit2.http.Streaming;
@@ -49,4 +52,16 @@ interface MyService {
      */
     @POST("user/login")
     Observable<ResultData<UserDto>> userLogin(@Query("values") String values);
+
+    /**
+     * 通过用户ID获取与文章相关信息
+     */
+    @GET("article/info")
+    Observable<ResultData<ArticleUserInfoData>> getArticleUserInfoDataById(@Query("values") String values, @HeaderMap Map<String, String> headers);
+
+    /**
+     * 更新文章喜欢
+     */
+    @POST("articleappreciate/modify")
+    Observable<ResultData<Boolean>> modifyArticleAppreciate(@Query("values") String values, @HeaderMap Map<String, String> headers);
 }

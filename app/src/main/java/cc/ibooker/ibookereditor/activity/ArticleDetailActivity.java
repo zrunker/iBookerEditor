@@ -1,14 +1,20 @@
 package cc.ibooker.ibookereditor.activity;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Picture;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.content.FileProvider;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -25,16 +31,29 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Set;
 
 import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.base.BaseActivity;
+import cc.ibooker.ibookereditor.bean.ArticleUserInfoData;
+import cc.ibooker.ibookereditor.dto.ResultData;
 import cc.ibooker.ibookereditor.jsevent.IbookerEditorJsCheckImgsEvent;
+import cc.ibooker.ibookereditor.net.service.HttpMethods;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
+import cc.ibooker.ibookereditor.utils.FileUtil;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
+import cc.ibooker.ibookereditor.utils.ToastUtil;
+import cc.ibooker.ibookereditor.utils.UserUtil;
 import cc.ibooker.ibookereditor.view.MyWebView;
 import cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout;
+import cc.ibooker.zdialoglib.ProDialog;
+import rx.Subscriber;
+import rx.subscriptions.CompositeSubscription;
+
+import static cc.ibooker.ibookereditor.utils.ConstantUtil.PERMISSIONS_REQUEST_OPER_FILE;
 
 /**
  * 显示文章详情页面
@@ -42,10 +61,12 @@ import cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout;
  * Created by 邹峰立 on 2018/3/28.
  */
 public class ArticleDetailActivity extends BaseActivity implements View.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
+    private final int FROM_ARTICLEDETAIL_TO_LOGIN_REQUEST_CDE = 221;
     private AutoSwipeRefreshLayout swipeRefreshLayout;
     private MyWebView webView;
     private WebSettings webSettings;
     private TextView titleTv;
+    private ImageView likeImg;
 
     private TextView fontSizeAddTv, fontSizeReduceTv;
 
@@ -57,12 +78,25 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
     private long aId;
     private String title;// 标记文章主题
     private String webUrl;
+    private boolean isAppreciate = false;// 标记用户是否喜欢
 
     private ArrayList<String> imgPathList;// WebView所有图片地址
     private IbookerEditorJsCheckImgsEvent ibookerEditorJsCheckImgsEvent;
 
     private int currentFontSize;// 用来控制字体
     private Handler handler;
+    private ProDialog proDialog;
+
+    private Subscriber<ResultData<ArticleUserInfoData>> getArticleUserInfoDataByIdSubscriber;
+    private Subscriber<ResultData<Boolean>> modifyArticleAppreciateSubscriber;
+    private CompositeSubscription mSubscription;
+
+    // 权限组
+    private String[] needPermissions = new String[]{
+            // SDK在Android 6.0+需要进行运行检测的权限如下：
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -83,8 +117,12 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
 
         if (aId != -1) {
             swipeRefreshLayout.autoRefresh();
-            getArticleUserDataById();
+            loadUrlAndData();
         }
+
+        // 申请权限
+        if (!hasPermission(needPermissions))
+            requestPermission(PERMISSIONS_REQUEST_OPER_FILE, needPermissions);
     }
 
     @Override
@@ -92,6 +130,17 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
         super.onNewIntent(intent);
         receiveIntent(intent);
         pushArticleIntent(intent);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (getArticleUserInfoDataByIdSubscriber != null)
+            getArticleUserInfoDataByIdSubscriber.unsubscribe();
+        if (modifyArticleAppreciateSubscriber != null)
+            modifyArticleAppreciateSubscriber.unsubscribe();
+        if (proDialog != null)
+            proDialog.closeProDialog();
     }
 
     @Override
@@ -103,6 +152,10 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
             handler.removeCallbacksAndMessages(null);
             handler = null;
         }
+        if (mSubscription != null) {
+            mSubscription.clear();
+            mSubscription.unsubscribe();
+        }
     }
 
     // 初始化
@@ -110,6 +163,10 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
         ImageView backImg = findViewById(R.id.img_back);
         backImg.setOnClickListener(this);
         titleTv = findViewById(R.id.tv_title);
+        likeImg = findViewById(R.id.img_like);
+        likeImg.setOnClickListener(this);
+        ImageView shareImg = findViewById(R.id.img_share);
+        shareImg.setOnClickListener(this);
         webView = findViewById(R.id.webView);
         webView.setOnScrollChangedCallback(new MyWebView.OnScrollChangedCallback() {
             @Override
@@ -346,6 +403,24 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
                 currentFontSize--;
                 setWebViewFontSize(currentFontSize);
                 break;
+            case R.id.img_like:// 更新文章喜欢
+                if (UserUtil.isLogin(this)) {
+                    modifyArticleAppreciate();
+                } else {
+                    Intent intent = new Intent(this, LoginActivity.class);
+                    startActivityForResult(intent, FROM_ARTICLEDETAIL_TO_LOGIN_REQUEST_CDE);
+                    overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_bottom);
+                }
+                break;
+            case R.id.img_share:// 分享
+                // 申请权限
+                if (!hasPermission(needPermissions))
+                    requestPermission(PERMISSIONS_REQUEST_OPER_FILE, needPermissions);
+                else {
+                    File file = generateFile();
+                    sharePicture(this, file, title);
+                }
+                break;
         }
     }
 
@@ -354,15 +429,16 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
     public void onRefresh() {
         webView.clearHistory();
         webView.clearCache(true);
-        getArticleUserDataById();
+        loadUrlAndData();
     }
 
     /**
-     * 根据文章ID文章详情
+     * 执行Url加载
      */
-    private void getArticleUserDataById() {
+    private void loadUrlAndData() {
         if (NetworkUtil.isNetworkConnected(this)) {
             webView.loadUrl(webUrl);
+            getArticleUserInfoDataById();
         } else {// 无网络
             updateStateLayout(true, 1, null);
         }
@@ -404,6 +480,19 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
                 }
             });
         }
+
+        // 隐藏底部
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            webView.evaluateJavascript("javascript:hiddenBottom()", new ValueCallback<String>() {
+
+                @Override
+                public void onReceiveValue(String value) {
+
+                }
+            });
+        } else {
+            webView.loadUrl("javascript:hiddenBottom()");
+        }
     }
 
     /**
@@ -419,7 +508,7 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
 
                 if (aId != -1) {
                     swipeRefreshLayout.autoRefresh();
-                    getArticleUserDataById();
+                    loadUrlAndData();
                 }
             }
         }
@@ -445,7 +534,7 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
                     if (!TextUtils.isEmpty(title))
                         titleTv.setText(title);
                     swipeRefreshLayout.autoRefresh();
-                    getArticleUserDataById();
+                    loadUrlAndData();
                 }
             }
         }
@@ -480,5 +569,173 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
             currentFontSize = 1;
         if (fontSize > 5)
             currentFontSize = 5;
+    }
+
+    /**
+     * 修改文章喜欢状态
+     */
+    private void updateLikeImg(boolean bool) {
+        isAppreciate = bool;
+        if (isAppreciate)
+            likeImg.setImageResource(R.drawable.icon_white_like_yes);
+        else
+            likeImg.setImageResource(R.drawable.icon_white_like_no);
+    }
+
+    /**
+     * 生成图片
+     */
+    private File generateFile() {
+        File file = null;
+        ToastUtil.shortToast(this, "图片生成中...");
+        Bitmap bitmap = getWebViewBitmap();
+        if (bitmap != null) {
+            try {
+                String filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "ibookerEditor" + File.separator + "shares" + File.separator;
+                String fileName = System.currentTimeMillis() + ".jpg";
+                File dir = new File(filePath);
+                boolean bool = dir.exists();
+                if (!bool) {
+                    FileUtil.createSDDirs(filePath);
+                }
+
+                file = new File(filePath, fileName);
+                FileOutputStream fOut = new FileOutputStream(file);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fOut);
+                fOut.flush();
+                fOut.close();
+            } catch (Exception var11) {
+                var11.printStackTrace();
+            } finally {
+                bitmap.recycle();
+                System.gc();
+            }
+        } else {
+            ToastUtil.shortToast(this, "生成图片失败！");
+        }
+
+        return file;
+    }
+
+    /**
+     * 获取整个WebView截图
+     */
+    private Bitmap getWebViewBitmap() {
+        Picture picture = webView.capturePicture();
+        Bitmap bitmap = Bitmap.createBitmap(picture.getWidth(), picture.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        picture.draw(canvas);
+        return bitmap;
+    }
+
+    /**
+     * 分享图片
+     */
+    private void sharePicture(Context context, File file, String Kdescription) {
+        if (file != null && file.exists() && file.isFile()) {
+            Intent intent = new Intent();
+            Uri uri;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                uri = FileProvider.getUriForFile(context, "cc.ibooker.ibookereditor.fileProvider", file);
+            } else {
+                uri = Uri.fromFile(file);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            }
+            intent.setAction(Intent.ACTION_SEND);
+            intent.setType("image/*");
+            intent.putExtra(Intent.EXTRA_STREAM, uri);
+            intent.putExtra(Intent.EXTRA_TEXT, Kdescription);
+            context.startActivity(intent);
+        }
+    }
+
+    /**
+     * 通过用户ID获取与文章相关信息
+     */
+    private void getArticleUserInfoDataById() {
+        if (NetworkUtil.isNetworkConnected(this)) {
+            getArticleUserInfoDataByIdSubscriber = new Subscriber<ResultData<ArticleUserInfoData>>() {
+                @Override
+                public void onCompleted() {
+                    swipeRefreshLayout.setRefreshing(false);
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    ToastUtil.shortToast(ArticleDetailActivity.this, e.getMessage());
+                    swipeRefreshLayout.setRefreshing(false);
+                }
+
+                @Override
+                public void onNext(ResultData<ArticleUserInfoData> resultData) {
+                    if (resultData.getResultCode() == 0) {// 成功
+                        ArticleUserInfoData articleUserInfoData = resultData.getData();
+                        updateLikeImg(articleUserInfoData.isAppreciate());
+                    } else {
+                        ToastUtil.shortToast(ArticleDetailActivity.this, resultData.getResultMsg());
+                    }
+                }
+            };
+            HttpMethods.getInstance().getArticleUserInfoDataById(getArticleUserInfoDataByIdSubscriber, aId);
+            if (mSubscription == null)
+                mSubscription = new CompositeSubscription();
+            mSubscription.add(getArticleUserInfoDataByIdSubscriber);
+        } else {// 无网络
+            updateStateLayout(true, 1, null);
+        }
+    }
+
+    /**
+     * 更新文章喜欢
+     */
+    private void modifyArticleAppreciate() {
+        if (NetworkUtil.isNetworkConnected(this)) {
+            if (proDialog == null)
+                proDialog = new ProDialog(this);
+            proDialog.showProDialog();
+            modifyArticleAppreciateSubscriber = new Subscriber<ResultData<Boolean>>() {
+                @Override
+                public void onCompleted() {
+                    if (proDialog != null)
+                        proDialog.closeProDialog();
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    ToastUtil.shortToast(ArticleDetailActivity.this, e.getMessage());
+                    if (proDialog != null)
+                        proDialog.closeProDialog();
+                }
+
+                @Override
+                public void onNext(ResultData<Boolean> resultData) {
+                    if (resultData.getResultCode() == 0) {// 成功
+                        isAppreciate = !isAppreciate;
+                        updateLikeImg(isAppreciate);
+                    } else {
+                        ToastUtil.shortToast(ArticleDetailActivity.this, resultData.getResultMsg());
+                    }
+                }
+            };
+            HttpMethods.getInstance().modifyArticleAppreciate(modifyArticleAppreciateSubscriber, aId);
+            if (mSubscription == null)
+                mSubscription = new CompositeSubscription();
+            mSubscription.add(modifyArticleAppreciateSubscriber);
+        } else {// 无网络
+            updateStateLayout(true, 1, null);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case FROM_ARTICLEDETAIL_TO_LOGIN_REQUEST_CDE:// 登录页面返回
+                    modifyArticleAppreciate();
+                    break;
+            }
+        }
     }
 }

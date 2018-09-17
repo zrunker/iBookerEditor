@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import cc.ibooker.ibookereditor.application.MyApplication;
 import cc.ibooker.ibookereditor.net.interceptor.CacheInterceptor;
+import cc.ibooker.ibookereditor.utils.ConstantUtil;
 import okhttp3.Cache;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;

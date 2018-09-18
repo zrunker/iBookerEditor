@@ -242,12 +242,15 @@ public class MainActivity extends BaseActivity implements
                 Intent intent_edit = new Intent(this, EditArticleActivity.class);
                 startActivity(intent_edit);
                 break;
-            case R.id.layout_side_nav_bar_header:
+            case R.id.layout_side_nav_bar_header:// 个人中心
                 drawer.closeDrawer(GravityCompat.START, true);
                 if (!UserUtil.isLogin(this)) {
                     Intent intent = new Intent(this, LoginActivity.class);
                     startActivityForResult(intent, FROM_MAIN_TO_LOGIN_REQUEST_CDE);
                     overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_bottom);
+                } else {
+                    Intent intent = new Intent(this, MeInfoActivity.class);
+                    startActivity(intent);
                 }
                 break;
         }

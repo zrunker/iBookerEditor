@@ -58,4 +58,6 @@
     <string name="notes_tip">笔记 - 从某时某刻起你就云同步了</string>
     <string name="reading">阅读</string>
     <string name="reading_tip">阅读 - 有深度的不一定是文章</string>
+    <string name="meinfo">个人中心</string>
+    <string name="like_article">喜欢文章</string>
 </resources>

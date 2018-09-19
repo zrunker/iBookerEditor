@@ -156,6 +156,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
 
     @Override
     public void finish() {
+        renameFile();
         EventBus.getDefault().postSticky(new SaveArticleSuccessEvent(true, _id, fileInfoBean));
         super.finish();
     }
@@ -561,6 +562,32 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
         finish();
     }
 
+    /**
+     * 文件重命名
+     */
+    public void renameFile() {
+        if (currentFile != null && currentFile.exists() && currentFile.isFile()) {
+            String fileName = currentFile.getName();
+            String filePath = currentFile.getAbsolutePath();
+            String title = ibookerEditerView.getIbookerEditorVpView()
+                    .getEditView()
+                    .getIbookerTitleEd()
+                    .getText()
+                    .toString()
+                    .trim();
+            String newFilePath = filePath.replace(fileName, title + "-" + fileName);
+            boolean bool = currentFile.renameTo(new File(newFilePath));
+            if (bool) {
+                fileInfoBean.setFilePath(newFilePath);
+                if (_id <= 0)// 当前文件不存在
+                    _id = sqLiteDao.insertLocalFile2(fileInfoBean);
+                else
+                    sqLiteDao.updateLocalFileById(fileInfoBean, _id);
+                currentFile.delete();
+            }
+        }
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         // 点击手机上的返回键，返回上一层
@@ -570,4 +597,5 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
         }
         return super.onKeyDown(keyCode, event);
     }
+
 }

@@ -672,8 +672,6 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
                     if (resultData.getResultCode() == 0) {// 成功
                         ArticleUserInfoData articleUserInfoData = resultData.getData();
                         updateLikeImg(articleUserInfoData.isAppreciate());
-                    } else {
-                        ToastUtil.shortToast(ArticleDetailActivity.this, resultData.getResultMsg());
                     }
                 }
             };

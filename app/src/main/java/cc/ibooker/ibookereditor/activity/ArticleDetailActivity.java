@@ -49,7 +49,7 @@ import cc.ibooker.ibookereditor.utils.ToastUtil;
 import cc.ibooker.ibookereditor.utils.UserUtil;
 import cc.ibooker.ibookereditor.view.MyWebView;
 import cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout;
-import cc.ibooker.zdialoglib.ProDialog;
+import cc.ibooker.zdialoglib.ProgressDialog;
 import rx.Subscriber;
 import rx.subscriptions.CompositeSubscription;
 
@@ -85,7 +85,7 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
 
     private int currentFontSize;// 用来控制字体
     private Handler handler;
-    private ProDialog proDialog;
+    private ProgressDialog proDialog;
 
     private Subscriber<ResultData<ArticleUserInfoData>> getArticleUserInfoDataByIdSubscriber;
     private Subscriber<ResultData<Boolean>> modifyArticleAppreciateSubscriber;
@@ -690,7 +690,7 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
     private void modifyArticleAppreciate() {
         if (NetworkUtil.isNetworkConnected(this)) {
             if (proDialog == null)
-                proDialog = new ProDialog(this);
+                proDialog = new ProgressDialog(this);
             proDialog.showProDialog();
             modifyArticleAppreciateSubscriber = new Subscriber<ResultData<Boolean>>() {
                 @Override
@@ -711,6 +711,10 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
                     if (resultData.getResultCode() == 0) {// 成功
                         isAppreciate = !isAppreciate;
                         updateLikeImg(isAppreciate);
+                    } else if (resultData.getResultCode() == 5001) {
+                        Intent intent = new Intent(ArticleDetailActivity.this, LoginActivity.class);
+                        startActivityForResult(intent, FROM_ARTICLEDETAIL_TO_LOGIN_REQUEST_CDE);
+                        overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_bottom);
                     } else {
                         ToastUtil.shortToast(ArticleDetailActivity.this, resultData.getResultMsg());
                     }

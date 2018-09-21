@@ -27,7 +27,7 @@ import cc.ibooker.ibookereditor.utils.ClickUtil;
 import cc.ibooker.ibookereditor.utils.ConstantUtil;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
 import cc.ibooker.ibookereditor.utils.ToastUtil;
-import cc.ibooker.zdialoglib.ProDialog;
+import cc.ibooker.zdialoglib.ProgressDialog;
 import rx.Subscriber;
 import rx.subscriptions.CompositeSubscription;
 
@@ -38,7 +38,7 @@ import rx.subscriptions.CompositeSubscription;
  */
 public class LoginActivity extends BaseActivity implements View.OnClickListener, TextView.OnEditorActionListener {
     private EditText accountEd, passwdEd;
-    private ProDialog proDialog;
+    private ProgressDialog proDialog;
     private Subscriber<ResultData<UserDto>> userLoginSubscriber;
     private CompositeSubscription mSubscription;
     private SQLiteDao sqLiteDao;
@@ -175,7 +175,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     // 开启Dialog
     private void showProDialog() {
         if (proDialog == null)
-            proDialog = new ProDialog(this);
+            proDialog = new ProgressDialog(this);
         proDialog.showProDialog();
     }
 

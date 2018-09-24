@@ -1,5 +1,6 @@
 package cc.ibooker.ibookereditor.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -47,6 +48,7 @@ public class MeInfoActivity extends BaseActivity implements
 
     private Subscriber<ResultData<ArrayList<ArticleAppreciateData>>> getArticleAppreciateDataListByPuid2Subscriber;
     private CompositeSubscription mSubscription;
+    private final int FROM_MEINFO_TO_LOGIN_REQUEST_CDE = 112;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -97,6 +99,8 @@ public class MeInfoActivity extends BaseActivity implements
         recyclerView.addOnScrollListener(ryScrollListener);
 
         footerData = new FooterData(false, false, getResources().getString(R.string.load_more_before));
+
+        setAdapter();
     }
 
     // 点击事件监听
@@ -201,6 +205,10 @@ public class MeInfoActivity extends BaseActivity implements
                             articleList.clear();
                         articleList.addAll(arrayListResultData.getData());
                         setAdapter();
+                    } else if (arrayListResultData.getResultCode() == 5001) {
+                        Intent intent = new Intent(MeInfoActivity.this, LoginActivity.class);
+                        startActivityForResult(intent, FROM_MEINFO_TO_LOGIN_REQUEST_CDE);
+                        overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_bottom);
                     } else {// 失败
                         ToastUtil.shortToast(MeInfoActivity.this, arrayListResultData.getResultMsg());
                     }
@@ -212,6 +220,18 @@ public class MeInfoActivity extends BaseActivity implements
             mSubscription.add(getArticleAppreciateDataListByPuid2Subscriber);
         } else {// 无网络
             ToastUtil.shortToast(MeInfoActivity.this, "当前网络不给力！");
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case FROM_MEINFO_TO_LOGIN_REQUEST_CDE:// 登录页面返回
+                    getArticleAppreciateDataListByPuid2();
+                    break;
+            }
         }
     }
 }

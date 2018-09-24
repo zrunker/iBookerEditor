@@ -7,7 +7,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="120dp"
+        android:layout_height="100dp"
         android:background="@drawable/bg_meinfo_top"
         android:orientation="horizontal">
 
@@ -40,68 +40,16 @@
 
     </LinearLayout>
 
-    <RelativeLayout
+    <cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout
+        android:id="@+id/swiperefreshlayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="-40dp"
-        android:padding="20dp">
-
-        <ImageView
-            android:id="@+id/img_mepic"
-            android:layout_width="90dp"
-            android:layout_height="90dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:contentDescription="@null"
-            android:src="@drawable/icon_mepic" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="15dp"
-            android:layout_marginStart="15dp"
-            android:layout_marginTop="30dp"
-            android:layout_toEndOf="@id/img_mepic"
-            android:layout_toRightOf="@id/img_mepic"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/tv_nickname"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:lines="1"
-                android:text="@string/app_name"
-                android:textColor="#666"
-                android:textSize="20sp" />
-
-            <TextView
-                android:id="@+id/tv_introduce"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:ellipsize="end"
-                android:lines="1"
-                android:text="@string/website"
-                android:textColor="#999"
-                android:textSize="12sp" />
-
-        </LinearLayout>
-
-    </RelativeLayout>
-
-    <include
-        android:id="@+id/layout_choose"
-        layout="@layout/activity_meinfo_choose" />
-
-    <!--<cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content">-->
+        android:layout_marginTop="-40dp">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recycleview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-    <!--</cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout>-->
+    </cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout>
 
 </LinearLayout>

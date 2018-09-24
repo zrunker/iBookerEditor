@@ -47,6 +47,7 @@ import cc.ibooker.ibookereditorlib.IbookerEditorEditView;
 import cc.ibooker.ibookereditorlib.IbookerEditorTopView;
 import cc.ibooker.ibookereditorlib.IbookerEditorView;
 import cc.ibooker.ibookereditorlib.IbookerEditorWebView;
+import cc.ibooker.zdialoglib.ProgressDialog;
 
 import static cc.ibooker.ibookereditor.utils.ConstantUtil.PERMISSIONS_REQUEST_OPER_FILE;
 import static cc.ibooker.ibookereditorlib.IbookerEditorEnum.TOOLVIEW_TAG.IBTN_ELSE;
@@ -85,6 +86,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
     };
 
     private final int FINISH_ACTIVITY_CODE = 111;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -163,6 +165,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
 
     @Override
     protected void onDestroy() {
+        closeProgressDialog();
         super.onDestroy();
         if (titleHandler != null)
             titleHandler = null;
@@ -514,7 +517,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
     }
 
     /**
-     * 保存文件
+     * finish执行之前-保存文件
      */
     private void saveFile() {
         if (currentFile != null && currentFile.exists() && currentFile.isFile()) {
@@ -537,6 +540,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
                     .getText()
                     .toString();
             if (!TextUtils.isEmpty(content) && !content.equals(preContent)) {
+                showProgressDialog();
                 ToastUtil.shortToast(this, "文件保存中...");
 
                 // 开启子线程保存
@@ -563,10 +567,12 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
     }
 
     /**
-     * 文件重命名
+     * 关闭当前页面-文件重命名
      */
     public void renameFile() {
         if (currentFile != null && currentFile.exists() && currentFile.isFile()) {
+            showProgressDialog();
+
             String fileName = currentFile.getName();
             String filePath = currentFile.getAbsolutePath();
             String title = ibookerEditerView.getIbookerEditorVpView()
@@ -586,6 +592,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
                 currentFile.delete();
             }
         }
+        closeProgressDialog();
     }
 
     @Override
@@ -596,6 +603,23 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
             return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    /**
+     * 展示progressDialog
+     */
+    private void showProgressDialog() {
+        if (progressDialog == null)
+            progressDialog = new ProgressDialog(this);
+        progressDialog.showProDialog();
+    }
+
+    /**
+     * 关闭progressDialog
+     */
+    private void closeProgressDialog() {
+        if (progressDialog != null)
+            progressDialog.closeProDialog();
     }
 
 }

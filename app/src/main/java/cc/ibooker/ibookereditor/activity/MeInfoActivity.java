@@ -229,7 +229,7 @@ public class MeInfoActivity extends BaseActivity implements
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case FROM_MEINFO_TO_LOGIN_REQUEST_CDE:// 登录页面返回
-                    getArticleAppreciateDataListByPuid2();
+                    onRefresh();
                     break;
             }
         }

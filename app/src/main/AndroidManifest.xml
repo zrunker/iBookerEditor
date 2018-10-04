@@ -75,6 +75,7 @@
             android:hardwareAccelerated="true"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
+            android:theme="@style/BlankTheme"
             android:windowSoftInputMode="adjustPan" />
 
         <!--书客编辑器Web页面-->
@@ -177,6 +178,17 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
+
+        <!--视频播放-->
+        <activity
+            android:name=".activity.VideoPlayerActivity"
+            android:alwaysRetainTaskState="true"
+            android:configChanges="orientation|screenSize|keyboard|keyboardHidden"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTask"
+            android:theme="@style/BlankTheme"
+            android:windowSoftInputMode="adjustPan" />
+
     </application>
 
 </manifest>

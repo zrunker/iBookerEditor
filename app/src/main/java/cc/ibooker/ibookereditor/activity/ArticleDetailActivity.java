@@ -229,6 +229,45 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
         // WebView默认是通过浏览器打开url，使用url在WebView中打开
         webView.setWebViewClient(new WebViewClient() {
 
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (url.contains(".mp4") || url.contains(".MP4")
+                        /*|| url.contains(".mpg") || url.contains(".MPG")
+                        || url.contains(".avi") || url.contains(".AVI")
+                        || url.contains(".flv") || url.contains(".FLV")
+                        || url.contains(".swf") || url.contains(".SWF")*/
+                        || url.contains(".mkv") || url.contains(".MKV")
+                        || url.contains(".3gp") || url.contains(".3GP")) {// 视频播放
+                    Uri uri = Uri.parse(url);
+                    Intent intent = new Intent(ArticleDetailActivity.this, VideoPlayerActivity.class);
+                    intent.setData(uri);
+                    startActivity(intent);
+                    return true;
+                }
+                return super.shouldOverrideUrlLoading(view, url);
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    String url = request.getUrl().toString();
+                    if (url.contains(".mp4") || url.contains(".MP4")
+                            /*|| url.contains(".mpg") || url.contains(".MPG")
+                            || url.contains(".avi") || url.contains(".AVI")
+                            || url.contains(".flv") || url.contains(".FLV")
+                            || url.contains(".swf") || url.contains(".SWF")*/
+                            || url.contains(".mkv") || url.contains(".MKV")
+                            || url.contains(".3gp") || url.contains(".3GP")) {// 视频播放
+                        Uri uri = Uri.parse(url);
+                        Intent intent = new Intent(ArticleDetailActivity.this, VideoPlayerActivity.class);
+                        intent.setData(uri);
+                        startActivity(intent);
+                        return true;
+                    }
+                }
+                return super.shouldOverrideUrlLoading(view, request);
+            }
+
             // 错误代码处理，一般是加载本地Html页面，或者使用TextView显示错误
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {

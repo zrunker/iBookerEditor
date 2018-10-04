@@ -61,18 +61,17 @@
         <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
     </style>
 
-    <!--图片浏览界面Style-->
-    <style name="ImgVPagerActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="BlankTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <!--标识状态栏-->
-        <item name="colorPrimaryDark">@color/colorBlank</item>
+        <item name="colorPrimaryDark">@color/black</item>
         <item name="colorAccent">@color/colorPrimary</item>
 
         <!--设置窗体无主题-->
         <item name="windowNoTitle">true</item>
         <!--背景-->
-        <item name="android:windowBackground">@color/colorBlank</item>
+        <item name="android:windowBackground">@color/black</item>
         <!--设置窗体切换动画-->
         <item name="android:windowAnimationStyle">@style/activityAnimation</item>
 

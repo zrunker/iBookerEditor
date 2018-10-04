@@ -87,6 +87,8 @@ public class ImgVPagerActivity extends BaseActivity implements View.OnClickListe
 
     // 初始化
     private void init() {
+        ImageView backImg = findViewById(R.id.img_back);
+        backImg.setOnClickListener(this);
         mViewPager = findViewById(R.id.id_viewpager);
         ImageView shareImg = findViewById(R.id.img_share);
         shareImg.setOnClickListener(this);
@@ -171,6 +173,9 @@ public class ImgVPagerActivity extends BaseActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.img_back:// 返回
+                finish();
+                break;
             case R.id.img_share:// 分享
                 if (RegularExpressionUtil.isInternetURL(currentPath)) {// 下载文件在分享
                     ToastUtil.shortToast(this, "图片保存中...");

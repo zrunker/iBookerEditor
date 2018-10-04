@@ -19,6 +19,16 @@
         android:layout_alignParentTop="true">
 
         <ImageView
+            android:id="@+id/img_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:contentDescription="@null"
+            android:padding="15dp"
+            android:src="@drawable/icon_back_white" />
+
+        <ImageView
             android:id="@+id/img_share"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

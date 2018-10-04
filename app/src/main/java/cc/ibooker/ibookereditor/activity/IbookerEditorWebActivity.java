@@ -13,6 +13,7 @@ import android.os.Message;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.content.FileProvider;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
 import android.view.View;
@@ -249,8 +250,7 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
                         || lowerFilePath.contains(".cpp") || lowerFilePath.contains(".c")
                         || lowerFilePath.contains(".php") || lowerFilePath.contains(".js")
                         || lowerFilePath.contains(".conf") || lowerFilePath.contains(".py")
-                        || lowerFilePath.contains(".mm") || lowerFilePath.contains(".oc"))) {
-
+                        || lowerFilePath.contains(".mm") || lowerFilePath.contains(".oc"))) {// 文件
                     file = new File(filePath);
                     if (file.exists() && file.isFile()) {
                         currentFilePath = filePath;
@@ -262,6 +262,30 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
                     } else {
                         ToastUtil.shortToast(this, "打开文件失败！");
                     }
+                } else if (lowerFilePath.contains(".mp4")
+                        /*|| url.contains(".mpg")
+                        || url.contains(".avi")
+                        || url.contains(".flv")
+                        || url.contains(".swf")*/
+                        || lowerFilePath.contains(".mkv")
+                        || lowerFilePath.contains(".3gp")) {// 视频播放
+                    Intent intentVideo = new Intent(this, VideoPlayerActivity.class);
+                    intentVideo.setData(uri);
+                    startActivity(intentVideo);
+                    finish();
+                } else if (lowerFilePath.contains(".apk")) {
+                    File apkFile = new File(filePath);
+                    Intent intentApk = new Intent(Intent.ACTION_VIEW);
+                    // 判断是否是AndroidN以及更高的版本
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        intentApk.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        Uri contentUri = FileProvider.getUriForFile(this, "cc.ibooker.ibookereditor.fileProvider", apkFile);
+                        intentApk.setDataAndType(contentUri, "application/vnd.android.package-archive");
+                    } else {
+                        intentApk.setDataAndType(Uri.fromFile(apkFile), "application/vnd.android.package-archive");
+                        intentApk.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    }
+                    startActivity(intentApk);
                 } else {
                     ToastUtil.shortToast(this, "打开文件失败！");
                 }

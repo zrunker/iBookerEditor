@@ -52,7 +52,6 @@ import cc.ibooker.ibookereditorlib.IbookerEditorWebView;
 import cc.ibooker.zdialoglib.ProgressDialog;
 
 import static cc.ibooker.ibookereditor.utils.ConstantUtil.PERMISSIONS_REQUEST_OPER_FILE;
-import static cc.ibooker.ibookereditorlib.IbookerEditorEnum.TOOLVIEW_TAG.IBTN_ELSE;
 
 /**
  * 编辑文章
@@ -341,38 +340,11 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
                 }
             }
         });
-//        ibookerEditerView.getIbookerEditorTopView().getHelpIBtn().setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                // 帮助按钮覆写
-//                if (ClickUtil.isFastClick()) return;
-//                Intent intentGrammer = new Intent(EditArticleActivity.this, ArticleDetailActivity.class);
-//                intentGrammer.putExtra("aId", 1L);
-//                intentGrammer.putExtra("title", "语法参考");
-//                startActivity(intentGrammer);
-//            }
-//        });
-//
-//        ibookerEditerView.getIbookerEditorTopView().getAboutImg().setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                // 关于按钮覆写
-//                if (ClickUtil.isFastClick()) return;
-//                Intent intentAbout = new Intent(EditArticleActivity.this, ArticleDetailActivity.class);
-//                intentAbout.putExtra("aId", 182L);
-//                intentAbout.putExtra("title", "关于");
-//                startActivity(intentAbout);
-//            }
-//        });
     }
 
     // 设置书客编辑器顶部按钮点击事件
     @Override
     public void onTopClick(Object tag) {
-        if (ClickUtil.isFastClick()) return;
-        if (tag.equals(IBTN_ELSE)) {// 其他
-            ToastUtil.shortToast(this, "保存1");
-        }
     }
 
     // 请求权限结果监听

@@ -103,9 +103,10 @@ public class MeInfoActivity extends BaseActivity implements
     // 执行列表长按事件
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void executeMeInfoArticleLikeLongClickEvent(MeInfoArticleLikeLongClickEvent event) {
-        if (event != null)
+        if (event != null) {
             showDiyDialog(event.getData(), event.getPosition());
-        EventBus.getDefault().removeStickyEvent(event);
+            EventBus.getDefault().removeStickyEvent(event);
+        }
     }
 
     // 初始化控件
@@ -324,6 +325,9 @@ public class MeInfoActivity extends BaseActivity implements
                 @Override
                 public void onNext(ResultData<Boolean> resultData) {
                     if (resultData.getResultCode() == 0) {// 成功
+                        int realPosition = position - 1;
+                        if (realPosition > 0 && realPosition < articleList.size())
+                            articleList.remove(realPosition);
                         adapter.removeData(position);
                     } else if (resultData.getResultCode() == 5001) {
                         Intent intent = new Intent(MeInfoActivity.this, LoginActivity.class);

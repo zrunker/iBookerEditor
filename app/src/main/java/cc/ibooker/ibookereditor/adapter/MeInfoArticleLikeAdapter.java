@@ -43,7 +43,7 @@ public class MeInfoArticleLikeAdapter extends RecyclerView.Adapter {
 
     // 删除数据
     public void removeData(int position) {
-        mDatas.remove(position);
+        mDatas.remove(position - 1);
         // 删除动画
         notifyItemRemoved(position);
         notifyDataSetChanged();

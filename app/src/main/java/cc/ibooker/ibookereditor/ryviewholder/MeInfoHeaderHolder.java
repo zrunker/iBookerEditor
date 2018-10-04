@@ -11,6 +11,9 @@ import cc.ibooker.ibookereditor.utils.ConstantUtil;
 import cc.ibooker.ibookereditor.zglide.GlideApp;
 import cc.ibooker.ibookereditor.zglide.GlideCircleTransform;
 
+/**
+ * 个人中心头部信息
+ */
 public class MeInfoHeaderHolder extends RecyclerView.ViewHolder {
     private ImageView meInfoImg;
     private TextView nickNameTv, introduceTv;

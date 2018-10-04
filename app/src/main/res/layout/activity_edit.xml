@@ -5,5 +5,4 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    app:IbookerEditorToolView_EmojiIBtn_Visible="false"
-    app:IbookerEditorTopView_ElseIBtn_Visible="false" />
+    app:IbookerEditorToolView_EmojiIBtn_Visible="false" />

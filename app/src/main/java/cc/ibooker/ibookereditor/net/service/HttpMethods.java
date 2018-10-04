@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import cc.ibooker.ibookereditor.bean.ArticleAppreciateData;
 import cc.ibooker.ibookereditor.bean.ArticleUserData;
 import cc.ibooker.ibookereditor.bean.ArticleUserInfoData;
 import cc.ibooker.ibookereditor.dto.ResultData;
@@ -30,7 +31,7 @@ public class HttpMethods {
     // 测试服
 //    private static final String BASE_URL = "http://47.93.239.223:808/mobile/";
     // 正式服
-    private static final String BASE_URL = "http://192.168.168.151:8080/ibooker/mobile/";
+    private static final String BASE_URL = "http://192.168.1.113:8080/ibooker/mobile/";
 
     private MyService myService;
 
@@ -74,6 +75,7 @@ public class HttpMethods {
         return SingletonHolder.INSTANCE;
     }
 
+    // 定义头部信息
     private Map<String, String> getHeaderMap() {
         Map<String, String> headers = new HashMap<>();
         headers.put("ua", ConstantUtil.userDto != null ? ConstantUtil.userDto.getUa() : "");
@@ -213,6 +215,42 @@ public class HttpMethods {
             map = new HashMap<>();
         map.put("aaAid", aId);
         myService.modifyArticleAppreciate(AESUtil.encrypt(map.toString()), getHeaderMap())
+                //指定subscribe()发生在io调度器（读写文件、读写数据库、网络信息交互等）
+                .subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                //指定subscriber的回调发生在主线程
+                .observeOn(AndroidSchedulers.mainThread())
+                //实现订阅关系
+                .subscribe(subscriber);
+
+    }
+
+    /**
+     * 根据用户ID查询文章喜欢信息列表
+     */
+    public void getArticleAppreciateDataListByPuid2(Subscriber<ResultData<ArrayList<ArticleAppreciateData>>> subscriber, int page) {
+        Map<String, Object> map;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+            map = new ArrayMap<>();
+        else
+            map = new HashMap<>();
+        map.put("page", page);
+        myService.getArticleAppreciateDataListByPuid2(AESUtil.encrypt(map.toString()), getHeaderMap())
+                //指定subscribe()发生在io调度器（读写文件、读写数据库、网络信息交互等）
+                .subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                //指定subscriber的回调发生在主线程
+                .observeOn(AndroidSchedulers.mainThread())
+                //实现订阅关系
+                .subscribe(subscriber);
+
+    }
+
+    /**
+     * 根据ID修改文章喜欢是否删除状态
+     */
+    public void updateArticleAppreciateIsdeleteById(Subscriber<ResultData<Boolean>> subscriber, long aaId) {
+        myService.updateArticleAppreciateIsdeleteById(aaId, getHeaderMap())
                 //指定subscribe()发生在io调度器（读写文件、读写数据库、网络信息交互等）
                 .subscribeOn(Schedulers.io())
                 .unsubscribeOn(Schedulers.io())

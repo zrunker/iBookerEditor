@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
+import com.umeng.message.PushAgent;
+
 import cc.ibooker.ibookereditor.broadcastreceiver.NetBroadcastReceiver;
 
 /**
@@ -22,6 +24,9 @@ public abstract class BaseFragment extends Fragment implements NetBroadcastRecei
 
         // 初始化方法
 //        init();
+
+        // 友盟
+        PushAgent.getInstance(getActivity()).onAppStart();
     }
 
     @Override

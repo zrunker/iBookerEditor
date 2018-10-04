@@ -3,6 +3,7 @@ package cc.ibooker.ibookereditor.net.service;
 import java.util.ArrayList;
 import java.util.Map;
 
+import cc.ibooker.ibookereditor.bean.ArticleAppreciateData;
 import cc.ibooker.ibookereditor.bean.ArticleUserData;
 import cc.ibooker.ibookereditor.bean.ArticleUserInfoData;
 import cc.ibooker.ibookereditor.dto.ResultData;
@@ -11,6 +12,7 @@ import okhttp3.ResponseBody;
 import retrofit2.http.GET;
 import retrofit2.http.HeaderMap;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.Streaming;
 import retrofit2.http.Url;
@@ -64,4 +66,16 @@ interface MyService {
      */
     @POST("articleappreciate/modify")
     Observable<ResultData<Boolean>> modifyArticleAppreciate(@Query("values") String values, @HeaderMap Map<String, String> headers);
+
+    /**
+     * 根据用户ID查询文章喜欢信息列表
+     */
+    @GET("articleappreciate/article/list")
+    Observable<ResultData<ArrayList<ArticleAppreciateData>>> getArticleAppreciateDataListByPuid2(@Query("values") String values, @HeaderMap Map<String, String> headers);
+
+    /**
+     * 根据ID修改文章喜欢是否删除状态
+     */
+    @POST("articleappreciate/{aaId}/isdelete/update")
+    Observable<ResultData<Boolean>> updateArticleAppreciateIsdeleteById(@Path("aaId") long aaId, @HeaderMap Map<String, String> headers);
 }

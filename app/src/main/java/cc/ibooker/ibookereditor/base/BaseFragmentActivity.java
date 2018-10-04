@@ -14,6 +14,8 @@ import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.umeng.message.PushAgent;
+
 import cc.ibooker.ibookereditor.broadcastreceiver.NetBroadcastReceiver;
 import cc.ibooker.ibookereditor.utils.ActivityUtil;
 import cc.ibooker.ibookereditor.utils.ConstantUtil;
@@ -48,6 +50,9 @@ public abstract class BaseFragmentActivity extends FragmentActivity implements N
 
         // 执行初始化方法
 //        init();
+
+        // 友盟
+        PushAgent.getInstance(this).onAppStart();
     }
 
     // 抽象 - 初始化方法，可以对控件进行初始化，也可以对数据进行初始化

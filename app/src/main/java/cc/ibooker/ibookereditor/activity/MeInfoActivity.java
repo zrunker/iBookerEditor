@@ -6,17 +6,26 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.ListView;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 
 import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.adapter.MeInfoArticleLikeAdapter;
+import cc.ibooker.ibookereditor.adapter.MeInfoDialogAdapter;
 import cc.ibooker.ibookereditor.base.BaseActivity;
 import cc.ibooker.ibookereditor.bean.ArticleAppreciateData;
 import cc.ibooker.ibookereditor.dto.FooterData;
 import cc.ibooker.ibookereditor.dto.ResultData;
+import cc.ibooker.ibookereditor.event.MeInfoArticleLikeLongClickEvent;
 import cc.ibooker.ibookereditor.net.service.HttpMethods;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
@@ -24,6 +33,8 @@ import cc.ibooker.ibookereditor.utils.ToastUtil;
 import cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout;
 import cc.ibooker.ibookereditor.zrecycleview.MyLinearLayoutManager;
 import cc.ibooker.ibookereditor.zrecycleview.RecyclerViewScrollListener;
+import cc.ibooker.zdialoglib.DiyDialog;
+import cc.ibooker.zdialoglib.ProgressDialog;
 import rx.Subscriber;
 import rx.subscriptions.CompositeSubscription;
 
@@ -46,6 +57,10 @@ public class MeInfoActivity extends BaseActivity implements
     private FooterData footerData;// 底部数据
     private int page = 1;
 
+    private DiyDialog diyDialog;
+    private ProgressDialog progressDialog;
+
+    private Subscriber<ResultData<Boolean>> updateArticleAppreciateIsdeleteByIdSubscriber;
     private Subscriber<ResultData<ArrayList<ArticleAppreciateData>>> getArticleAppreciateDataListByPuid2Subscriber;
     private CompositeSubscription mSubscription;
     private final int FROM_MEINFO_TO_LOGIN_REQUEST_CDE = 112;
@@ -59,22 +74,38 @@ public class MeInfoActivity extends BaseActivity implements
 
         swipeRefreshLayout.autoRefresh();
         getArticleAppreciateDataListByPuid2();
+
+        EventBus.getDefault().register(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        closeDiyDialog();
+        closeProgressDialog();
         if (getArticleAppreciateDataListByPuid2Subscriber != null)
             getArticleAppreciateDataListByPuid2Subscriber.unsubscribe();
+        if (updateArticleAppreciateIsdeleteByIdSubscriber != null)
+            updateArticleAppreciateIsdeleteByIdSubscriber.unsubscribe();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        EventBus.getDefault().removeStickyEvent(MeInfoArticleLikeLongClickEvent.class);
+        EventBus.getDefault().unregister(this);
         if (mSubscription != null) {
             mSubscription.clear();
             mSubscription.unsubscribe();
         }
+    }
+
+    // 执行列表长按事件
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    public void executeMeInfoArticleLikeLongClickEvent(MeInfoArticleLikeLongClickEvent event) {
+        if (event != null)
+            showDiyDialog(event.getData(), event.getPosition());
+        EventBus.getDefault().removeStickyEvent(event);
     }
 
     // 初始化控件
@@ -234,4 +265,97 @@ public class MeInfoActivity extends BaseActivity implements
             }
         }
     }
+
+    // 关闭TipDialog
+    private void closeDiyDialog() {
+        if (diyDialog != null)
+            diyDialog.closeDiyDialog();
+    }
+
+    // 展示TipDialog
+    private ListView listView;
+
+    private void showDiyDialog(final ArticleAppreciateData data, int position) {
+        if (diyDialog == null) {
+            View view = LayoutInflater.from(this).inflate(R.layout.activity_meinfo_article_like_dialog, null);
+            listView = view.findViewById(R.id.listview);
+            listView.setAdapter(new MeInfoDialogAdapter(this));
+            diyDialog = new DiyDialog(this, view);
+            diyDialog.setDiyDialogWidth(70);
+        }
+        if (data != null) {
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    if (ClickUtil.isFastClick()) return;
+                    closeDiyDialog();
+                    if (position == 0) {
+                        Intent intent = new Intent(MeInfoActivity.this, ArticleDetailActivity.class);
+                        intent.putExtra("aId", data.getAaAid());
+                        intent.putExtra("title", data.getaTitle());
+                        startActivity(intent);
+                    } else if (position == 1) {
+                        updateArticleAppreciateIsdeleteById(data.getAaId(), position);
+                    }
+                }
+            });
+            diyDialog.showDiyDialog();
+        }
+    }
+
+    /**
+     * 根据ID修改文章喜欢是否删除状态
+     */
+    private void updateArticleAppreciateIsdeleteById(long aaId, final int position) {
+        if (NetworkUtil.isNetworkConnected(this)) {
+            showProgressDialog();
+            updateArticleAppreciateIsdeleteByIdSubscriber = new Subscriber<ResultData<Boolean>>() {
+                @Override
+                public void onCompleted() {
+                    closeProgressDialog();
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    ToastUtil.shortToast(MeInfoActivity.this, e.getMessage());
+                    closeProgressDialog();
+                }
+
+                @Override
+                public void onNext(ResultData<Boolean> resultData) {
+                    if (resultData.getResultCode() == 0) {// 成功
+                        adapter.removeData(position);
+                    } else if (resultData.getResultCode() == 5001) {
+                        Intent intent = new Intent(MeInfoActivity.this, LoginActivity.class);
+                        startActivityForResult(intent, FROM_MEINFO_TO_LOGIN_REQUEST_CDE);
+                        overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_bottom);
+                    } else {// 失败
+                        ToastUtil.shortToast(MeInfoActivity.this, resultData.getResultMsg());
+                    }
+                }
+            };
+            HttpMethods.getInstance().updateArticleAppreciateIsdeleteById(updateArticleAppreciateIsdeleteByIdSubscriber, aaId);
+            if (mSubscription == null)
+                mSubscription = new CompositeSubscription();
+            mSubscription.add(updateArticleAppreciateIsdeleteByIdSubscriber);
+        } else {// 无网络
+            ToastUtil.shortToast(MeInfoActivity.this, "当前网络不给力！");
+        }
+    }
+
+    // 展示进度条Dialog
+    private void showProgressDialog() {
+        if (progressDialog == null) {
+            progressDialog = new ProgressDialog(this);
+        }
+        progressDialog.showProDialog();
+    }
+
+    // 关闭进度条Dialog
+    private void closeProgressDialog() {
+        if (progressDialog != null)
+            progressDialog.closeProDialog();
+    }
+
+
 }

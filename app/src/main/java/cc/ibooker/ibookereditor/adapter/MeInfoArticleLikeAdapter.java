@@ -41,6 +41,14 @@ public class MeInfoArticleLikeAdapter extends RecyclerView.Adapter {
         this.notifyDataSetChanged();
     }
 
+    // 删除数据
+    public void removeData(int position) {
+        mDatas.remove(position);
+        // 删除动画
+        notifyItemRemoved(position);
+        notifyDataSetChanged();
+    }
+
     // 刷新底部
     public void updateFooterView(FooterData footerData) {
         this.footerData = footerData;
@@ -73,7 +81,7 @@ public class MeInfoArticleLikeAdapter extends RecyclerView.Adapter {
                 ((MeInfoHeaderHolder) holder).onBind();
                 break;
             case TYPE_ONE:
-                ((MeInfoArticleLikeHolder) holder).onBindData(mDatas.get(position - 1));
+                ((MeInfoArticleLikeHolder) holder).onBindData(mDatas.get(position - 1), position);
                 break;
             case TYPE_TWO:
                 ((FooterHolder) holder).bindHolder(footerData);

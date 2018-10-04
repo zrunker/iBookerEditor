@@ -1,13 +1,19 @@
 package cc.ibooker.ibookereditor.application;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.util.Log;
 
-import com.tencent.bugly.crashreport.CrashReport;
+import com.umeng.commonsdk.UMConfigure;
+import com.umeng.message.IUmengRegisterCallback;
+import com.umeng.message.PushAgent;
+import com.umeng.message.UmengMessageHandler;
+import com.umeng.message.entity.UMessage;
 
-import cc.ibooker.ibookereditor.BuildConfig;
-import cc.ibooker.ibookereditor.utils.AppUtil;
+import cc.ibooker.ibookereditor.utils.ConstantUtil;
 
 import static cc.ibooker.ibookereditor.utils.ConstantUtil.TEXTVIEWSIZE;
 
@@ -27,9 +33,38 @@ public class MyApplication extends Application {
         // 全局上下文赋值
         instance = this;
 
-        // 应用程序捕获异常
-//        CrashHandler crashHandler = CrashHandler.getInstance();
-//        crashHandler.init(getApplicationContext());
+        // 友盟 - 统计/推送 - 只能放在Application - onCreate
+        UMConfigure.init(this, "5b867262b27b0a4c9a00010e", null, UMConfigure.DEVICE_TYPE_PHONE, "697fce64d35084390b590996f0e35c07");
+        // 注册推送
+        PushAgent mPushAgent = PushAgent.getInstance(this);
+        // 注册推送服务，每次调用register方法都会回调该接口
+        mPushAgent.register(new IUmengRegisterCallback() {
+
+            @Override
+            public void onSuccess(String deviceToken) {
+                // 注册成功会返回device token
+                Log.d("deviceToken", deviceToken);
+            }
+
+            @Override
+            public void onFailure(String s, String s1) {
+                Log.d("deviceToken", s + "---" + s1);
+            }
+        });
+        // 通知栏最多显示3条
+        mPushAgent.setDisplayNotificationNumber(3);
+        // 控制通知是否展示
+        UmengMessageHandler messageHandler = new UmengMessageHandler() {
+            @Override
+            public void dealWithNotificationMessage(Context context, UMessage msg) {
+                // 调用super则会走通知展示流程，不调用super则不展示通知
+                SharedPreferences sharedPreferences = instance.getSharedPreferences(ConstantUtil.SHAREDPREFERENCES_SET_NAME, Context.MODE_PRIVATE);
+                boolean bool = sharedPreferences.getBoolean(ConstantUtil.SHAREDPREFERENCES_ARTICLE_RECOMMEND, true);
+                if (bool)
+                    super.dealWithNotificationMessage(context, msg);
+            }
+        };
+        mPushAgent.setMessageHandler(messageHandler);
 
         // 启动服务执行耗时操作
         InitializeService.start(this);

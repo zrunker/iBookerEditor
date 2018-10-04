@@ -190,6 +190,13 @@ public class MainActivity extends BaseActivity implements
         }
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        swipeRefreshLayout.setRefreshing(false);
+        ryScrollListener.setLoadingMore(false);
+    }
+
     // 保存本地文章成功事件
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void executeSaveArticleSuccessEvent(SaveArticleSuccessEvent event) {
@@ -718,6 +725,7 @@ public class MainActivity extends BaseActivity implements
             LocalOperDialogLvAdapter localOperDialogLvAdapter = new LocalOperDialogLvAdapter(this);
             listView.setAdapter(localOperDialogLvAdapter);
             localOperDialog = new DiyDialog(this, view);
+            localOperDialog.setDiyDialogWidth(70);
         }
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -731,7 +739,7 @@ public class MainActivity extends BaseActivity implements
                 }
             }
         });
-        localOperDialog.setDiyDialogWidth(70).showDiyDialog();
+        localOperDialog.showDiyDialog();
     }
 
     /**

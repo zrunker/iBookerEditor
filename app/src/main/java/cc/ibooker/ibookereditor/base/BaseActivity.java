@@ -3,7 +3,6 @@ package cc.ibooker.ibookereditor.base;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,7 +10,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
-import android.view.WindowManager;
+
+import com.umeng.message.PushAgent;
 
 import cc.ibooker.ibookereditor.broadcastreceiver.NetBroadcastReceiver;
 import cc.ibooker.ibookereditor.utils.ActivityUtil;
@@ -48,6 +48,9 @@ public abstract class BaseActivity extends AppCompatActivity implements NetBroad
 
         // 执行初始化方法
 //        init();
+
+        // 友盟
+        PushAgent.getInstance(this).onAppStart();
     }
 
     // 抽象 - 初始化方法，可以对数据进行初始化

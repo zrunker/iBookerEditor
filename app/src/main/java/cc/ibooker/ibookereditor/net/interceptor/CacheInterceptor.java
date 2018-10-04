@@ -28,8 +28,8 @@ public class CacheInterceptor implements Interceptor {
         Request request = chain.request();
         if (NetworkUtil.isNetworkConnected(context.getApplicationContext())) {// 有网络缓存
             Response response = chain.proceed(request);
-            // icon_read from cache for 10 s
-            int maxAge = 10;
+            // icon_read from cache for 5 s
+            int maxAge = 5;
             //获取头部信息
             return response.newBuilder()
                     .removeHeader("Pragma")

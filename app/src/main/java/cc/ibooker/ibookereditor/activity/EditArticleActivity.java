@@ -20,6 +20,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -44,6 +45,7 @@ import cc.ibooker.ibookereditor.utils.ClickUtil;
 import cc.ibooker.ibookereditor.utils.FileUtil;
 import cc.ibooker.ibookereditor.utils.ToastUtil;
 import cc.ibooker.ibookereditorlib.IbookerEditorEditView;
+import cc.ibooker.ibookereditorlib.IbookerEditorMorePopuwindow;
 import cc.ibooker.ibookereditorlib.IbookerEditorTopView;
 import cc.ibooker.ibookereditorlib.IbookerEditorView;
 import cc.ibooker.ibookereditorlib.IbookerEditorWebView;
@@ -282,7 +284,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
 
             @Override
             public void afterTextChanged(Editable editable) {
-
+                ibookerEditerView.getIbookerEditorTopView().setBackTvFontNum(editable.length());
             }
         });
 
@@ -314,7 +316,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
             }
         });
 
-        ibookerEditerView.getIbookerEditorTopView().getBackImg().setOnClickListener(new View.OnClickListener() {
+        ibookerEditerView.getIbookerEditorTopView().getBackTv().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // 返回按钮覆写
@@ -323,29 +325,45 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
             }
         });
 
-        ibookerEditerView.getIbookerEditorTopView().getHelpIBtn().setOnClickListener(new View.OnClickListener() {
+        ibookerEditerView.setOnMoreLvItemClickListener(new IbookerEditorMorePopuwindow.OnMoreLvItemClickListener() {
             @Override
-            public void onClick(View v) {
-                // 帮助按钮覆写
-                if (ClickUtil.isFastClick()) return;
-                Intent intentGrammer = new Intent(EditArticleActivity.this, ArticleDetailActivity.class);
-                intentGrammer.putExtra("aId", 1L);
-                intentGrammer.putExtra("title", "语法参考");
-                startActivity(intentGrammer);
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                if (i == 0) {// 帮助
+                    Intent intentGrammer = new Intent(EditArticleActivity.this, ArticleDetailActivity.class);
+                    intentGrammer.putExtra("aId", 1L);
+                    intentGrammer.putExtra("title", "语法参考");
+                    startActivity(intentGrammer);
+                } else if (i == 1) {// 关于
+                    Intent intentAbout = new Intent(EditArticleActivity.this, ArticleDetailActivity.class);
+                    intentAbout.putExtra("aId", 182L);
+                    intentAbout.putExtra("title", "关于");
+                    startActivity(intentAbout);
+                }
             }
         });
-
-        ibookerEditerView.getIbookerEditorTopView().getAboutImg().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 关于按钮覆写
-                if (ClickUtil.isFastClick()) return;
-                Intent intentAbout = new Intent(EditArticleActivity.this, ArticleDetailActivity.class);
-                intentAbout.putExtra("aId", 182L);
-                intentAbout.putExtra("title", "关于");
-                startActivity(intentAbout);
-            }
-        });
+//        ibookerEditerView.getIbookerEditorTopView().getHelpIBtn().setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                // 帮助按钮覆写
+//                if (ClickUtil.isFastClick()) return;
+//                Intent intentGrammer = new Intent(EditArticleActivity.this, ArticleDetailActivity.class);
+//                intentGrammer.putExtra("aId", 1L);
+//                intentGrammer.putExtra("title", "语法参考");
+//                startActivity(intentGrammer);
+//            }
+//        });
+//
+//        ibookerEditerView.getIbookerEditorTopView().getAboutImg().setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                // 关于按钮覆写
+//                if (ClickUtil.isFastClick()) return;
+//                Intent intentAbout = new Intent(EditArticleActivity.this, ArticleDetailActivity.class);
+//                intentAbout.putExtra("aId", 182L);
+//                intentAbout.putExtra("title", "关于");
+//                startActivity(intentAbout);
+//            }
+//        });
     }
 
     // 设置书客编辑器顶部按钮点击事件

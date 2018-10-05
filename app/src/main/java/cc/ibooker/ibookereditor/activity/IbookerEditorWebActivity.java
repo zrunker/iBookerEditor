@@ -273,6 +273,11 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
                     intentVideo.setData(uri);
                     startActivity(intentVideo);
                     finish();
+                } else if (lowerFilePath.contains(".mp3")) {// 音频播放
+                    Intent audioIntent = new Intent(this, AudioPlayerActivity.class);
+                    audioIntent.setData(uri);
+                    startActivity(audioIntent);
+                    finish();
                 } else if (lowerFilePath.contains(".apk")) {
                     File apkFile = new File(filePath);
                     Intent intentApk = new Intent(Intent.ACTION_VIEW);

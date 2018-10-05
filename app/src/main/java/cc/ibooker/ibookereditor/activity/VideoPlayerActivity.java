@@ -1,5 +1,7 @@
 package cc.ibooker.ibookereditor.activity;
 
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -48,6 +50,23 @@ public class VideoPlayerActivity extends BaseActivity
 
         uri = getIntent().getData();
         initView();
+
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (intent != null) {
+            uri = intent.getData();
+            // 设置播放地址
+            progressbar.setVisibility(View.VISIBLE);
+            videoView.setVideoURI(uri);
+
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        }
     }
 
     // 初始化View

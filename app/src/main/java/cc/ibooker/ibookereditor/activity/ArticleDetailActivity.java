@@ -243,6 +243,12 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
                     intent.setData(uri);
                     startActivity(intent);
                     return true;
+                } else if (url.contains(".mp3") || url.contains(".MP3")) {// 音频播放
+                    Uri uri = Uri.parse(url);
+                    Intent intent = new Intent(ArticleDetailActivity.this, AudioPlayerActivity.class);
+                    intent.setData(uri);
+                    startActivity(intent);
+                    return true;
                 }
                 return super.shouldOverrideUrlLoading(view, url);
             }

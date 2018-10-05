@@ -189,6 +189,16 @@
             android:theme="@style/BlankTheme"
             android:windowSoftInputMode="adjustPan" />
 
+        <!--音频播放-->
+        <activity
+            android:name=".activity.AudioPlayerActivity"
+            android:alwaysRetainTaskState="true"
+            android:configChanges="orientation|screenSize|keyboard|keyboardHidden"
+            android:hardwareAccelerated="true"
+            android:launchMode="singleTask"
+            android:theme="@style/BlankTheme"
+            android:windowSoftInputMode="adjustPan" />
+
     </application>
 
 </manifest>

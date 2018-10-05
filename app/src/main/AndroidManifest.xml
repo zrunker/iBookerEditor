@@ -196,7 +196,7 @@
             android:configChanges="orientation|screenSize|keyboard|keyboardHidden"
             android:hardwareAccelerated="true"
             android:launchMode="singleTask"
-            android:theme="@style/BlankTheme"
+            android:theme="@style/MusicTheme"
             android:windowSoftInputMode="adjustPan" />
 
     </application>

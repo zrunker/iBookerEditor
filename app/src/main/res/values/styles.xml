@@ -81,6 +81,26 @@
         <!--<item name="android:windowLightStatusBar" tools:targetApi="m">true</item>-->
     </style>
 
+    <style name="MusicTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <!--标识状态栏-->
+        <item name="colorPrimaryDark">@color/musicColor</item>
+        <item name="colorAccent">@color/colorPrimary</item>
+
+        <!--设置窗体无主题-->
+        <item name="windowNoTitle">true</item>
+        <!--背景-->
+        <item name="android:windowBackground">@color/musicColor</item>
+        <!--设置窗体切换动画-->
+        <item name="android:windowAnimationStyle">@style/activityAnimation</item>
+
+        <!--透明状态栏 - 19-->
+        <item name="android:windowTranslucentStatus" tools:targetApi="kitkat">true</item>
+        <!--状态栏文字颜色变成黑色，非沉浸式 - 23-->
+        <!--<item name="android:windowLightStatusBar" tools:targetApi="m">true</item>-->
+    </style>
+
     <!--启动页-->
     <style name="AppTheme.Splash">
         <item name="windowActionBar">false</item>

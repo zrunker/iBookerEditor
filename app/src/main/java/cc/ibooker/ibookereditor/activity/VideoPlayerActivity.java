@@ -19,6 +19,7 @@ import android.widget.VideoView;
 import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.base.BaseActivity;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
+import cc.ibooker.ibookereditor.utils.ToastUtil;
 
 /**
  * 视频播放Activity
@@ -94,6 +95,7 @@ public class VideoPlayerActivity extends BaseActivity
     // 视频播放完成
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
+        ToastUtil.shortToast(this, "播放完成！");
 //        finish();
     }
 

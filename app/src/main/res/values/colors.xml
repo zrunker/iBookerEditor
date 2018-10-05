@@ -18,5 +18,6 @@
     <color name="colorBlank">#000000</color>
 
     <color name="colorEFEFEF">#EFEFEF</color>
+    <color name="musicColor">#171717</color>
 
 </resources>

@@ -35,7 +35,7 @@ public class AudioPlayerActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_audioplayer);
-        setStatusBarColor(R.color.colorBlank);
+        setStatusBarColor(R.color.musicColor);
 
         initView();
         initMediaPlayer();
@@ -114,6 +114,7 @@ public class AudioPlayerActivity extends BaseActivity {
         mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
             @Override
             public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
+                ToastUtil.shortToast(AudioPlayerActivity.this, "播放错误！");
                 mediaPlayer.reset();
                 return false;
             }
@@ -123,7 +124,7 @@ public class AudioPlayerActivity extends BaseActivity {
         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
-//                imageView
+                ToastUtil.shortToast(AudioPlayerActivity.this, "播放完成！");
             }
         });
 
@@ -146,6 +147,8 @@ public class AudioPlayerActivity extends BaseActivity {
     AudioManager.OnAudioFocusChangeListener focusChangeListener = new AudioManager.OnAudioFocusChangeListener() {
         @Override
         public void onAudioFocusChange(int focusChange) {
+            if (mediaPlayer == null)
+                initMediaPlayer();
             switch (focusChange) {
                 case AudioManager.AUDIOFOCUS_GAIN:
                     // 获取audio focus

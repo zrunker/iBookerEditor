@@ -130,6 +130,7 @@
             android:hardwareAccelerated="true"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
+            android:theme="@style/TranslucentTheme"
             android:windowSoftInputMode="adjustPan">
 
             <intent-filter>

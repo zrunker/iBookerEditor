@@ -19,6 +19,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.Window;
 import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -33,7 +34,10 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Set;
 
 import cc.ibooker.ibookereditor.R;
@@ -100,6 +104,9 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
+            requestWindowFeature(Window.FEATURE_SWIPE_TO_DISMISS);
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_article_detail);
 
@@ -217,6 +224,20 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
             }
         });
         updateStateLayout(false, -1, null);
+
+        // 设置状态栏
+        TextView statusbarTv = findViewById(R.id.tv_statusbar);
+        // 获取status_bar_height资源的ID
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            // 根据资源ID获取响应的尺寸值
+            int statusBarHeight = getResources().getDimensionPixelSize(resourceId);
+            statusbarTv.setHeight(statusBarHeight);
+        }
+        long time = System.currentTimeMillis();
+        Date date = new Date(time);
+        SimpleDateFormat format = new SimpleDateFormat("MM月dd日 HH时mm分 EEEE", Locale.CHINA);
+        statusbarTv.setText(format.format(date));
     }
 
     // 初始化WebView

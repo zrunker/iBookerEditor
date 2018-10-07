@@ -20,6 +20,7 @@ import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -108,6 +109,8 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
             requestWindowFeature(Window.FEATURE_SWIPE_TO_DISMISS);
         }
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         setContentView(R.layout.activity_article_detail);
 
         aId = getIntent().getLongExtra("aId", -1);
@@ -148,6 +151,14 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
             modifyArticleAppreciateSubscriber.unsubscribe();
         if (proDialog != null)
             proDialog.closeProDialog();
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
     }
 
     @Override

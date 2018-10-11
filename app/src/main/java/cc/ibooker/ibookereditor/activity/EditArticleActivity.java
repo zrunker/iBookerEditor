@@ -69,6 +69,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
     private FileInfoBean fileInfoBean;
     private int _id;
     private String preTitle, preContent;
+    private boolean isNeedReName;
 
     private IbookerEditorView ibookerEditerView;
 
@@ -109,27 +110,27 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
         }
 
         // 获取传递数据
-        int id = getIntent().getIntExtra("_id", 0);
+        _id = getIntent().getIntExtra("_id", 0);
         long createTime = getIntent().getLongExtra("createTime", 0);
         String title = getIntent().getStringExtra("title");
         final String filePath = getIntent().getStringExtra("filePath");
-        if (id > 0) {
-            _id = id;
-            fileInfoBean.setId(id);
+        isNeedReName = getIntent().getBooleanExtra("isNeedReName", true);
+        if (_id > 0) {
+            fileInfoBean.setId(_id);
         }
         if (createTime > 0) {
             currentStamp = createTime;
-            fileInfoBean.setFileCreateTime(createTime);
+            fileInfoBean.setFileCreateTime(currentStamp);
         }
         if (!TextUtils.isEmpty(filePath)) {
             currentFilePath = filePath;
-            fileInfoBean.setFilePath(filePath);
-            currentFile = new File(filePath);
+            fileInfoBean.setFilePath(currentFilePath);
+            currentFile = new File(currentFilePath);
         }
         if (!TextUtils.isEmpty(title)) {
             preTitle = title;
-            fileInfoBean.setFileName(title);
-            ibookerEditerView.setIEEditViewIbookerTitleEdText(title);
+            fileInfoBean.setFileName(preTitle);
+            ibookerEditerView.setIEEditViewIbookerTitleEdText(preTitle);
             ibookerEditerView.getIbookerEditorVpView().getEditView().getIbookerTitleEd().setSelection(title.length());
         }
         // 读取文件内容并赋值
@@ -159,7 +160,8 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
 
     @Override
     public void finish() {
-        renameFile();
+        if (isNeedReName)
+            renameFile();
         EventBus.getDefault().postSticky(new SaveArticleSuccessEvent(true, _id, fileInfoBean));
         super.finish();
     }
@@ -519,6 +521,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
                     .toString()
                     .trim();
             if (!TextUtils.isEmpty(title) && !title.equals(preTitle)) {
+                fileInfoBean.setFileName(title);
                 if (_id <= 0)
                     _id = sqLiteDao.insertLocalFile2(fileInfoBean);
                 else
@@ -571,15 +574,23 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
                     .getText()
                     .toString()
                     .trim();
-            String newFilePath = filePath.replace(fileName, title + "-" + fileName);
-            boolean bool = currentFile.renameTo(new File(newFilePath));
-            if (bool) {
-                fileInfoBean.setFilePath(newFilePath);
-                if (_id <= 0)// 当前文件不存在
-                    _id = sqLiteDao.insertLocalFile2(fileInfoBean);
-                else
-                    sqLiteDao.updateLocalFileById(fileInfoBean, _id);
-                currentFile.delete();
+            if (!TextUtils.isEmpty(title) || !TextUtils.isEmpty(fileName)) {
+                String newFilePath = filePath.replace(fileName, title + "-" + fileName);
+                boolean bool = currentFile.renameTo(new File(newFilePath));
+                if (bool) {
+                    fileInfoBean.setFilePath(newFilePath);
+                    if (currentFile.exists())
+                        fileInfoBean.setFileSize(currentFile.length());
+                    if (TextUtils.isEmpty(title))
+                        title = fileName;
+                    fileInfoBean.setFileName(title);
+                    if (_id <= 0)// 当前文件不存在
+                        _id = sqLiteDao.insertLocalFile2(fileInfoBean);
+                    else
+                        sqLiteDao.updateLocalFileById(fileInfoBean, _id);
+                    // 删除旧文件
+                    currentFile.delete();
+                }
             }
         }
         closeProgressDialog();

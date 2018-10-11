@@ -185,6 +185,7 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
                     intent.putExtra("_id", -1);
                     intent.putExtra("filePath", file.getAbsolutePath());
                     intent.putExtra("createTime", file.lastModified());
+                    intent.putExtra("isNeedReName", false);
                     startActivityForResult(intent, FROM_WEB_EDIT_REQUST_CODE);
                 }
                 break;

@@ -3,14 +3,11 @@ package cc.ibooker.ibookereditor.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -191,27 +188,6 @@ public class ImgVPagerActivity extends BaseActivity implements View.OnClickListe
             case R.id.img_right:// 右移事件
                 mViewPager.setCurrentItem(currentPosition == imgAllPathList.size() - 1 ? 0 : currentPosition + 1);
                 break;
-        }
-    }
-
-    // 修改状态栏的颜色
-    private void setStatusBarColor(int color) {
-        try {
-            Window window = getWindow();
-            // 取消设置透明状态栏,使 ContentView 内容不再覆盖状态栏
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            }
-            // 需要设置这个 flag 才能调用 setStatusBarColor 来设置状态栏颜色
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            }
-            // 设置状态栏颜色
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                window.setStatusBarColor(getResources().getColor(color));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 

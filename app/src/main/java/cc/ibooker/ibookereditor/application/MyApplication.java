@@ -7,6 +7,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.Log;
 
+import com.mob.MobSDK;
 import com.umeng.commonsdk.UMConfigure;
 import com.umeng.message.IUmengRegisterCallback;
 import com.umeng.message.PushAgent;
@@ -65,6 +66,9 @@ public class MyApplication extends Application {
             }
         };
         mPushAgent.setMessageHandler(messageHandler);
+
+        // ShareSdk
+        MobSDK.init(this);
 
         // 启动服务执行耗时操作
         InitializeService.start(this);

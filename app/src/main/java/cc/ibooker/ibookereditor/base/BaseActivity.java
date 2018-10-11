@@ -3,6 +3,7 @@ package cc.ibooker.ibookereditor.base;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -10,6 +11,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.umeng.message.PushAgent;
 
@@ -135,5 +138,26 @@ public abstract class BaseActivity extends AppCompatActivity implements NetBroad
      */
     @Override
     public void onNetChange(boolean netWorkState) {
+    }
+
+    // 修改状态栏的颜色
+    public void setStatusBarColor(int color) {
+        try {
+            Window window = getWindow();
+            // 取消设置透明状态栏,使 ContentView 内容不再覆盖状态栏
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            }
+            // 需要设置这个 flag 才能调用 setStatusBarColor 来设置状态栏颜色
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            }
+            // 设置状态栏颜色
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                window.setStatusBarColor(getResources().getColor(color));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

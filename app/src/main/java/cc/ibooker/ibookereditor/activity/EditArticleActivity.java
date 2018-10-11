@@ -18,8 +18,6 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 
 import org.greenrobot.eventbus.EventBus;
@@ -462,27 +460,6 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
                     }
                 }, 100);
             }
-        }
-    }
-
-    // 修改状态栏的颜色
-    private void setStatusBarColor(int color) {
-        try {
-            Window window = getWindow();
-            // 取消设置透明状态栏,使 ContentView 内容不再覆盖状态栏
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            }
-            // 需要设置这个 flag 才能调用 setStatusBarColor 来设置状态栏颜色
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            }
-            // 设置状态栏颜色
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                window.setStatusBarColor(getResources().getColor(color));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 

@@ -31,7 +31,8 @@ public class HttpMethods {
     // 测试服
 //    private static final String BASE_URL = "http://47.93.239.223:808/mobile/";
     // 正式服
-    private static final String BASE_URL = "http://192.168.1.113:8080/ibooker/mobile/";
+//    private static final String BASE_URL = "http://192.168.1.113:8080/ibooker/mobile/";
+    private static final String BASE_URL = "http://ibooker.cc/ibooker/mobile/";
 
     private MyService myService;
 

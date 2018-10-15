@@ -158,9 +158,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
 
     @Override
     public void finish() {
-        if (isNeedReName)
-            renameFile();
-        EventBus.getDefault().postSticky(new SaveArticleSuccessEvent(true, _id, fileInfoBean));
+
         super.finish();
     }
 
@@ -176,6 +174,14 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
             myHandler = null;
         if (executorService != null)
             executorService.shutdownNow();
+    }
+
+    // 结束编辑文件方法
+    private void endEditFile() {
+        if (isNeedReName)
+            renameFile();
+        EventBus.getDefault().postSticky(new SaveArticleSuccessEvent(true, _id, fileInfoBean));
+        finish();
     }
 
     // 初始化
@@ -445,7 +451,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
         public void handleMessage(Message msg) {
             final EditArticleActivity currentActivity = mWeakRef.get();
             if (msg.what == currentActivity.FINISH_ACTIVITY_CODE) {
-                currentActivity.finish();
+                currentActivity.endEditFile();
             } else {
                 if (msg.obj != null) {
                     String content = (String) msg.obj;
@@ -533,7 +539,7 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
 //                writeSdData(content, currentFile);
             }
         }
-        finish();
+        endEditFile();
     }
 
     /**
@@ -552,7 +558,12 @@ public class EditArticleActivity extends BaseActivity implements IbookerEditorTo
                     .toString()
                     .trim();
             if (!TextUtils.isEmpty(title) || !TextUtils.isEmpty(fileName)) {
-                String newFilePath = filePath.replace(fileName, title + "-" + fileName);
+                String newFileName = currentFileName;
+                if (!TextUtils.isEmpty(fileName)) {
+                    String prefix = fileName.substring(fileName.lastIndexOf(".") + 1);
+                    newFileName = currentStamp + "." + prefix;
+                }
+                String newFilePath = filePath.replace(fileName, title + "-" + newFileName);
                 boolean bool = currentFile.renameTo(new File(newFilePath));
                 if (bool) {
                     fileInfoBean.setFilePath(newFilePath);

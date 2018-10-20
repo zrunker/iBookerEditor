@@ -5,9 +5,11 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.content.FileProvider;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -38,7 +40,7 @@ import java.util.ArrayList;
 
 import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.adapter.ALocalAdapter;
-import cc.ibooker.ibookereditor.adapter.ARecommendAdapter;
+import cc.ibooker.ibookereditor.adapter.ANewAdapter;
 import cc.ibooker.ibookereditor.adapter.LocalOperDialogLvAdapter;
 import cc.ibooker.ibookereditor.adapter.SideMenuAdapter;
 import cc.ibooker.ibookereditor.base.BaseActivity;
@@ -72,7 +74,7 @@ import cc.ibooker.zdialoglib.TipDialog;
 import rx.Subscriber;
 import rx.subscriptions.CompositeSubscription;
 
-import static cc.ibooker.ibookereditor.utils.ConstantUtil.PAGE_SIZE_RECOMMEND_ARTICLE;
+import static cc.ibooker.ibookereditor.utils.ConstantUtil.PAGE_SIZE_NEW_ARTICLE;
 import static cc.ibooker.ibookereditor.utils.ConstantUtil.PERMISSIONS_REQUEST_OPER_FILE;
 
 /**
@@ -101,7 +103,7 @@ public class MainActivity extends BaseActivity implements
     private RecyclerViewScrollListener ryScrollListener;
     private AutoSwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
-    private ARecommendAdapter aRecommendAdapter;
+    private ANewAdapter aNewAdapter;
     private ArrayList<ArticleUserData> articleUserDataList = new ArrayList<>();
     private ALocalAdapter aLocalAdapter;
     private ArrayList<LocalEntity> localEntities = new ArrayList<>();
@@ -115,8 +117,8 @@ public class MainActivity extends BaseActivity implements
     private TextView stateTv;
 
     private int dataRes = 0;// 数据来源，0来自本地，1来自推荐。
-    private int recommendPage = 1;
-    private Subscriber<ResultData<ArrayList<ArticleUserData>>> getRecommendArticleListSubscriber;
+    private int newArticlePage = 1;
+    private Subscriber<ResultData<ArrayList<ArticleUserData>>> getNewArticleUserDataListSubscriber;
     private CompositeSubscription mSubscription;
 
     // 权限组
@@ -129,7 +131,7 @@ public class MainActivity extends BaseActivity implements
 
     private SQLiteDao sqLiteDao;
 
-    private DiyDialog localOperDialog;
+    private DiyDialog localOperDialog, aDetailDialog;
     private TipDialog delDialog;
 
     @Override
@@ -173,8 +175,9 @@ public class MainActivity extends BaseActivity implements
         drawer.closeDrawer(GravityCompat.START, true);
         closeLocalOperDialog();
         closeDelDialog();
-        if (getRecommendArticleListSubscriber != null)
-            getRecommendArticleListSubscriber.unsubscribe();
+        closeADetailDialog();
+        if (getNewArticleUserDataListSubscriber != null)
+            getNewArticleUserDataListSubscriber.unsubscribe();
     }
 
     @Override
@@ -392,10 +395,10 @@ public class MainActivity extends BaseActivity implements
         if (0 == dataRes) {// 加载本地数据
             getLocalArticleList();
         } else if (1 == dataRes) {// 加载推荐数据
-            recommendPage = 1;
-            if (getRecommendArticleListSubscriber != null && !getRecommendArticleListSubscriber.isUnsubscribed())
-                getRecommendArticleListSubscriber.unsubscribe();
-            getRecommendArticleList();
+            newArticlePage = 1;
+            if (getNewArticleUserDataListSubscriber != null && !getNewArticleUserDataListSubscriber.isUnsubscribed())
+                getNewArticleUserDataListSubscriber.unsubscribe();
+            getNewArticleUserDataList();
         }
     }
 
@@ -405,12 +408,12 @@ public class MainActivity extends BaseActivity implements
         if (0 == dataRes) {// 加载本地数据
             ryScrollListener.setLoadingMore(false);
         } else if (1 == dataRes) {// 加载推荐数据
-            if (isCanLoadMore && articleUserDataList.size() >= PAGE_SIZE_RECOMMEND_ARTICLE) {
-                recommendPage++;
+            if (isCanLoadMore && articleUserDataList.size() >= PAGE_SIZE_NEW_ARTICLE) {
+                newArticlePage++;
                 swipeRefreshLayout.setRefreshing(false);
-                if (getRecommendArticleListSubscriber != null && !getRecommendArticleListSubscriber.isUnsubscribed())
-                    getRecommendArticleListSubscriber.unsubscribe();
-                getRecommendArticleList();
+                if (getNewArticleUserDataListSubscriber != null && !getNewArticleUserDataListSubscriber.isUnsubscribed())
+                    getNewArticleUserDataListSubscriber.unsubscribe();
+                getNewArticleUserDataList();
             } else {
                 ryScrollListener.setLoadingMore(false);
             }
@@ -432,7 +435,7 @@ public class MainActivity extends BaseActivity implements
             updateEditImgBtnVisibility();
         } else {// 阅读
             topTv.setText(getString(R.string.reading_tip));
-            setaRecommendAdapter();
+            setaNewAdapter();
             // 加载数据
             swipeRefreshLayout.autoRefresh();
             onRefresh();
@@ -485,18 +488,18 @@ public class MainActivity extends BaseActivity implements
     }
 
     // 刷新推荐文章列表
-    private void setaRecommendAdapter() {
-        if (aRecommendAdapter == null)
-            aRecommendAdapter = new ARecommendAdapter(this, articleUserDataList, footerData);
+    private void setaNewAdapter() {
+        if (aNewAdapter == null)
+            aNewAdapter = new ANewAdapter(this, articleUserDataList, footerData);
         else
-            aRecommendAdapter.reflashData(articleUserDataList);
+            aNewAdapter.reflashData(articleUserDataList);
 
-        if (recyclerView.getAdapter() != aRecommendAdapter)
-            recyclerView.setAdapter(aRecommendAdapter);
+        if (recyclerView.getAdapter() != aNewAdapter)
+            recyclerView.setAdapter(aNewAdapter);
 
         stateLayout.setVisibility(View.GONE);
         swipeRefreshLayout.setVisibility(View.VISIBLE);
-        isCanLoadMore = ((articleUserDataList.size() >= PAGE_SIZE_RECOMMEND_ARTICLE) && (articleUserDataList.size() % PAGE_SIZE_RECOMMEND_ARTICLE == 0));
+        isCanLoadMore = ((articleUserDataList.size() >= PAGE_SIZE_NEW_ARTICLE) && (articleUserDataList.size() % PAGE_SIZE_NEW_ARTICLE == 0));
         updateFooterView();
     }
 
@@ -507,7 +510,7 @@ public class MainActivity extends BaseActivity implements
             footerData.setShowProgressBar(true);
             footerData.setTitle(getResources().getString(R.string.load_more));
         } else {
-            if (articleUserDataList == null || articleUserDataList.size() < PAGE_SIZE_RECOMMEND_ARTICLE) {
+            if (articleUserDataList == null || articleUserDataList.size() < PAGE_SIZE_NEW_ARTICLE) {
                 footerData.setShowFooter(false);
                 footerData.setShowProgressBar(false);
                 footerData.setTitle(getResources().getString(R.string.load_more_before));
@@ -521,7 +524,7 @@ public class MainActivity extends BaseActivity implements
                 footerData.setTitle(getResources().getString(R.string.load_more_complete));
             }
         }
-        aRecommendAdapter.updateFooterView(footerData);
+        aNewAdapter.updateFooterView(footerData);
     }
 
     // 初始化数据
@@ -611,11 +614,11 @@ public class MainActivity extends BaseActivity implements
     }
 
     /**
-     * 获取推荐文章相关信息
+     * 按时间顺序获取文章列表
      */
-    private void getRecommendArticleList() {
+    private void getNewArticleUserDataList() {
         if (NetworkUtil.isNetworkConnected(this)) {
-            getRecommendArticleListSubscriber = new Subscriber<ResultData<ArrayList<ArticleUserData>>>() {
+            getNewArticleUserDataListSubscriber = new Subscriber<ResultData<ArrayList<ArticleUserData>>>() {
                 @Override
                 public void onCompleted() {
                     swipeRefreshLayout.setRefreshing(false);
@@ -633,26 +636,40 @@ public class MainActivity extends BaseActivity implements
                 public void onNext(ResultData<ArrayList<ArticleUserData>> arrayListResultData) {
                     if (arrayListResultData.getResultCode() == 0) {// 成功
                         if (arrayListResultData.getData() == null) {
-                            updateStateLayout(true, 4, null);
+                            if (articleUserDataList.size() <= 0)
+                                updateStateLayout(true, 4, null);
+                            else {
+                                footerData.setTitle("未获取到任何数据！");
+                                footerData.setShowProgressBar(false);
+                                footerData.setShowFooter(true);
+                                aNewAdapter.updateFooterView(footerData);
+                            }
                         } else {
                             if (articleUserDataList == null)
                                 articleUserDataList = new ArrayList<>();
-                            if (recommendPage == 1)
+                            if (newArticlePage == 1)
                                 articleUserDataList.clear();
                             articleUserDataList.addAll(arrayListResultData.getData());
-                            setaRecommendAdapter();
+                            setaNewAdapter();
 
                             updateStateLayout(false, -1, null);
                         }
                     } else {// 失败
-                        updateStateLayout(true, 3, arrayListResultData.getResultMsg());
+                        if (articleUserDataList.size() <= 0)
+                            updateStateLayout(true, 3, arrayListResultData.getResultMsg());
+                        else {
+                            footerData.setTitle(arrayListResultData.getResultMsg());
+                            footerData.setShowProgressBar(false);
+                            footerData.setShowFooter(true);
+                            aNewAdapter.updateFooterView(footerData);
+                        }
                     }
                 }
             };
-            HttpMethods.getInstance().getRecommendArticleList(getRecommendArticleListSubscriber, recommendPage);
+            HttpMethods.getInstance().getNewArticleUserDataList(getNewArticleUserDataListSubscriber, newArticlePage);
             if (mSubscription == null)
                 mSubscription = new CompositeSubscription();
-            mSubscription.add(getRecommendArticleListSubscriber);
+            mSubscription.add(getNewArticleUserDataListSubscriber);
         } else {// 无网络
             updateStateLayout(true, 1, null);
         }
@@ -682,7 +699,7 @@ public class MainActivity extends BaseActivity implements
         super.onNetChange(netWorkState);
         if (netWorkState) {
             if (dataRes == 1)
-                getRecommendArticleList();
+                getNewArticleUserDataList();
         }
     }
 
@@ -732,9 +749,11 @@ public class MainActivity extends BaseActivity implements
             public void onItemClick(AdapterView<?> parent, View view, int i, long id) {
                 if (ClickUtil.isFastClick()) return;
                 closeLocalOperDialog();
-                if (i == 0) {// 分享
+                if (i == 0) {// 详情
+                    showADetailDialog(localEntity);
+                } else if (i == 1) {// 分享
                     shareFile(MainActivity.this, new File(localEntity.getaFilePath()), localEntity.getaTitle());
-                } else if (i == 1) {// 删除
+                } else if (i == 2) {// 删除
                     showDelDialog(localEntity.getaFilePath(), position);
                 }
             }
@@ -783,6 +802,39 @@ public class MainActivity extends BaseActivity implements
     private void closeDelDialog() {
         if (delDialog != null)
             delDialog.closeTipDialog();
+    }
+
+    /**
+     * 展示详情Dialog
+     */
+    private TextView adNameTv, adTimeTv, adSizeTv, adPathTv;
+
+    private void showADetailDialog(LocalEntity localEntity) {
+        if (aDetailDialog == null) {
+            View view = LayoutInflater.from(this).inflate(R.layout.layout_adetail_dialog, null);
+            adNameTv = view.findViewById(R.id.tv_name);
+            adTimeTv = view.findViewById(R.id.tv_time);
+            adSizeTv = view.findViewById(R.id.tv_size);
+            adPathTv = view.findViewById(R.id.tv_path);
+            aDetailDialog = new DiyDialog(this, view);
+            aDetailDialog.setDiyDialogWidth(75);
+        }
+        if (localEntity != null) {
+            if (localEntity.getFile() != null)
+                adNameTv.setText(localEntity.getFile().getName());
+            adTimeTv.setText(localEntity.getaFormatTime());
+            adSizeTv.setText(localEntity.getaFormatSize());
+            adPathTv.setText(localEntity.getaFilePath());
+        }
+        aDetailDialog.showDiyDialog();
+    }
+
+    /**
+     * 关闭详情Dialog
+     */
+    private void closeADetailDialog() {
+        if (aDetailDialog != null)
+            aDetailDialog.closeDiyDialog();
     }
 
     /**
@@ -865,6 +917,15 @@ public class MainActivity extends BaseActivity implements
                     reflashHeaderLayout();
                     break;
             }
+        }
+    }
+
+    @Override
+    public void doRequestPermissionsResult(int requestCode, @NonNull int[] grantResults) {
+        super.doRequestPermissionsResult(requestCode, grantResults);
+        if (requestCode == PERMISSIONS_REQUEST_OPER_FILE
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            onRefresh();
         }
     }
 }

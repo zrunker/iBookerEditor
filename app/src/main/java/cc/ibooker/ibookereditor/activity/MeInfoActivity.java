@@ -38,7 +38,7 @@ import cc.ibooker.zdialoglib.ProgressDialog;
 import rx.Subscriber;
 import rx.subscriptions.CompositeSubscription;
 
-import static cc.ibooker.ibookereditor.utils.ConstantUtil.PAGE_SIZE_RECOMMEND_ARTICLE;
+import static cc.ibooker.ibookereditor.utils.ConstantUtil.PAGE_SIZE_NEW_ARTICLE;
 
 /**
  * 个人中心
@@ -159,7 +159,7 @@ public class MeInfoActivity extends BaseActivity implements
     // 加载更多
     @Override
     public void onLoad() {
-        if (isCanLoadMore && articleList.size() >= PAGE_SIZE_RECOMMEND_ARTICLE) {
+        if (isCanLoadMore && articleList.size() >= PAGE_SIZE_NEW_ARTICLE) {
             page++;
             swipeRefreshLayout.setRefreshing(false);
             if (getArticleAppreciateDataListByPuid2Subscriber != null && !getArticleAppreciateDataListByPuid2Subscriber.isUnsubscribed())
@@ -181,7 +181,7 @@ public class MeInfoActivity extends BaseActivity implements
             adapter.reflashData(articleList);
         }
 
-        isCanLoadMore = ((articleList.size() >= PAGE_SIZE_RECOMMEND_ARTICLE) && (articleList.size() % PAGE_SIZE_RECOMMEND_ARTICLE == 0));
+        isCanLoadMore = ((articleList.size() >= PAGE_SIZE_NEW_ARTICLE) && (articleList.size() % PAGE_SIZE_NEW_ARTICLE == 0));
         updateFooterView();
     }
 
@@ -192,7 +192,7 @@ public class MeInfoActivity extends BaseActivity implements
             footerData.setShowProgressBar(true);
             footerData.setTitle(getResources().getString(R.string.load_more));
         } else {
-            if (articleList == null || articleList.size() < PAGE_SIZE_RECOMMEND_ARTICLE) {
+            if (articleList == null || articleList.size() < PAGE_SIZE_NEW_ARTICLE) {
                 footerData.setShowFooter(false);
                 footerData.setShowProgressBar(false);
                 footerData.setTitle(getResources().getString(R.string.load_more_before));

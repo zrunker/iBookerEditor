@@ -22,6 +22,7 @@ public class LocalOperDialogLvAdapter extends BaseAdapter {
         this.inflater = LayoutInflater.from(context);
         if (mDatas == null)
             mDatas = new ArrayList<>();
+        mDatas.add(context.getString(R.string.detail));
         mDatas.add(context.getString(R.string.share));
         mDatas.add(context.getString(R.string.delete));
         mDatas.add(context.getString(R.string.cancel));

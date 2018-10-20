@@ -24,9 +24,9 @@ public class ConstantUtil {
     public final static int PAGE_SIZE_LOCAL_ARTICLE = 15;
 
     /**
-     * 推荐文章每页显示条目
+     * 最新文章每页显示条目
      */
-    public final static int PAGE_SIZE_RECOMMEND_ARTICLE = 12;
+    public final static int PAGE_SIZE_NEW_ARTICLE = 8;
 
     /**
      * 用户信息

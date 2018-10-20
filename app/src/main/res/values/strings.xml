@@ -45,7 +45,7 @@
 
     <string name="account_hint">请输入书客创作账号</string>
     <string name="passwd_hint">请输入密码</string>
-
+    <string name="detail">详情</string>
     <string name="share">分享</string>
     <string name="delete">删除</string>
     <string name="cancel">取消</string>
@@ -60,4 +60,23 @@
     <string name="reading_tip">阅读 - 有深度的不一定是文章</string>
     <string name="meinfo">个人中心</string>
     <string name="like_article">喜欢文章</string>
+    <string name="name_">名称：</string>
+    <string name="time_">时间：</string>
+    <string name="size_">大小：</string>
+    <string name="path_">路径：</string>
+
+    <string name="user_protocol">用户协议</string>
+    <string name="enjoy_us">加入我们</string>
+    <string name="reg_account">注册账号</string>
+    <string name="forget_passwd">忘记密码？</string>
+    <string name="input_phone">请输入手机号</string>
+    <string name="input_passwd">请输入密码</string>
+    <string name="input_ensure_passwd">确认密码</string>
+    <string name="input_code">请输入验证码</string>
+    <string name="input_phone_tip">请输入11位手机号码</string>
+    <string name="input_code_tip">请输入4位数字验证码</string>
+    <string name="input_passwd_tip">密码(以字母开头，长度在4~20之间，只能包含字母、数字和下划线)</string>
+    <string name="reg">注册</string>
+    <string name="reset_passwd">重置密码</string>
+    <string name="next">下一步</string>
 </resources>

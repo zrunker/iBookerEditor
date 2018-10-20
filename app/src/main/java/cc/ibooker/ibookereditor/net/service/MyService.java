@@ -31,6 +31,12 @@ interface MyService {
     Observable<ResultData<ArrayList<ArticleUserData>>> getRecommendArticleList(@Query("values") String values);
 
     /**
+     * 按时间顺序获取文章列表
+     */
+    @GET("article/new/list")
+    Observable<ResultData<ArrayList<ArticleUserData>>> getNewArticleUserDataList(@Query("values") String values);
+
+    /**
      * 根据文章ID获取文章详情
      */
     @GET("article/detail")
@@ -78,4 +84,29 @@ interface MyService {
      */
     @POST("articleappreciate/{aaId}/isdelete/update")
     Observable<ResultData<Boolean>> updateArticleAppreciateIsdeleteById(@Path("aaId") long aaId, @HeaderMap Map<String, String> headers);
+
+    /**
+     * 获取短信验证码
+     */
+    @POST("sms/code/send")
+    Observable<ResultData<String>> getSmsCode(@Query("values") String values, @HeaderMap Map<String, String> headers);
+
+    /**
+     * 验证账号（该账号是否可以注册）
+     */
+    @POST("user/account/valid")
+    Observable<ResultData<Boolean>> validAccountExist(@Query("values") String values, @HeaderMap Map<String, String> headers);
+
+    /**
+     * 验证短信验证码
+     */
+    @POST("sms/code/valid")
+    Observable<ResultData<Boolean>> validSmsCode(@Query("values") String values, @HeaderMap Map<String, String> headers);
+
+    /**
+     * 通过手机号注册
+     */
+    @POST("user/phone/register")
+    Observable<ResultData<Boolean>> registerByPhone(@Query("values") String values, @HeaderMap Map<String, String> headers);
+
 }

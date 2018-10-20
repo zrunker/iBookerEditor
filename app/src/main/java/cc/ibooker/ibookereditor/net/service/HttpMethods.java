@@ -102,7 +102,26 @@ public class HttpMethods {
                 .observeOn(AndroidSchedulers.mainThread())
                 //实现订阅关系
                 .subscribe(subscriber);
+    }
 
+    /**
+     * 按时间顺序获取文章列表
+     */
+    public void getNewArticleUserDataList(Subscriber<ResultData<ArrayList<ArticleUserData>>> subscriber, int page) {
+        Map<String, Object> map;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+            map = new ArrayMap<>();
+        else
+            map = new HashMap<>();
+        map.put("page", page);
+        myService.getNewArticleUserDataList(AESUtil.encrypt(map.toString()))
+                //指定subscribe()发生在io调度器（读写文件、读写数据库、网络信息交互等）
+                .subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                //指定subscriber的回调发生在主线程
+                .observeOn(AndroidSchedulers.mainThread())
+                //实现订阅关系
+                .subscribe(subscriber);
     }
 
     /**
@@ -123,7 +142,6 @@ public class HttpMethods {
                 .observeOn(AndroidSchedulers.mainThread())
                 //实现订阅关系
                 .subscribe(subscriber);
-
     }
 
     /**
@@ -146,7 +164,6 @@ public class HttpMethods {
                 .observeOn(AndroidSchedulers.mainThread())
                 //实现订阅关系
                 .subscribe(subscriber);
-
     }
 
     /**
@@ -202,7 +219,6 @@ public class HttpMethods {
                 .observeOn(AndroidSchedulers.mainThread())
                 //实现订阅关系
                 .subscribe(subscriber);
-
     }
 
     /**
@@ -223,7 +239,6 @@ public class HttpMethods {
                 .observeOn(AndroidSchedulers.mainThread())
                 //实现订阅关系
                 .subscribe(subscriber);
-
     }
 
     /**
@@ -244,7 +259,6 @@ public class HttpMethods {
                 .observeOn(AndroidSchedulers.mainThread())
                 //实现订阅关系
                 .subscribe(subscriber);
-
     }
 
     /**
@@ -259,6 +273,88 @@ public class HttpMethods {
                 .observeOn(AndroidSchedulers.mainThread())
                 //实现订阅关系
                 .subscribe(subscriber);
+    }
 
+    /**
+     * 获取短信验证码
+     */
+    public void getSmsCode(Subscriber<ResultData<String>> subscriber, String mobile) {
+        Map<String, Object> map;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+            map = new ArrayMap<>();
+        else
+            map = new HashMap<>();
+        map.put("mobile", mobile);
+        myService.getSmsCode(AESUtil.encrypt(map.toString()), getHeaderMap())
+                //指定subscribe()发生在io调度器（读写文件、读写数据库、网络信息交互等）
+                .subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                //指定subscriber的回调发生在主线程
+                .observeOn(AndroidSchedulers.mainThread())
+                //实现订阅关系
+                .subscribe(subscriber);
+    }
+
+    /**
+     * 验证账号（该账号是否可以注册）
+     */
+    public void validAccountExist(Subscriber<ResultData<Boolean>> subscriber, String account) {
+        Map<String, Object> map;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+            map = new ArrayMap<>();
+        else
+            map = new HashMap<>();
+        map.put("account", account);
+        myService.validAccountExist(AESUtil.encrypt(map.toString()), getHeaderMap())
+                //指定subscribe()发生在io调度器（读写文件、读写数据库、网络信息交互等）
+                .subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                //指定subscriber的回调发生在主线程
+                .observeOn(AndroidSchedulers.mainThread())
+                //实现订阅关系
+                .subscribe(subscriber);
+    }
+
+    /**
+     * 验证短信验证码
+     */
+    public void validSmsCode(Subscriber<ResultData<Boolean>> subscriber, String mobile, String smsCode) {
+        Map<String, Object> map;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+            map = new ArrayMap<>();
+        else
+            map = new HashMap<>();
+        map.put("mobile", mobile);
+        map.put("smsCode", smsCode);
+        myService.validSmsCode(AESUtil.encrypt(map.toString()), getHeaderMap())
+                //指定subscribe()发生在io调度器（读写文件、读写数据库、网络信息交互等）
+                .subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                //指定subscriber的回调发生在主线程
+                .observeOn(AndroidSchedulers.mainThread())
+                //实现订阅关系
+                .subscribe(subscriber);
+    }
+
+    /**
+     * 验证短信验证码
+     */
+    public void registerByPhone(Subscriber<ResultData<Boolean>> subscriber, String account, String uPasswd, String smsCode) {
+        Map<String, Object> map;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+            map = new ArrayMap<>();
+        else
+            map = new HashMap<>();
+        map.put("account", account);
+        map.put("uPasswd", uPasswd);
+        map.put("smsCode", smsCode);
+        myService.registerByPhone(AESUtil.encrypt(map.toString()), getHeaderMap())
+                //指定subscribe()发生在io调度器（读写文件、读写数据库、网络信息交互等）
+                .subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                //指定subscriber的回调发生在主线程
+                .observeOn(AndroidSchedulers.mainThread())
+                //实现订阅关系
+                .subscribe(subscriber);
     }
 }

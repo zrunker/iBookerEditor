@@ -1,5 +1,6 @@
 package cc.ibooker.ibookereditor.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -39,6 +40,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     private Subscriber<ResultData<UserDto>> userLoginSubscriber;
     private CompositeSubscription mSubscription;
     private SQLiteDao sqLiteDao;
+
+    private final int FROM_LOGIN_TO_REG_CODE = 222;
+    private final int FROM_LOGIN_TO_FORGETPASSWD_CODE = 333;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -82,6 +86,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         passwdEd.setOnEditorActionListener(this);
         Button loginBtn = findViewById(R.id.btn_login);
         loginBtn.setOnClickListener(this);
+        TextView accountRegTv = findViewById(R.id.tv_account_reg);
+        accountRegTv.setOnClickListener(this);
+        TextView forgetPasswdTv = findViewById(R.id.tv_forget_passwd);
+        forgetPasswdTv.setOnClickListener(this);
     }
 
     // 点击事件监听
@@ -91,6 +99,14 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         switch (v.getId()) {
             case R.id.btn_login:
                 login();
+                break;
+            case R.id.tv_account_reg:// 注册
+                Intent intentReg = new Intent(this, RegActivity.class);
+                startActivityForResult(intentReg, FROM_LOGIN_TO_REG_CODE);
+                break;
+            case R.id.tv_forget_passwd:// 忘记密码
+                Intent intentForgetPasswd = new Intent(this, ForgetPasswdOneActivity.class);
+                startActivityForResult(intentForgetPasswd, FROM_LOGIN_TO_FORGETPASSWD_CODE);
                 break;
         }
     }
@@ -182,4 +198,18 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             proDialog.closeProDialog();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case FROM_LOGIN_TO_REG_CODE:// 注册返回
+
+                    break;
+                case FROM_LOGIN_TO_FORGETPASSWD_CODE:// 忘记密码
+
+                    break;
+            }
+        }
+    }
 }

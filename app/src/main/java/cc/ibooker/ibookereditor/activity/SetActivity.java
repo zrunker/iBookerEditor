@@ -113,6 +113,10 @@ public class SetActivity extends BaseActivity implements View.OnClickListener {
         if (mExecutorService == null || mExecutorService.isShutdown())
             mExecutorService = Executors.newCachedThreadPool();
         mExecutorService.execute(thread);
+        TextView userProtocolTv = findViewById(R.id.tv_user_protocol);
+        userProtocolTv.setOnClickListener(this);
+        TextView enjoyUsTv = findViewById(R.id.tv_enjoy_us);
+        enjoyUsTv.setOnClickListener(this);
     }
 
     // 点击事件监听
@@ -155,6 +159,18 @@ public class SetActivity extends BaseActivity implements View.OnClickListener {
                 Intent intent = new Intent(this, LoginActivity.class);
                 startActivityForResult(intent, FROM_SET_TO_LOGIN_REQUEST_CDE);
                 overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_bottom);
+                break;
+            case R.id.tv_user_protocol:// 用户协议
+                Intent intentUserProtocol = new Intent(this, ArticleDetailActivity.class);
+                intentUserProtocol.putExtra("aId", 2L);
+                intentUserProtocol.putExtra("title", "用户协议");
+                startActivity(intentUserProtocol);
+                break;
+            case R.id.tv_enjoy_us:// 加入我们
+                Intent intentEnjoyUs = new Intent(this, ArticleDetailActivity.class);
+                intentEnjoyUs.putExtra("aId", 160L);
+                intentEnjoyUs.putExtra("title", "加入我们");
+                startActivity(intentEnjoyUs);
                 break;
         }
     }

@@ -185,6 +185,7 @@
 
 # JS混淆
 -keep class cc.ibooker.ibookereditorlib.**{ *; }
+-keep class cc.ibooker.ibookereditor.jsevent.**{ *; }
 
 
 #-----------处理第三方依赖库---------
@@ -361,58 +362,58 @@
 
 
 # SharedSDK
-#-keep class cn.sharesdk.**{*;}
-#-keep class com.sina.**{*;}
-#-keep class **.R$* {*;}
-#-keep class **.R{*;}
-#-keep class com.mob.**{*;}
-#-keep class m.framework.**{*;}
-#-dontwarn cn.sharesdk.**
-#-dontwarn com.sina.**
-#-dontwarn com.mob.**
-#-dontwarn **.R$*
+-keep class cn.sharesdk.**{*;}
+-keep class com.sina.**{*;}
+-keep class **.R$* {*;}
+-keep class **.R{*;}
+-keep class com.mob.**{*;}
+-keep class m.framework.**{*;}
+-dontwarn cn.sharesdk.**
+-dontwarn com.sina.**
+-dontwarn com.mob.**
+-dontwarn **.R$*
 
 
 
 
 # 友盟
-#-keep class com.umeng.** {*;}
-#-keepclassmembers class * {
-#   public <init> (org.json.JSONObject);
-#}
-#-keepclassmembers enum * {
-#    public static **[] values();
-#    public static ** valueOf(java.lang.String);
-#}
-#
-#-dontwarn com.umeng.**
-#-dontwarn com.taobao.**
-#-dontwarn anet.channel.**
-#-dontwarn anetwork.channel.**
-#-dontwarn org.android.**
-#-dontwarn org.apache.thrift.**
-#-dontwarn com.xiaomi.**
-#-dontwarn com.huawei.**
-#-dontwarn com.meizu.**
-#
-#-keepattributes *Annotation*
-#
-#-keep class com.taobao.** {*;}
-#-keep class org.android.** {*;}
-#-keep class anet.channel.** {*;}
-#-keep class com.umeng.** {*;}
-#-keep class com.xiaomi.** {*;}
-#-keep class com.huawei.** {*;}
-#-keep class com.meizu.** {*;}
-#-keep class org.apache.thrift.** {*;}
-#
-#-keep class com.alibaba.sdk.android.**{*;}
-#-keep class com.ut.**{*;}
-#-keep class com.ta.**{*;}
-#
-#-keep public class **.R$*{
-#   public static final int *;
-#}
+-keep class com.umeng.** {*;}
+-keepclassmembers class * {
+   public <init> (org.json.JSONObject);
+}
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+-dontwarn com.umeng.**
+-dontwarn com.taobao.**
+-dontwarn anet.channel.**
+-dontwarn anetwork.channel.**
+-dontwarn org.android.**
+-dontwarn org.apache.thrift.**
+-dontwarn com.xiaomi.**
+-dontwarn com.huawei.**
+-dontwarn com.meizu.**
+
+-keepattributes *Annotation*
+
+-keep class com.taobao.** {*;}
+-keep class org.android.** {*;}
+-keep class anet.channel.** {*;}
+-keep class com.umeng.** {*;}
+-keep class com.xiaomi.** {*;}
+-keep class com.huawei.** {*;}
+-keep class com.meizu.** {*;}
+-keep class org.apache.thrift.** {*;}
+
+-keep class com.alibaba.sdk.android.**{*;}
+-keep class com.ut.**{*;}
+-keep class com.ta.**{*;}
+
+-keep public class **.R$*{
+   public static final int *;
+}
 
 
 

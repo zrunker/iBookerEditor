@@ -15,9 +15,9 @@ import cc.ibooker.ibookereditor.ryviewholder.ARecommendViewHolder;
 import cc.ibooker.ibookereditor.ryviewholder.FooterHolder;
 
 /**
- * 推荐文章Adapter
+ * 最新文章Adapter
  */
-public class ARecommendAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class ANewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final int TYPE_ONE = 1, TYPE_TWO = 2;
     private LayoutInflater inflater;
     private ArrayList<ArticleUserData> mDatas;
@@ -25,7 +25,7 @@ public class ARecommendAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private FooterData footerData;
     private int isFooter = 0;// 0没有底部，1有底部
 
-    public ARecommendAdapter(Context context, ArrayList<ArticleUserData> list, FooterData footerData) {
+    public ANewAdapter(Context context, ArrayList<ArticleUserData> list, FooterData footerData) {
         this.inflater = LayoutInflater.from(context);
         this.mDatas = list;
         if (footerData != null) {

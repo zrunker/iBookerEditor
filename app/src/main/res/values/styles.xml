@@ -11,9 +11,6 @@
         <item name="windowNoTitle">true</item>
         <!--设置窗体切换动画-->
         <item name="android:windowAnimationStyle">@style/activityAnimation</item>
-
-        <item name="android:fontFamily" tools:ignore="NewApi">sans-serif</item>
-        <item name="android:fontStyle" tools:ignore="NewApi">normal</item>
     </style>
 
     <!--Activity进入和退出动画-->

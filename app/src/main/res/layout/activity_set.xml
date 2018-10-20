@@ -37,240 +37,299 @@
 
     </LinearLayout>
 
-    <!--工具-->
-    <TextView
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="14dp"
-        android:text="@string/util"
-        android:textColor="@color/colorAccent" />
+        android:scrollbars="none">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/gridview_selector"
-        android:orientation="vertical">
-
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="14dp">
+            android:orientation="vertical">
 
+            <!--工具-->
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:text="@string/main_set"
-                android:textColor="#444"
-                android:textSize="14sp"
-                tools:ignore="RelativeOverlap" />
+                android:padding="14dp"
+                android:text="@string/util"
+                android:textColor="@color/colorAccent" />
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:background="@drawable/bg_orange_btn"
-                android:orientation="horizontal"
-                tools:ignore="RelativeOverlap">
+                android:background="@drawable/gridview_selector"
+                android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tv_notes"
-                    android:layout_width="wrap_content"
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_orange_left_btn"
-                    android:paddingBottom="3dp"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
-                    android:paddingTop="3dp"
-                    android:text="@string/notes"
-                    android:textColor="@color/colorTitle" />
+                    android:padding="14dp">
 
-                <TextView
-                    android:id="@+id/tv_reading"
-                    android:layout_width="wrap_content"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:text="@string/main_set"
+                        android:textColor="#444"
+                        android:textSize="14sp"
+                        tools:ignore="RelativeOverlap" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/bg_orange_btn"
+                        android:orientation="horizontal"
+                        tools:ignore="RelativeOverlap">
+
+                        <TextView
+                            android:id="@+id/tv_notes"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_orange_left_btn"
+                            android:paddingBottom="3dp"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp"
+                            android:paddingTop="3dp"
+                            android:text="@string/notes"
+                            android:textColor="@color/colorTitle" />
+
+                        <TextView
+                            android:id="@+id/tv_reading"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_orange_right_btn"
+                            android:paddingBottom="3dp"
+                            android:paddingLeft="12dp"
+                            android:paddingRight="12dp"
+                            android:paddingTop="3dp"
+                            android:text="@string/reading"
+                            android:textColor="@color/colorTitle" />
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.6dp"
+                    android:layout_marginEnd="14dp"
+                    android:layout_marginLeft="14dp"
+                    android:layout_marginRight="14dp"
+                    android:layout_marginStart="14dp"
+                    android:background="#e4e4e4" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_orange_right_btn"
-                    android:paddingBottom="3dp"
-                    android:paddingLeft="12dp"
-                    android:paddingRight="12dp"
-                    android:paddingTop="3dp"
-                    android:text="@string/reading"
-                    android:textColor="@color/colorTitle" />
+                    android:padding="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:text="@string/article_auto_save"
+                        android:textColor="#444"
+                        android:textSize="14sp"
+                        tools:ignore="RelativeOverlap" />
+
+                    <ToggleButton
+                        android:id="@+id/togglebtn_save"
+                        android:layout_width="45dp"
+                        android:layout_height="25dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/toggle_check"
+                        android:checked="true"
+                        android:textColor="@null"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </RelativeLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.6dp"
+                    android:layout_marginEnd="14dp"
+                    android:layout_marginLeft="14dp"
+                    android:layout_marginRight="14dp"
+                    android:layout_marginStart="14dp"
+                    android:background="#e4e4e4" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:text="@string/good_article_recommend"
+                        android:textColor="#444"
+                        android:textSize="14sp"
+                        tools:ignore="RelativeOverlap" />
+
+                    <ToggleButton
+                        android:id="@+id/togglebtn_recommend"
+                        android:layout_width="45dp"
+                        android:layout_height="25dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/toggle_check"
+                        android:checked="true"
+                        android:textColor="@null"
+                        android:textOff="@null"
+                        android:textOn="@null" />
+                </RelativeLayout>
             </LinearLayout>
-        </RelativeLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0.6dp"
-            android:layout_marginEnd="14dp"
-            android:layout_marginLeft="14dp"
-            android:layout_marginRight="14dp"
-            android:layout_marginStart="14dp"
-            android:background="#e4e4e4" />
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="14dp">
-
+            <!--通用设置-->
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:text="@string/article_auto_save"
-                android:textColor="#444"
-                android:textSize="14sp"
-                tools:ignore="RelativeOverlap" />
+                android:padding="14dp"
+                android:text="@string/common_set"
+                android:textColor="@color/colorAccent" />
 
-            <ToggleButton
-                android:id="@+id/togglebtn_save"
-                android:layout_width="45dp"
-                android:layout_height="25dp"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:background="@drawable/toggle_check"
-                android:checked="true"
-                android:textColor="@null"
-                android:textOff="@null"
-                android:textOn="@null" />
-        </RelativeLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/gridview_selector"
+                android:orientation="vertical">
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0.6dp"
-            android:layout_marginEnd="14dp"
-            android:layout_marginLeft="14dp"
-            android:layout_marginRight="14dp"
-            android:layout_marginStart="14dp"
-            android:background="#e4e4e4" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="14dp">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="14dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/clear_cache"
+                        android:textColor="#444"
+                        android:textSize="14sp"
+                        tools:ignore="RelativeOverlap" />
 
+                    <TextView
+                        android:id="@+id/tv_cache"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="end|center_vertical"
+                        android:paddingEnd="5dp"
+                        android:paddingLeft="5dp"
+                        android:paddingRight="5dp"
+                        android:paddingStart="5dp"
+                        android:textColor="#aaa" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.6dp"
+                    android:layout_marginEnd="14dp"
+                    android:layout_marginLeft="14dp"
+                    android:layout_marginRight="14dp"
+                    android:layout_marginStart="14dp"
+                    android:background="#e4e4e4" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/version_update"
+                        android:textColor="#444"
+                        android:textSize="14sp"
+                        tools:ignore="RelativeOverlap" />
+
+                    <TextView
+                        android:id="@+id/tv_version"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="end|center_vertical"
+                        android:paddingEnd="5dp"
+                        android:paddingLeft="5dp"
+                        android:paddingRight="5dp"
+                        android:paddingStart="5dp"
+                        android:textColor="#aaa" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!--其他-->
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:text="@string/good_article_recommend"
-                android:textColor="#444"
-                android:textSize="14sp"
-                tools:ignore="RelativeOverlap" />
+                android:padding="14dp"
+                android:text="@string/_else"
+                android:textColor="@color/colorAccent" />
 
-            <ToggleButton
-                android:id="@+id/togglebtn_recommend"
-                android:layout_width="45dp"
-                android:layout_height="25dp"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:background="@drawable/toggle_check"
-                android:checked="true"
-                android:textColor="@null"
-                android:textOff="@null"
-                android:textOn="@null" />
-        </RelativeLayout>
-    </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/gridview_selector"
+                android:orientation="vertical">
 
-    <!--通用设置-->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="14dp"
-        android:text="@string/common_set"
-        android:textColor="@color/colorAccent" />
+                <TextView
+                    android:id="@+id/tv_user_protocol"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableEnd="@drawable/icon_gray_arrow_right"
+                    android:drawableRight="@drawable/icon_gray_arrow_right"
+                    android:padding="14dp"
+                    android:text="@string/user_protocol"
+                    android:textColor="#444"
+                    android:textSize="14sp" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/gridview_selector"
-        android:orientation="vertical">
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.6dp"
+                    android:layout_marginEnd="14dp"
+                    android:layout_marginLeft="14dp"
+                    android:layout_marginRight="14dp"
+                    android:layout_marginStart="14dp"
+                    android:background="#e4e4e4" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="14dp">
+                <TextView
+                    android:id="@+id/tv_enjoy_us"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableEnd="@drawable/icon_gray_arrow_right"
+                    android:drawableRight="@drawable/icon_gray_arrow_right"
+                    android:padding="14dp"
+                    android:text="@string/enjoy_us"
+                    android:textColor="#444"
+                    android:textSize="14sp" />
 
+            </LinearLayout>
+
+            <!--退出登录/登录-->
             <TextView
-                android:layout_width="wrap_content"
+                android:id="@+id/tv_logout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/clear_cache"
-                android:textColor="#444"
-                android:textSize="14sp"
-                tools:ignore="RelativeOverlap" />
-
-            <TextView
-                android:id="@+id/tv_cache"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end|center_vertical"
-                android:paddingEnd="5dp"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:paddingStart="5dp"
-                android:textColor="#aaa" />
+                android:layout_marginTop="32dp"
+                android:background="@drawable/gridview_selector"
+                android:gravity="center"
+                android:padding="14dp"
+                android:text="@string/quit_login"
+                android:textColor="@color/colorAccent"
+                android:textSize="14sp" />
         </LinearLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0.6dp"
-            android:layout_marginEnd="14dp"
-            android:layout_marginLeft="14dp"
-            android:layout_marginRight="14dp"
-            android:layout_marginStart="14dp"
-            android:background="#e4e4e4" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="14dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/version_update"
-                android:textColor="#444"
-                android:textSize="14sp"
-                tools:ignore="RelativeOverlap" />
-
-            <TextView
-                android:id="@+id/tv_version"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="end|center_vertical"
-                android:paddingEnd="5dp"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:paddingStart="5dp"
-                android:textColor="#aaa" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <!--退出登录/登录-->
-    <TextView
-        android:id="@+id/tv_logout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:background="@drawable/gridview_selector"
-        android:gravity="center"
-        android:padding="14dp"
-        android:text="@string/quit_login"
-        android:textColor="@color/colorAccent"
-        android:textSize="14sp" />
-
+    </ScrollView>
 </LinearLayout>

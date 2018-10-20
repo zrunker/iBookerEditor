@@ -1,14 +1,13 @@
 apply plugin: 'com.android.application'
-//apply plugin: 'com.mob.sdk'
 
 android {
     compileSdkVersion 27
     defaultConfig {
         applicationId "cc.ibooker.ibookereditor"
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 27
-        versionCode 5
-        versionName "1.0.4"
+        versionCode 6
+        versionName "1.0.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -28,7 +27,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    buildToolsVersion '27.0.3'
+    buildToolsVersion '28.0.3'
 
     lintOptions {
         abortOnError false
@@ -56,25 +55,21 @@ dependencies {
     /*网络框架 rxjava + retrofit + okhttp + glide*/
     implementation 'io.reactivex:rxjava:1.2.10'
     implementation 'io.reactivex:rxandroid:1.2.1'
-
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.2.0'
     implementation 'com.squareup.retrofit2:adapter-rxjava:2.2.0'
     implementation 'com.google.code.gson:gson:2.8.0'
-
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.10.0'
     implementation 'com.squareup.okhttp:okhttp-urlconnection:2.7.5'
-
     implementation 'com.github.bumptech.glide:glide:4.7.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
     implementation 'com.github.bumptech.glide:okhttp3-integration:4.7.1'
-
     implementation 'org.greenrobot:eventbus:3.1.1'
-
-    implementation 'com.github.zrunker:ZDialog:v1.0.4'
+    implementation 'com.github.zrunker:ZDialog:v1.0.6'
     implementation 'com.github.zrunker:ZPopupWindow:v1.03'
     implementation 'com.github.zrunker:ZEditText:v1.0.2'
+    implementation 'com.github.zrunker:ZCountDownView:v1.1.1'
 
     /*bugly*/
     implementation 'com.tencent.bugly:crashreport:2.6.6'
@@ -84,30 +79,17 @@ dependencies {
     implementation 'com.umeng.sdk:analytics:7.5.0'
     implementation 'com.umeng.sdk:utdid:1.1.5.3'
     implementation 'com.umeng.sdk:push:4.2.0'
+
+    /*ShareSDK*/
+    implementation files('libs/MobCommons-2018.0918.1444.jar')
+    implementation files('libs/MobTools-2018.0911.1425.jar')
+    implementation files('libs/ShareSDK-Core-3.2.1.jar')
+    implementation files('libs/ShareSDK-QQ-3.2.1.jar')
+    implementation files('libs/ShareSDK-QZone-3.2.1.jar')
+    implementation files('libs/ShareSDK-SinaWeibo-3.2.1.jar')
+    implementation files('libs/ShareSDK-TencentWeibo-3.2.1.jar')
+    implementation files('libs/ShareSDK-Wechat-3.2.1.jar')
+    implementation files('libs/ShareSDK-Wechat-Core-3.2.1.jar')
+    implementation files('libs/ShareSDK-Wechat-Moments-3.2.1.jar')
 }
 
-//MobSDK {
-//    appKey "27a5e37c748ec"
-//    appSecret "33006bc4fd415d6a15ab93ec458a70d1"
-//
-//    ShareSDK {
-//        //平台配置信息
-//        devInfo {
-//            SinaWeibo {
-//                appKey "3771761242"
-//                appSecret "923defca564396d29bc78286c0768266"
-//                callbackUri "http://www.ibooker.cc"
-//                shareByAppClient true
-//            }
-//            Wechat {
-//                appId "wx4868b35061f87885"
-//                appSecret "64020361b8ec4c99936c0e3999a9f249"
-//            }
-//            QQ {
-//                appId "100371282"
-//                appKey "aed9b0303e3ed1e27bae87c33761161d"
-//                shareByAppClient true
-//            }
-//        }
-//    }
-//}

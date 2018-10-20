@@ -47,6 +47,7 @@ public class ForgetPasswdTwoActivity extends BaseActivity implements View.OnClic
                 finish();
                 break;
             case R.id.btn_submit:// 提交
+                String newCode = passwEd.getText().toString().trim();
 
                 break;
         }

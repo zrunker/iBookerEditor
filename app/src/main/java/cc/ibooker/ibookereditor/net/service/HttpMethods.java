@@ -357,4 +357,27 @@ public class HttpMethods {
                 //实现订阅关系
                 .subscribe(subscriber);
     }
+
+
+    /**
+     * 根据手机号修改密码
+     */
+    public void updatePasswdByUphone(Subscriber<ResultData<Boolean>> subscriber, String uPhone, String code, String newCode) {
+        Map<String, Object> map;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+            map = new ArrayMap<>();
+        else
+            map = new HashMap<>();
+        map.put("uPhone", uPhone);
+        map.put("code", code);
+        map.put("newCode", newCode);
+        myService.updatePasswdByUphone(AESUtil.encrypt(map.toString()), getHeaderMap())
+                //指定subscribe()发生在io调度器（读写文件、读写数据库、网络信息交互等）
+                .subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                //指定subscriber的回调发生在主线程
+                .observeOn(AndroidSchedulers.mainThread())
+                //实现订阅关系
+                .subscribe(subscriber);
+    }
 }

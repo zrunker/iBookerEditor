@@ -109,4 +109,10 @@ interface MyService {
     @POST("user/phone/register")
     Observable<ResultData<Boolean>> registerByPhone(@Query("values") String values, @HeaderMap Map<String, String> headers);
 
+    /**
+     * 根据手机号修改密码
+     */
+    @POST("user/passwd/phone/update")
+    Observable<ResultData<Boolean>> updatePasswdByUphone(@Query("values") String values, @HeaderMap Map<String, String> headers);
+
 }

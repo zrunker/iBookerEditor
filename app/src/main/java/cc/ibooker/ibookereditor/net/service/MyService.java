@@ -8,10 +8,16 @@ import cc.ibooker.ibookereditor.bean.ArticleUserData;
 import cc.ibooker.ibookereditor.bean.ArticleUserInfoData;
 import cc.ibooker.ibookereditor.dto.ResultData;
 import cc.ibooker.ibookereditor.dto.UserDto;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.HeaderMap;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
+import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.Streaming;
@@ -107,12 +113,34 @@ interface MyService {
      * 通过手机号注册
      */
     @POST("user/phone/register")
-    Observable<ResultData<Boolean>> registerByPhone(@Query("values") String values, @HeaderMap Map<String, String> headers);
+    Observable<ResultData<UserDto>> registerByPhone(@Query("values") String values, @HeaderMap Map<String, String> headers);
 
     /**
      * 根据手机号修改密码
      */
     @POST("user/passwd/phone/update")
     Observable<ResultData<Boolean>> updatePasswdByUphone(@Query("values") String values, @HeaderMap Map<String, String> headers);
+
+    /**
+     * 验证昵称（该昵称是否可以使用）
+     */
+    @POST("user/nickname/valid")
+    Observable<ResultData<Boolean>> validNicknameExist(@Query("values") String values, @HeaderMap Map<String, String> headers);
+
+    /**
+     * 根据用户ID修改用户信息
+     */
+    @POST("user/update")
+    Observable<ResultData<Boolean>> updateUserByUid(@Query("values") String values, @HeaderMap Map<String, String> headers);
+
+    /**
+     * 根据ID修改用户图像
+     */
+    @FormUrlEncoded
+    @POST("user/pic/upload")
+    Observable<ResultData<String>> upLoadUserPicImage(@Field("values") String values, @Field("imgfile") String imgfile, @HeaderMap Map<String, String> headers);
+//    @Multipart
+//    @PUT("user/pic/upload")
+//    Observable<ResultData<String>> upLoadUserPicImage(@Part("values") RequestBody values, @HeaderMap Map<String, String> headers);
 
 }

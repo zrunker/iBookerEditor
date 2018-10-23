@@ -1,5 +1,6 @@
 package cc.ibooker.ibookereditor.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -11,8 +12,12 @@ import android.widget.ImageView;
 import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.base.BaseActivity;
 import cc.ibooker.ibookereditor.dto.ResultData;
+import cc.ibooker.ibookereditor.dto.UserDto;
 import cc.ibooker.ibookereditor.net.service.HttpMethods;
+import cc.ibooker.ibookereditor.sqlite.SQLiteDao;
+import cc.ibooker.ibookereditor.sqlite.SQLiteDaoImpl;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
+import cc.ibooker.ibookereditor.utils.ConstantUtil;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
 import cc.ibooker.ibookereditor.utils.RegularExpressionUtil;
 import cc.ibooker.ibookereditor.utils.ToastUtil;
@@ -27,10 +32,12 @@ import rx.subscriptions.CompositeSubscription;
 public class RegActivity extends BaseActivity implements View.OnClickListener {
     private EditText phoneEd, codeEd, passwdEd, ensurePasswdEd;
     private SingleCountDownView singleCountDownView;
-    private String phone, code, passwd, ensurePasswd;
+    private String phone, code, passwd;
 
     private Subscriber<ResultData<Boolean>> validAccountExistSubscriber;
     private Subscriber<ResultData<String>> getSmsCodeSubscriber;
+    private Subscriber<ResultData<Boolean>> validSmsCodeSubscriber;
+    private Subscriber<ResultData<UserDto>> registerByPhoneSubscriber;
     private CompositeSubscription mSubscription;
     private ProgressDialog proDialog;
 
@@ -47,6 +54,12 @@ public class RegActivity extends BaseActivity implements View.OnClickListener {
         super.onStop();
         if (validAccountExistSubscriber != null)
             validAccountExistSubscriber.unsubscribe();
+        if (getSmsCodeSubscriber != null)
+            getSmsCodeSubscriber.unsubscribe();
+        if (validSmsCodeSubscriber != null)
+            validSmsCodeSubscriber.unsubscribe();
+        if (registerByPhoneSubscriber != null)
+            registerByPhoneSubscriber.unsubscribe();
         closeProDialog();
     }
 
@@ -109,14 +122,14 @@ public class RegActivity extends BaseActivity implements View.OnClickListener {
                 phone = phoneEd.getText().toString().trim();
                 code = codeEd.getText().toString().trim();
                 passwd = passwdEd.getText().toString().trim();
-                ensurePasswd = ensurePasswdEd.getText().toString().trim();
+                String ensurePasswd = ensurePasswdEd.getText().toString().trim();
                 if (TextUtils.isEmpty(phone)) {
                     ToastUtil.shortToast(this, "请输入手机号");
                 } else if (phone.length() != 11) {
                     ToastUtil.shortToast(this, getResources().getString(R.string.input_phone_tip));
                 } else if (TextUtils.isEmpty(code)) {
                     ToastUtil.shortToast(this, "请输入验证码");
-                } else if (code.length() != 4) {
+                } else if (code.length() != 6) {
                     ToastUtil.shortToast(this, getResources().getString(R.string.input_code_tip));
                 } else if (TextUtils.isEmpty(passwd)) {
                     ToastUtil.shortToast(this, "请输入密码");
@@ -127,7 +140,7 @@ public class RegActivity extends BaseActivity implements View.OnClickListener {
                 } else if (!passwd.equals(ensurePasswd)) {
                     ToastUtil.shortToast(this, "两次密码不一致");
                 } else {// 验证验证码-注册
-
+                    validSmsCode(phone, code);
                 }
                 break;
         }
@@ -218,7 +231,7 @@ public class RegActivity extends BaseActivity implements View.OnClickListener {
                         if (resultData.getData() == null) {
                             ToastUtil.shortToast(RegActivity.this, "获取数据失败！");
                         } else {
-                            ToastUtil.shortToast(RegActivity.this, resultData.getData());
+                            ToastUtil.shortToast(RegActivity.this, "验证码已发送！");
                         }
                     } else {// 失败
                         ToastUtil.shortToast(RegActivity.this, resultData.getResultMsg());
@@ -229,6 +242,93 @@ public class RegActivity extends BaseActivity implements View.OnClickListener {
             if (mSubscription == null)
                 mSubscription = new CompositeSubscription();
             mSubscription.add(getSmsCodeSubscriber);
+        } else {// 无网络
+            ToastUtil.shortToast(this, "当前网络不给力！");
+        }
+    }
+
+    /**
+     * 验证短信验证码
+     */
+    private void validSmsCode(final String mobile, final String smsCode) {
+        if (NetworkUtil.isNetworkConnected(this)) {
+            showProDialog();
+            validSmsCodeSubscriber = new Subscriber<ResultData<Boolean>>() {
+                @Override
+                public void onCompleted() {
+                    closeProDialog();
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    ToastUtil.shortToast(RegActivity.this, e.getMessage());
+                    closeProDialog();
+                }
+
+                @Override
+                public void onNext(ResultData<Boolean> resultData) {
+                    if (resultData.getResultCode() == 0) {// 成功 - 执行注册
+                        registerByPhone(phone, passwd, code);
+                    } else {// 失败
+                        ToastUtil.shortToast(RegActivity.this, resultData.getResultMsg());
+                    }
+                }
+            };
+            HttpMethods.getInstance().validSmsCode(validSmsCodeSubscriber, mobile, smsCode);
+            if (mSubscription == null)
+                mSubscription = new CompositeSubscription();
+            mSubscription.add(validSmsCodeSubscriber);
+        } else {// 无网络
+            ToastUtil.shortToast(this, "当前网络不给力！");
+        }
+    }
+
+    /**
+     * 通过手机号注册
+     */
+    private void registerByPhone(String account, String uPasswd, String smsCode) {
+        if (NetworkUtil.isNetworkConnected(this)) {
+            showProDialog();
+            registerByPhoneSubscriber = new Subscriber<ResultData<UserDto>>() {
+                @Override
+                public void onCompleted() {
+                    closeProDialog();
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    ToastUtil.shortToast(RegActivity.this, e.getMessage());
+                    closeProDialog();
+                }
+
+                @Override
+                public void onNext(ResultData<UserDto> resultData) {
+                    if (resultData.getResultCode() == 0) {// 成功
+                        if (resultData.getData() == null) {
+                            ToastUtil.shortToast(RegActivity.this, "获取数据失败！");
+                        } else {
+                            // 静态赋值
+                            ConstantUtil.userDto = resultData.getData();
+                            // 将数据保存到数据库
+                            SQLiteDao sqLiteDao = new SQLiteDaoImpl(RegActivity.this);
+                            sqLiteDao.insertUser(resultData.getData());
+
+                            // 关闭当前页面进入完善个人信息界面
+                            Intent intent = new Intent(RegActivity.this, PrefectMeInfoActivity.class);
+                            intent.putExtra("isValidNicknameExist", true);
+                            startActivity(intent);
+                            setResult(RESULT_OK);
+                            finish();
+                        }
+                    } else {// 失败
+                        ToastUtil.shortToast(RegActivity.this, resultData.getResultMsg());
+                    }
+                }
+            };
+            HttpMethods.getInstance().registerByPhone(registerByPhoneSubscriber, account, uPasswd, smsCode);
+            if (mSubscription == null)
+                mSubscription = new CompositeSubscription();
+            mSubscription.add(registerByPhoneSubscriber);
         } else {// 无网络
             ToastUtil.shortToast(this, "当前网络不给力！");
         }

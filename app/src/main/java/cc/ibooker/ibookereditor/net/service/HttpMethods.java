@@ -31,10 +31,13 @@ public class HttpMethods {
     // 测试服
 //    private static final String BASE_URL = "http://47.93.239.223:808/mobile/";
     // 正式服
-//    private static final String BASE_URL = "http://192.168.1.113:8080/ibooker/mobile/";
-    private static final String BASE_URL = "http://ibooker.cc/ibooker/mobile/";
+//    private static final String BASE_URL = "http://192.168.1.121:8080/ibooker/mobile/";
+//    private static final String BASE_URL_2 = "http://192.168.1.121:8080/ibookerfile/mobile/";
 
-    private MyService myService;
+    private static final String BASE_URL = "http://ibooker.cc/ibooker/mobile/";
+    private static final String BASE_URL_2 = "http://ibookerfile.cc/ibookerfile/mobile/";
+
+    private MyService myService, myService2;
 
     // 构造方法私有
     private HttpMethods() {
@@ -63,7 +66,17 @@ public class HttpMethods {
                 .baseUrl(BASE_URL)
                 .build();
 
+        Retrofit retrofit2 = new Retrofit.Builder()
+//                .client(httpClientBuilder.build())
+                .client(MyOkHttpClient.getClient())
+//                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(MyGsonConverterFactory.create())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .baseUrl(BASE_URL_2)
+                .build();
+
         myService = retrofit.create(MyService.class);
+        myService2 = retrofit2.create(MyService.class);
     }
 
     //在访问HttpMethods时创建单例
@@ -337,9 +350,9 @@ public class HttpMethods {
     }
 
     /**
-     * 验证短信验证码
+     * 通过手机号注册
      */
-    public void registerByPhone(Subscriber<ResultData<Boolean>> subscriber, String account, String uPasswd, String smsCode) {
+    public void registerByPhone(Subscriber<ResultData<UserDto>> subscriber, String account, String uPasswd, String smsCode) {
         Map<String, Object> map;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
             map = new ArrayMap<>();
@@ -358,7 +371,6 @@ public class HttpMethods {
                 .subscribe(subscriber);
     }
 
-
     /**
      * 根据手机号修改密码
      */
@@ -372,6 +384,80 @@ public class HttpMethods {
         map.put("code", code);
         map.put("newCode", newCode);
         myService.updatePasswdByUphone(AESUtil.encrypt(map.toString()), getHeaderMap())
+                //指定subscribe()发生在io调度器（读写文件、读写数据库、网络信息交互等）
+                .subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                //指定subscriber的回调发生在主线程
+                .observeOn(AndroidSchedulers.mainThread())
+                //实现订阅关系
+                .subscribe(subscriber);
+    }
+
+    /**
+     * 验证昵称（该昵称是否可以使用）
+     */
+    public void validNicknameExist(Subscriber<ResultData<Boolean>> subscriber, String uNickname) {
+        Map<String, Object> map;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+            map = new ArrayMap<>();
+        else
+            map = new HashMap<>();
+        map.put("uNickname", uNickname);
+        myService.validNicknameExist(AESUtil.encrypt(map.toString()), getHeaderMap())
+                //指定subscribe()发生在io调度器（读写文件、读写数据库、网络信息交互等）
+                .subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                //指定subscriber的回调发生在主线程
+                .observeOn(AndroidSchedulers.mainThread())
+                //实现订阅关系
+                .subscribe(subscriber);
+    }
+
+    /**
+     * 根据用户ID修改用户信息
+     */
+    public void updateUserByUid(Subscriber<ResultData<Boolean>> subscriber, long uId, String uNickname,
+                                String uSex, float uHeight, float uWeight, String uBirthday, String uDomicile,
+                                double uPointx, double uPointy, String uIntroduce) {
+        Map<String, Object> map;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+            map = new ArrayMap<>();
+        else
+            map = new HashMap<>();
+        map.put("uId", uId);
+        map.put("uNickname", uNickname);
+        map.put("uSex", uSex);
+        map.put("uHeight", uHeight);
+        map.put("uWeight", uWeight);
+        map.put("uBirthday", uBirthday);
+        map.put("uDomicile", uDomicile);
+        map.put("uPointx", uPointx);
+        map.put("uPointy", uPointy);
+        map.put("uIntroduce", uIntroduce);
+        myService.updateUserByUid(AESUtil.encrypt(map.toString()), getHeaderMap())
+                //指定subscribe()发生在io调度器（读写文件、读写数据库、网络信息交互等）
+                .subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                //指定subscriber的回调发生在主线程
+                .observeOn(AndroidSchedulers.mainThread())
+                //实现订阅关系
+                .subscribe(subscriber);
+    }
+
+    /**
+     * 根据ID修改用户图像
+     */
+    public void upLoadUserPicImage(Subscriber<ResultData<String>> subscriber, long uId, String imgfile) {
+        Map<String, Object> map;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT)
+            map = new ArrayMap<>();
+        else
+            map = new HashMap<>();
+        map.put("uId", uId);
+//        map.put("imgfile", imgfile);
+//        String aesStr = AESUtil.encrypt(map.toString());
+//        RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), aesStr != null ? aesStr : "");
+        myService2.upLoadUserPicImage(AESUtil.encrypt(map.toString()), imgfile, getHeaderMap())
                 //指定subscribe()发生在io调度器（读写文件、读写数据库、网络信息交互等）
                 .subscribeOn(Schedulers.io())
                 .unsubscribeOn(Schedulers.io())

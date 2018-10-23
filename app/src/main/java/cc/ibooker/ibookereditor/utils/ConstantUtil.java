@@ -41,4 +41,19 @@ public class ConstantUtil {
     public final static String SHAREDPREFERENCES_ARTICLE_RECOMMEND = "SHAREDPREFERENCES_ARTICLE_RECOMMEND";
     public final static String SHAREDPREFERENCES_MAIN_SET = "SHAREDPREFERENCES_MAIN_SET";
 
+    /**
+     * 保存定位信息
+     */
+    public static String sCurrentCountry = "";// 当前国家
+    public static String sCurrentProv = "";// 当前省份
+    public static String sCurrentCity = "";// 当前城市
+    public static String sCurrentCityCode = "";// 当前城市编码
+    public static String sCurrentDistrict = "";// 当前城区
+    public static String sCurrentStreet = "";// 当前街道
+    public static String sCurrentStreetNum = "";// 当前街道门牌号
+    public static String sCurrentAdCode = "";// 地区编码
+    public static String sCurrentAoiName = "";// 当前定位点的AOI信息
+    public static String sCurrentAddress = "";// 当前地址
+    public static double sPointx = 0;// 经度
+    public static double sPointy = 0;// 纬度
 }

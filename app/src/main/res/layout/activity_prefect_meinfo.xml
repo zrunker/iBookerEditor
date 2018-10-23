@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/layout_top"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/colorAccent"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/img_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@null"
+            android:padding="15dp"
+            android:src="@drawable/icon_back_white" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:lines="1"
+            android:maxLines="1"
+            android:text="@string/prefect_info"
+            android:textColor="@color/colorWhite"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+    <cc.ibooker.ibookereditor.view.SpringbackScrollview
+        android:id="@+id/springback_scrollview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@id/layout_top"
+        android:fadingEdge="none"
+        android:fadingEdgeLength="0dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/lin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:orientation="vertical">
+
+            <!-- 昵称 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/gridview_selector"
+                android:gravity="center_vertical"
+                android:minHeight="50dp"
+                android:orientation="horizontal"
+                android:padding="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    android:text="@string/nickname"
+                    android:textColor="#777777"
+                    android:textSize="15sp" />
+
+                <EditText
+                    android:id="@+id/ed_nickname"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="5"
+                    android:background="@null"
+                    android:hint="@string/input_nickname"
+                    android:inputType="textPersonName"
+                    android:maxLength="15"
+                    android:textColor="#555555"
+                    android:textSize="15sp" />
+            </LinearLayout>
+            <!-- 性别 -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/gridview_selector"
+                android:gravity="center_vertical"
+                android:minHeight="50dp"
+                android:orientation="horizontal"
+                android:padding="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    android:text="@string/sex"
+                    android:textColor="#777777"
+                    android:textSize="15sp" />
+
+                <RadioGroup
+                    android:id="@+id/rp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="5"
+                    android:background="@null"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/male"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="false"
+                        android:text="@string/male"
+                        android:textColor="#555555" />
+
+                    <RadioButton
+                        android:id="@+id/female"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginStart="10dp"
+                        android:checked="false"
+                        android:text="@string/female"
+                        android:textColor="#555555" />
+                </RadioGroup>
+            </LinearLayout>
+            <!-- 身高 -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/gridview_selector"
+                android:gravity="center_vertical"
+                android:minHeight="50dp"
+                android:orientation="horizontal"
+                android:padding="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    android:text="@string/height_rule"
+                    android:textColor="#777777"
+                    android:textSize="15sp" />
+
+                <EditText
+                    android:id="@+id/ed_user_height"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="5"
+                    android:background="@null"
+                    android:hint="@string/input_height"
+                    android:inputType="numberDecimal"
+                    android:maxLength="5"
+                    android:textColor="#555555"
+                    android:textSize="15sp" />
+            </LinearLayout>
+            <!-- 身高 -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/gridview_selector"
+                android:gravity="center_vertical"
+                android:minHeight="50dp"
+                android:orientation="horizontal"
+                android:padding="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    android:text="@string/weight_rule"
+                    android:textColor="#777777"
+                    android:textSize="15sp" />
+
+                <EditText
+                    android:id="@+id/ed_user_weight"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="5"
+                    android:background="@null"
+                    android:hint="@string/input_weight"
+                    android:inputType="numberDecimal"
+                    android:maxLength="5"
+                    android:textColor="#555555"
+                    android:textSize="15sp" />
+            </LinearLayout>
+            <!-- 出生日期 -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/gridview_selector"
+                android:gravity="center_vertical"
+                android:minHeight="50dp"
+                android:orientation="horizontal"
+                android:padding="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    android:text="@string/birthday"
+                    android:textColor="#777777"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/tv_user_birth"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="5"
+                    android:background="@null"
+                    android:drawableEnd="@drawable/icon_gray_arrow_right"
+                    android:drawablePadding="5dp"
+                    android:drawableRight="@drawable/icon_gray_arrow_right"
+                    android:hint="@string/input_birthday"
+                    android:textColor="#555555"
+                    android:textSize="15sp" />
+            </LinearLayout>
+            <!-- 现居住地 -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/gridview_selector"
+                android:gravity="center_vertical"
+                android:minHeight="50dp"
+                android:orientation="horizontal"
+                android:padding="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    android:text="@string/domicile"
+                    android:textColor="#777777"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/tv_addr"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="5"
+                    android:background="@null"
+                    android:drawableEnd="@drawable/icon_gray_arrow_right"
+                    android:drawablePadding="5dp"
+                    android:drawableRight="@drawable/icon_gray_arrow_right"
+                    android:hint="@string/input_domicile"
+                    android:textColor="#555555"
+                    android:textSize="15sp" />
+            </LinearLayout>
+            <!-- 自我介绍 -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/gridview_selector"
+                android:gravity="center_vertical"
+                android:minHeight="50dp"
+                android:orientation="horizontal"
+                android:padding="10dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    android:text="@string/introduce"
+                    android:textColor="#777777"
+                    android:textSize="15sp" />
+
+                <EditText
+                    android:id="@+id/ed_user_introduce"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="5"
+                    android:background="@null"
+                    android:gravity="top|start"
+                    android:hint="@string/input_introduce"
+                    android:inputType="textMultiLine"
+                    android:maxLength="500"
+                    android:minLines="5"
+                    android:textColor="#555555"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_submit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="30dp"
+                android:background="@drawable/bg_btn_fe7517_corner_4"
+                android:text="@string/submit"
+                android:textColor="@color/white"
+                android:textSize="17sp" />
+        </LinearLayout>
+    </cc.ibooker.ibookereditor.view.SpringbackScrollview>
+
+</RelativeLayout>

@@ -76,4 +76,11 @@ public interface SQLiteDao {
      * 查询用户信息
      */
     UserDto selectUser();
+
+    /**
+     * 修改用户表
+     *
+     * @param data 待修改数据
+     */
+    void updateUser(UserDto data);
 }

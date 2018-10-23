@@ -18,6 +18,7 @@ import cc.ibooker.ibookereditor.base.BaseActivity;
 import cc.ibooker.ibookereditor.dto.ResultData;
 import cc.ibooker.ibookereditor.dto.UserDto;
 import cc.ibooker.ibookereditor.event.MainReflashHeaderEvent;
+import cc.ibooker.ibookereditor.event.UpdateUserInfoSuccessEvent;
 import cc.ibooker.ibookereditor.net.service.HttpMethods;
 import cc.ibooker.ibookereditor.sqlite.SQLiteDao;
 import cc.ibooker.ibookereditor.sqlite.SQLiteDaoImpl;
@@ -42,7 +43,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     private SQLiteDao sqLiteDao;
 
     private final int FROM_LOGIN_TO_REG_CODE = 222;
-    private final int FROM_LOGIN_TO_FORGETPASSWD_CODE = 333;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -106,7 +106,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                 break;
             case R.id.tv_forget_passwd:// 忘记密码
                 Intent intentForgetPasswd = new Intent(this, ForgetPasswdOneActivity.class);
-                startActivityForResult(intentForgetPasswd, FROM_LOGIN_TO_FORGETPASSWD_CODE);
+                startActivity(intentForgetPasswd);
                 break;
         }
     }
@@ -128,7 +128,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         String uPhone = accountEd.getText().toString().trim();
         String uPasswd = passwdEd.getText().toString().trim();
         if (TextUtils.isEmpty(uPhone)) {
-            ToastUtil.shortToast(this, "请输入书客创作账号");
+            ToastUtil.shortToast(this, "请输入账号");
         } else if (uPhone.length() != 11) {
             ToastUtil.shortToast(this, "请输入正确格式的手机号");
         } else if (TextUtils.isEmpty(uPasswd)) {
@@ -204,10 +204,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case FROM_LOGIN_TO_REG_CODE:// 注册返回
-
-                    break;
-                case FROM_LOGIN_TO_FORGETPASSWD_CODE:// 忘记密码
-
+                    EventBus.getDefault().postSticky(new UpdateUserInfoSuccessEvent(true));
+                    finish();
                     break;
             }
         }

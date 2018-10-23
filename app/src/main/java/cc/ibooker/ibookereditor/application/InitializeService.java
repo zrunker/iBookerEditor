@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 
+import com.mob.MobSDK;
 import com.tencent.bugly.crashreport.CrashReport;
 
 import cc.ibooker.ibookereditor.BuildConfig;
@@ -39,6 +40,9 @@ public class InitializeService extends IntentService {
         // 应用程序捕获异常
         CrashHandler crashHandler = CrashHandler.getInstance();
         crashHandler.init(getApplicationContext());
+
+        // ShareSdk
+        MobSDK.init(this);
 
         // Bugly
         CrashReport.UserStrategy strategy = new CrashReport.UserStrategy(getApplicationContext());

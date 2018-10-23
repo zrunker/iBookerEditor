@@ -26,6 +26,7 @@ import cc.ibooker.ibookereditor.bean.ArticleAppreciateData;
 import cc.ibooker.ibookereditor.dto.FooterData;
 import cc.ibooker.ibookereditor.dto.ResultData;
 import cc.ibooker.ibookereditor.event.MeInfoArticleLikeLongClickEvent;
+import cc.ibooker.ibookereditor.event.UpdateUserInfoSuccessEvent;
 import cc.ibooker.ibookereditor.net.service.HttpMethods;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
@@ -64,6 +65,7 @@ public class MeInfoActivity extends BaseActivity implements
     private Subscriber<ResultData<ArrayList<ArticleAppreciateData>>> getArticleAppreciateDataListByPuid2Subscriber;
     private CompositeSubscription mSubscription;
     private final int FROM_MEINFO_TO_LOGIN_REQUEST_CDE = 112;
+    private final int FROM_MEINFO_TOPREFECTMEINFO_CODE = 113;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -93,6 +95,7 @@ public class MeInfoActivity extends BaseActivity implements
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().removeStickyEvent(MeInfoArticleLikeLongClickEvent.class);
+        EventBus.getDefault().removeStickyEvent(UpdateUserInfoSuccessEvent.class);
         EventBus.getDefault().unregister(this);
         if (mSubscription != null) {
             mSubscription.clear();
@@ -109,10 +112,20 @@ public class MeInfoActivity extends BaseActivity implements
         }
     }
 
+    // 执行修改用户信息成功事件
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    public void executeUpdateUserInfoSuccessEvent(UpdateUserInfoSuccessEvent event) {
+        if (event.isReflash())
+            onRefresh();
+        EventBus.getDefault().removeStickyEvent(event);
+    }
+
     // 初始化控件
     private void initView() {
         ImageView backImg = findViewById(R.id.img_back);
         backImg.setOnClickListener(this);
+        ImageView editImg = findViewById(R.id.img_edit);
+        editImg.setOnClickListener(this);
 
         swipeRefreshLayout = findViewById(R.id.swiperefreshlayout);
         swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
@@ -142,6 +155,10 @@ public class MeInfoActivity extends BaseActivity implements
         switch (v.getId()) {
             case R.id.img_back:
                 finish();
+                break;
+            case R.id.img_edit:
+                Intent intent = new Intent(this, PrefectMeInfoActivity.class);
+                startActivityForResult(intent, FROM_MEINFO_TOPREFECTMEINFO_CODE);
                 break;
         }
     }
@@ -260,7 +277,7 @@ public class MeInfoActivity extends BaseActivity implements
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
-                case FROM_MEINFO_TO_LOGIN_REQUEST_CDE:// 登录页面返回
+                case FROM_MEINFO_TO_LOGIN_REQUEST_CDE | FROM_MEINFO_TOPREFECTMEINFO_CODE:// 登录页面返回
                     onRefresh();
                     break;
             }
@@ -360,6 +377,5 @@ public class MeInfoActivity extends BaseActivity implements
         if (progressDialog != null)
             progressDialog.closeProDialog();
     }
-
 
 }

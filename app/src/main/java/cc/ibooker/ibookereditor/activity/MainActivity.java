@@ -31,6 +31,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.umeng.commonsdk.debug.E;
+
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -53,6 +55,7 @@ import cc.ibooker.ibookereditor.dto.ResultData;
 import cc.ibooker.ibookereditor.event.LocalOperDialogEvent;
 import cc.ibooker.ibookereditor.event.MainReflashHeaderEvent;
 import cc.ibooker.ibookereditor.event.SaveArticleSuccessEvent;
+import cc.ibooker.ibookereditor.event.UpdateUserInfoSuccessEvent;
 import cc.ibooker.ibookereditor.net.service.HttpMethods;
 import cc.ibooker.ibookereditor.sqlite.SQLiteDao;
 import cc.ibooker.ibookereditor.sqlite.SQLiteDaoImpl;
@@ -186,6 +189,7 @@ public class MainActivity extends BaseActivity implements
         EventBus.getDefault().removeStickyEvent(SaveArticleSuccessEvent.class);
         EventBus.getDefault().removeStickyEvent(LocalOperDialogEvent.class);
         EventBus.getDefault().removeStickyEvent(MainReflashHeaderEvent.class);
+        EventBus.getDefault().removeStickyEvent(UpdateUserInfoSuccessEvent.class);
         EventBus.getDefault().unregister(this);
         if (mSubscription != null) {
             mSubscription.clear();
@@ -226,6 +230,14 @@ public class MainActivity extends BaseActivity implements
     // 执行首页用户信息刷新事件
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void executeMainReflashHeaderEvent(MainReflashHeaderEvent event) {
+        if (event.isReflash())
+            reflashHeaderLayout();
+        EventBus.getDefault().removeStickyEvent(event);
+    }
+
+    // 执行修改用户信息成功事件
+    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
+    public void executeUpdateUserInfoSuccessEvent(UpdateUserInfoSuccessEvent event) {
         if (event.isReflash())
             reflashHeaderLayout();
         EventBus.getDefault().removeStickyEvent(event);

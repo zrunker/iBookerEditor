@@ -6,8 +6,8 @@ android {
         applicationId "cc.ibooker.ibookereditor"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 6
-        versionName "1.0.5"
+        versionCode 7
+        versionName "1.0.6"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -48,10 +48,8 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-
     /*引入书客编辑器*/
     implementation 'com.github.zrunker:IbookerEditorAndroid:v1.2.8'
-
     /*网络框架 rxjava + retrofit + okhttp + glide*/
     implementation 'io.reactivex:rxjava:1.2.10'
     implementation 'io.reactivex:rxandroid:1.2.1'
@@ -70,16 +68,13 @@ dependencies {
     implementation 'com.github.zrunker:ZPopupWindow:v1.03'
     implementation 'com.github.zrunker:ZEditText:v1.0.2'
     implementation 'com.github.zrunker:ZCountDownView:v1.1.1'
-
     /*bugly*/
     implementation 'com.tencent.bugly:crashreport:2.6.6'
-
     /*友盟*/
     implementation 'com.umeng.sdk:common:1.5.3'
     implementation 'com.umeng.sdk:analytics:7.5.0'
     implementation 'com.umeng.sdk:utdid:1.1.5.3'
     implementation 'com.umeng.sdk:push:4.2.0'
-
     /*ShareSDK*/
     implementation files('libs/MobCommons-2018.0918.1444.jar')
     implementation files('libs/MobTools-2018.0911.1425.jar')
@@ -91,5 +86,7 @@ dependencies {
     implementation files('libs/ShareSDK-Wechat-3.2.1.jar')
     implementation files('libs/ShareSDK-Wechat-Core-3.2.1.jar')
     implementation files('libs/ShareSDK-Wechat-Moments-3.2.1.jar')
+    /*高德地图*/
+    implementation files('libs/AMap2DMap_5.2.0_AMapSearch_6.5.0_AMapLocation_4.3.0_20181016.jar')
 }
 

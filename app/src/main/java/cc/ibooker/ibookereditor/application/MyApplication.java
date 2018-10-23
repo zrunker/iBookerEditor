@@ -67,9 +67,6 @@ public class MyApplication extends Application {
         };
         mPushAgent.setMessageHandler(messageHandler);
 
-        // ShareSdk
-        MobSDK.init(this);
-
         // 启动服务执行耗时操作
         InitializeService.start(this);
     }

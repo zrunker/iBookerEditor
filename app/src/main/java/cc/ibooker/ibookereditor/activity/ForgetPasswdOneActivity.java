@@ -117,6 +117,8 @@ public class ForgetPasswdOneActivity extends BaseActivity implements View.OnClic
                     ToastUtil.shortToast(this, getResources().getString(R.string.input_phone_tip));
                 } else if (TextUtils.isEmpty(code)) {
                     ToastUtil.shortToast(this, "请输入验证码");
+                } else if (code.length() != 6) {
+                    ToastUtil.shortToast(this, getResources().getString(R.string.input_code_tip));
                 } else {
                     validSmsCode(phone, code);
                 }
@@ -210,7 +212,7 @@ public class ForgetPasswdOneActivity extends BaseActivity implements View.OnClic
                         if (resultData.getData() == null) {
                             ToastUtil.shortToast(ForgetPasswdOneActivity.this, "获取数据失败！");
                         } else {
-                            ToastUtil.shortToast(ForgetPasswdOneActivity.this, resultData.getData());
+                            ToastUtil.shortToast(ForgetPasswdOneActivity.this, "验证码已发送！");
                         }
                     } else {// 失败
                         ToastUtil.shortToast(ForgetPasswdOneActivity.this, resultData.getResultMsg());

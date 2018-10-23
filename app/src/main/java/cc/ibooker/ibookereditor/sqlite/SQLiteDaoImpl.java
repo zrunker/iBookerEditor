@@ -3,6 +3,7 @@ package cc.ibooker.ibookereditor.sqlite;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 
@@ -35,10 +36,12 @@ public class SQLiteDaoImpl implements SQLiteDao {
      */
     @Override
     public synchronized void insertLocalFile(FileInfoBean data) {
-        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
-        String sql = "insert into t_local_file(lf_name, lf_path, lf_size, lf_create_time) values(?,?,?,?)";
-        db.execSQL(sql, new Object[]{data.getFileName(), data.getFilePath(), data.getFileSize(), data.getFileCreateTime()});
-        dbHelper.closeDatabase();
+        if (data != null) {
+            SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
+            String sql = "insert into t_local_file(lf_name, lf_path, lf_size, lf_create_time) values(?,?,?,?)";
+            db.execSQL(sql, new Object[]{data.getFileName(), data.getFilePath(), data.getFileSize(), data.getFileCreateTime()});
+            dbHelper.closeDatabase();
+        }
     }
 
     /**
@@ -48,25 +51,28 @@ public class SQLiteDaoImpl implements SQLiteDao {
      */
     @Override
     public synchronized int insertLocalFile2(FileInfoBean data) {
-        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
+        if (data != null) {
+            SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
 
-        // 首先查找是否有该文件
-        int _id = selectIdByFilePath(data.getFilePath());
-        if (_id > 0) {
-            deleteLocalFileById(_id);
+            // 首先查找是否有该文件
+            int _id = selectIdByFilePath(data.getFilePath());
+            if (_id > 0) {
+                deleteLocalFileById(_id);
+            }
+            // 插入数据
+            String sql = "insert into t_local_file(lf_name, lf_path, lf_size, lf_create_time) values(?,?,?,?)";
+            db.execSQL(sql, new Object[]{data.getFileName(), data.getFilePath(), data.getFileSize(), data.getFileCreateTime()});
+
+            // 查询插入的ID
+            Cursor cursor = db.rawQuery("select last_insert_rowid() from t_local_file", null);
+            if (cursor.moveToFirst())
+                _id = cursor.getInt(0);
+
+            cursor.close();
+            dbHelper.closeDatabase();
+            return _id;
         }
-        // 插入数据
-        String sql = "insert into t_local_file(lf_name, lf_path, lf_size, lf_create_time) values(?,?,?,?)";
-        db.execSQL(sql, new Object[]{data.getFileName(), data.getFilePath(), data.getFileSize(), data.getFileCreateTime()});
-
-        // 查询插入的ID
-        Cursor cursor = db.rawQuery("select last_insert_rowid() from t_local_file", null);
-        if (cursor.moveToFirst())
-            _id = cursor.getInt(0);
-
-        cursor.close();
-        dbHelper.closeDatabase();
-        return _id;
+        return 0;
     }
 
     /**
@@ -89,9 +95,11 @@ public class SQLiteDaoImpl implements SQLiteDao {
      */
     @Override
     public synchronized void updateLocalFileById(FileInfoBean data, int _id) {
-        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
-        db.execSQL("update t_local_file set lf_name = ?, lf_path = ?, lf_size = ? where _id=?", new Object[]{data.getFileName(), data.getFilePath(), data.getFileSize(), _id});
-        dbHelper.closeDatabase();
+        if (data != null) {
+            SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
+            db.execSQL("update t_local_file set lf_name = ?, lf_path = ?, lf_size = ? where _id=?", new Object[]{data.getFileName(), data.getFilePath(), data.getFileSize(), _id});
+            dbHelper.closeDatabase();
+        }
     }
 
     /**
@@ -177,13 +185,17 @@ public class SQLiteDaoImpl implements SQLiteDao {
      */
     @Override
     public synchronized void insertUser(UserDto data) {
-        deleteUser(data);
+        if (data != null && data.getUser() != null && !TextUtils.isEmpty(data.getUa()) && !TextUtils.isEmpty(data.getToken())) {
+            deleteUser(data);
 
-        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
-        String sql = "insert into t_user(u_id, u_phone, u_pic, u_nickname, u_introduce, u_ua, u_token) values(?,?,?,?,?,?,?)";
-        db.execSQL(sql, new Object[]{data.getUser().getuId(), data.getUser().getuPhone(), data.getUser().getuPic(),
-                data.getUser().getuNickname(), data.getUser().getuIntroduce(), data.getUa(), data.getToken()});
-        dbHelper.closeDatabase();
+            SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
+            String sql = "insert into t_user(u_id, u_phone, u_pic, u_nickname, u_sex, u_height, u_weight, u_birthday, u_domicile, u_pointx, u_pointy, u_introduce, u_ua, u_token) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            db.execSQL(sql, new Object[]{data.getUser().getuId(), data.getUser().getuPhone(), data.getUser().getuPic(),
+                    data.getUser().getuNickname(), data.getUser().getuSex(), data.getUser().getuHeight(), data.getUser().getuWeight(),
+                    data.getUser().getuBirthday(), data.getUser().getuDomicile(), data.getUser().getuPointx(), data.getUser().getuPointy(),
+                    data.getUser().getuIntroduce(), data.getUa(), data.getToken()});
+            dbHelper.closeDatabase();
+        }
     }
 
     /**
@@ -193,9 +205,11 @@ public class SQLiteDaoImpl implements SQLiteDao {
      */
     @Override
     public synchronized void deleteUser(UserDto data) {
-        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
-        db.execSQL("delete from t_user where u_id=? or u_phone=?", new Object[]{data.getUser().getuId(), data.getUser().getuPhone()});
-        dbHelper.closeDatabase();
+        if (data != null && data.getUser() != null) {
+            SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
+            db.execSQL("delete from t_user where u_id=? or u_phone=?", new Object[]{data.getUser().getuId(), data.getUser().getuPhone()});
+            dbHelper.closeDatabase();
+        }
     }
 
     /**
@@ -217,6 +231,20 @@ public class SQLiteDaoImpl implements SQLiteDao {
             userEntity.setuPic(u_pic);
             String u_nickname = cursor.getString(cursor.getColumnIndex("u_nickname"));
             userEntity.setuNickname(u_nickname);
+            String u_sex = cursor.getString(cursor.getColumnIndex("u_sex"));
+            userEntity.setuSex(u_sex);
+            float u_height = cursor.getFloat(cursor.getColumnIndex("u_height"));
+            userEntity.setuHeight(u_height);
+            float u_weight = cursor.getFloat(cursor.getColumnIndex("u_weight"));
+            userEntity.setuWeight(u_weight);
+            String u_birthday = cursor.getString(cursor.getColumnIndex("u_birthday"));
+            userEntity.setuBirthday(u_birthday);
+            String u_domicile = cursor.getString(cursor.getColumnIndex("u_domicile"));
+            userEntity.setuDomicile(u_domicile);
+            double u_pointx = cursor.getDouble(cursor.getColumnIndex("u_pointx"));
+            userEntity.setuPointx(u_pointx);
+            double u_pointy = cursor.getDouble(cursor.getColumnIndex("u_pointy"));
+            userEntity.setuPointy(u_pointy);
             String u_introduce = cursor.getString(cursor.getColumnIndex("u_introduce"));
             userEntity.setuIntroduce(u_introduce);
             userDto.setUser(userEntity);
@@ -228,6 +256,23 @@ public class SQLiteDaoImpl implements SQLiteDao {
         cursor.close();
         dbHelper.closeDatabase();
         return userDto;
+    }
+
+    /**
+     * 修改用户表
+     *
+     * @param data 待修改数据
+     */
+    @Override
+    public void updateUser(UserDto data) {
+        if (data != null && data.getUser() != null) {
+            SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
+            db.execSQL("update t_user set u_pic = ?, u_nickname = ?, u_introduce = ?, u_sex = ?, u_height = ?, u_weight = ?, u_birthday = ?, u_domicile = ?, u_pointx = ?, u_pointy = ? where u_id=? or u_phone=?",
+                    new Object[]{data.getUser().getuPic(), data.getUser().getuNickname(), data.getUser().getuIntroduce(), data.getUser().getuSex(),
+                            data.getUser().getuHeight(), data.getUser().getuWeight(), data.getUser().getuBirthday(), data.getUser().getuDomicile(), data.getUser().getuPointx(), data.getUser().getuPointy(),
+                            data.getUser().getuId(), data.getUser().getuPhone()});
+            dbHelper.closeDatabase();
+        }
     }
 
 }

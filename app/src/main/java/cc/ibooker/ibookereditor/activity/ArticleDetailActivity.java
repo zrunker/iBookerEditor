@@ -699,9 +699,12 @@ public class ArticleDetailActivity extends BaseActivity implements View.OnClickL
      */
     private Bitmap getWebViewBitmap() {
         Picture picture = webView.capturePicture();
-        Bitmap bitmap = Bitmap.createBitmap(picture.getWidth(), picture.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        picture.draw(canvas);
+        Bitmap bitmap = null;
+        if (picture != null && picture.getWidth() > 0 && picture.getHeight() > 0) {
+            bitmap = Bitmap.createBitmap(picture.getWidth(), picture.getHeight(), Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            picture.draw(canvas);
+        }
         return bitmap;
     }
 

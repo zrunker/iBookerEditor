@@ -1,12 +1,15 @@
 package cc.ibooker.ibookereditor.ryviewholder;
 
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import cc.ibooker.ibookereditor.R;
+import cc.ibooker.ibookereditor.activity.PicActivity;
 import cc.ibooker.ibookereditor.bean.UserEntity;
+import cc.ibooker.ibookereditor.utils.ClickUtil;
 import cc.ibooker.ibookereditor.utils.ConstantUtil;
 import cc.ibooker.ibookereditor.zglide.GlideApp;
 import cc.ibooker.ibookereditor.zglide.GlideCircleTransform;
@@ -34,6 +37,14 @@ public class MeInfoHeaderHolder extends RecyclerView.ViewHolder {
                     .error(R.drawable.icon_mepic)
                     .transforms(new GlideCircleTransform())
                     .into(meInfoImg);
+            meInfoImg.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (ClickUtil.isFastClick()) return;
+                    Intent intent = new Intent(itemView.getContext(), PicActivity.class);
+                    itemView.getContext().startActivity(intent);
+                }
+            });
             nickNameTv.setText(userEntity.getuNickname());
             introduceTv.setText(userEntity.getuIntroduce());
         }

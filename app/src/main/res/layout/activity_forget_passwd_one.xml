@@ -75,7 +75,7 @@
                 android:background="@drawable/bg_e9f0ee_corner_4"
                 android:hint="@string/input_code"
                 android:inputType="phone"
-                android:maxLength="4"
+                android:maxLength="6"
                 android:paddingEnd="20dp"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"

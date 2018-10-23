@@ -43,7 +43,7 @@
     <string name="complain">投诉</string>
     <string name="message">留言</string>
 
-    <string name="account_hint">请输入书客创作账号</string>
+    <string name="account_hint">请输入账号</string>
     <string name="passwd_hint">请输入密码</string>
     <string name="detail">详情</string>
     <string name="share">分享</string>
@@ -74,9 +74,26 @@
     <string name="input_ensure_passwd">确认密码</string>
     <string name="input_code">请输入验证码</string>
     <string name="input_phone_tip">请输入11位手机号码</string>
-    <string name="input_code_tip">请输入4位数字验证码</string>
+    <string name="input_code_tip">请输入6位数字验证码</string>
     <string name="input_passwd_tip">密码(以字母开头，长度在4~20之间，只能包含字母、数字和下划线)</string>
     <string name="reg">注册</string>
     <string name="reset_passwd">重置密码</string>
     <string name="next">下一步</string>
+    <string name="prefect_info">完善信息</string>
+    <string name="nickname">昵称</string>
+    <string name="input_nickname">请输入昵称</string>
+    <string name="sex">性别</string>
+    <string name="male">男</string>
+    <string name="female">女</string>
+    <string name="height_rule">身高(CM)</string>
+    <string name="weight_rule">体重(KG)</string>
+    <string name="input_height">请输入身高</string>
+    <string name="input_weight">请输入体重</string>
+    <string name="domicile">现居住地</string>
+    <string name="input_domicile">请输入现居住地</string>
+    <string name="introduce">自我简介</string>
+    <string name="input_introduce">请输入自我简介</string>
+    <string name="birthday">出生日期</string>
+    <string name="input_birthday">请输入出生日期</string>
+    <string name="choose_pic">选择图片</string>
 </resources>

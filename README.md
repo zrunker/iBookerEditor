@@ -1,4 +1,4 @@
-# IBookerEditor
+# iBookerEditor
 书客编辑器开源项目
 
 ### 移动版插件：

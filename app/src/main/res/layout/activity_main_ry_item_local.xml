@@ -9,8 +9,8 @@
         android:id="@+id/img_project"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:contentDescription="@null"
         android:src="@drawable/icon_project" />
@@ -19,26 +19,27 @@
         android:id="@+id/tv_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
         android:ellipsize="end"
         android:lines="1"
         android:maxLines="1"
-        android:textColor="#777" />
+        android:textColor="#777"
+        android:textSize="13sp" />
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_marginEnd="13dp"
-        android:layout_marginLeft="13dp"
-        android:layout_marginRight="13dp"
         android:layout_marginStart="13dp"
-        android:layout_toEndOf="@id/img_project"
-        android:layout_toLeftOf="@id/tv_time"
-        android:layout_toRightOf="@id/img_project"
+        android:layout_marginLeft="13dp"
+        android:layout_marginEnd="13dp"
+        android:layout_marginRight="13dp"
         android:layout_toStartOf="@id/tv_time"
+        android:layout_toLeftOf="@id/tv_time"
+        android:layout_toEndOf="@id/img_project"
+        android:layout_toRightOf="@id/img_project"
         android:orientation="vertical">
 
         <TextView
@@ -59,7 +60,7 @@
             android:ellipsize="end"
             android:lines="1"
             android:maxLines="1"
-            android:textColor="#777"
+            android:textColor="#999"
             android:textSize="12sp" />
     </LinearLayout>
 

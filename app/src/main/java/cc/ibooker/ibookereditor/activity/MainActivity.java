@@ -1,7 +1,6 @@
 package cc.ibooker.ibookereditor.activity;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -31,8 +30,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.umeng.commonsdk.debug.E;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -53,8 +50,8 @@ import cc.ibooker.ibookereditor.dto.FileInfoBean;
 import cc.ibooker.ibookereditor.dto.FooterData;
 import cc.ibooker.ibookereditor.dto.ResultData;
 import cc.ibooker.ibookereditor.event.LocalOperDialogEvent;
-import cc.ibooker.ibookereditor.event.MainReflashHeaderEvent;
-import cc.ibooker.ibookereditor.event.SaveArticleSuccessEvent;
+import cc.ibooker.ibookereditor.event.MainRefreshHeaderEvent;
+import cc.ibooker.ibookereditor.event.SaveNotesSuccessEvent;
 import cc.ibooker.ibookereditor.event.UpdateUserInfoSuccessEvent;
 import cc.ibooker.ibookereditor.net.service.HttpMethods;
 import cc.ibooker.ibookereditor.sqlite.SQLiteDao;
@@ -83,18 +80,15 @@ import static cc.ibooker.ibookereditor.utils.ConstantUtil.PERMISSIONS_REQUEST_OP
 /**
  * 书客编辑器开源项目
  * <p>
- * 本地文件一次性全部加载，推荐文章分页加载
+ * 本地文件一次性全部加载，推荐图文支持分页加载
  *
  * @author 邹峰立
  */
-@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-public class MainActivity extends BaseActivity implements
-        View.OnClickListener,
-        SwipeRefreshLayout.OnRefreshListener,
-        RecyclerViewScrollListener.OnLoadListener {
+public class MainActivity extends BaseActivity implements View.OnClickListener,
+        SwipeRefreshLayout.OnRefreshListener, RecyclerViewScrollListener.OnLoadListener {
     private final int FROM_MAIN_TO_LOGIN_REQUEST_CDE = 111;
     private DrawerLayout drawer;
-    private TextView topTv, nameTv, phoneTv;
+    private TextView nameTv, phoneTv;
     private ImageView picImg;
     private ImageButton editImgBtn;
     private Animation showAnimation, hiddenAnimation;
@@ -106,8 +100,11 @@ public class MainActivity extends BaseActivity implements
     private RecyclerViewScrollListener ryScrollListener;
     private AutoSwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
+
+    // 图文
     private ANewAdapter aNewAdapter;
     private ArrayList<ArticleUserData> articleUserDataList = new ArrayList<>();
+    // 笔记
     private ALocalAdapter aLocalAdapter;
     private ArrayList<LocalEntity> localEntities = new ArrayList<>();
 
@@ -119,13 +116,13 @@ public class MainActivity extends BaseActivity implements
     private ImageView stateImg;
     private TextView stateTv;
 
-    private int dataRes = 0;// 数据来源，0来自本地，1来自推荐。
+    private int dataRes = 0;// 数据来源，0来自本地笔记，1来自推荐图文。
     private int newArticlePage = 1;
     private Subscriber<ResultData<ArrayList<ArticleUserData>>> getNewArticleUserDataListSubscriber;
     private CompositeSubscription mSubscription;
 
     // 权限组
-    private String[] needPermissions = new String[]{
+    private final String[] needPermissions = new String[]{
             // SDK在Android 6.0+需要进行运行检测的权限如下：
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -146,13 +143,15 @@ public class MainActivity extends BaseActivity implements
 
         // 设置DrawerLayout
         drawer = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         // 申请权限
-        if (!hasPermission(needPermissions))
+        if (!hasPermission(needPermissions)) {
             requestPermission(PERMISSIONS_REQUEST_OPER_FILE, needPermissions);
+        }
 
         // 初始化
         init();
@@ -162,7 +161,7 @@ public class MainActivity extends BaseActivity implements
         setSideAdapter();
 
         // 获取用户信息
-        reflashHeaderLayout();
+        refreshHeaderLayout();
 
         // 加载数据
         SharedPreferences sharedPreferences = getSharedPreferences(ConstantUtil.SHAREDPREFERENCES_SET_NAME, Context.MODE_PRIVATE);
@@ -179,16 +178,17 @@ public class MainActivity extends BaseActivity implements
         closeLocalOperDialog();
         closeDelDialog();
         closeADetailDialog();
-        if (getNewArticleUserDataListSubscriber != null)
+        if (getNewArticleUserDataListSubscriber != null) {
             getNewArticleUserDataListSubscriber.unsubscribe();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        EventBus.getDefault().removeStickyEvent(SaveArticleSuccessEvent.class);
+        EventBus.getDefault().removeStickyEvent(SaveNotesSuccessEvent.class);
         EventBus.getDefault().removeStickyEvent(LocalOperDialogEvent.class);
-        EventBus.getDefault().removeStickyEvent(MainReflashHeaderEvent.class);
+        EventBus.getDefault().removeStickyEvent(MainRefreshHeaderEvent.class);
         EventBus.getDefault().removeStickyEvent(UpdateUserInfoSuccessEvent.class);
         EventBus.getDefault().unregister(this);
         if (mSubscription != null) {
@@ -204,21 +204,24 @@ public class MainActivity extends BaseActivity implements
         ryScrollListener.setLoadingMore(false);
     }
 
-    // 保存本地文章成功事件
+    // 保存本地笔记成功事件
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
-    public void executeSaveArticleSuccessEvent(SaveArticleSuccessEvent event) {
+    public void executeSaveNotesSuccessEvent(SaveNotesSuccessEvent event) {
         // 保存相关数据到数据中
-        SQLiteDao sqLiteDao = new SQLiteDaoImpl(this);
+        if (sqLiteDao == null) {
+            sqLiteDao = new SQLiteDaoImpl(this);
+        }
         sqLiteDao.updateLocalFileById(event.getFileInfoBean(), event.get_id());
 
         // 刷新界面-只刷新本地
-        if (event.isIsflashData() && 0 == dataRes)
+        if (event.isIsflashData() && 0 == dataRes) {
             onRefresh();
+        }
 
         EventBus.getDefault().removeStickyEvent(event);
     }
 
-    // 展示本地文章相关操作事件
+    // 展示本地笔记相关操作事件
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void executeLocalOperDialogEvent(LocalOperDialogEvent event) {
         int position = event.getPosition();
@@ -229,17 +232,19 @@ public class MainActivity extends BaseActivity implements
 
     // 执行首页用户信息刷新事件
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
-    public void executeMainReflashHeaderEvent(MainReflashHeaderEvent event) {
-        if (event.isReflash())
-            reflashHeaderLayout();
+    public void executeMainRefreshHeaderEvent(MainRefreshHeaderEvent event) {
+        if (event.isReflash()) {
+            refreshHeaderLayout();
+        }
         EventBus.getDefault().removeStickyEvent(event);
     }
 
     // 执行修改用户信息成功事件
     @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
     public void executeUpdateUserInfoSuccessEvent(UpdateUserInfoSuccessEvent event) {
-        if (event.isReflash())
-            reflashHeaderLayout();
+        if (event.isReflash()) {
+            refreshHeaderLayout();
+        }
         EventBus.getDefault().removeStickyEvent(event);
     }
 
@@ -261,7 +266,7 @@ public class MainActivity extends BaseActivity implements
         if (ClickUtil.isFastClick()) return;
         switch (v.getId()) {
             case R.id.ibtn_edit:// 编辑
-                Intent intent_edit = new Intent(this, EditArticleActivity.class);
+                Intent intent_edit = new Intent(this, EditNotesActivity.class);
                 startActivity(intent_edit);
                 break;
             case R.id.layout_side_nav_bar_header:// 个人中心
@@ -280,7 +285,6 @@ public class MainActivity extends BaseActivity implements
 
     // 初始化方法
     private void init() {
-        topTv = findViewById(R.id.tv_top);
         editImgBtn = findViewById(R.id.ibtn_edit);
         editImgBtn.setOnClickListener(this);
 
@@ -348,6 +352,7 @@ public class MainActivity extends BaseActivity implements
                         startActivity(intentFeedback);
                         break;
                     case 6:// 评分
+                        drawer.closeDrawer(GravityCompat.START, true);
 //                        String mAddress = "market://details?id=" + AppUtil.getVersion(MainActivity.this);
 //                        Intent marketIntent = new Intent("android.intent.action.VIEW");
 //                        marketIntent.setData(Uri.parse(mAddress));
@@ -396,8 +401,9 @@ public class MainActivity extends BaseActivity implements
         updateStateLayout(false, -1, null);
 
         // 初始化sqLiteDao
-        if (sqLiteDao == null)
+        if (sqLiteDao == null) {
             sqLiteDao = new SQLiteDaoImpl(this);
+        }
     }
 
     // 下拉刷新
@@ -405,11 +411,12 @@ public class MainActivity extends BaseActivity implements
     public void onRefresh() {
         ryScrollListener.setLoadingMore(false);
         if (0 == dataRes) {// 加载本地数据
-            getLocalArticleList();
+            getLocalNotesList();
         } else if (1 == dataRes) {// 加载推荐数据
             newArticlePage = 1;
-            if (getNewArticleUserDataListSubscriber != null && !getNewArticleUserDataListSubscriber.isUnsubscribed())
+            if (getNewArticleUserDataListSubscriber != null && !getNewArticleUserDataListSubscriber.isUnsubscribed()) {
                 getNewArticleUserDataListSubscriber.unsubscribe();
+            }
             getNewArticleUserDataList();
         }
     }
@@ -423,8 +430,6 @@ public class MainActivity extends BaseActivity implements
             if (isCanLoadMore && articleUserDataList.size() >= PAGE_SIZE_NEW_ARTICLE) {
                 newArticlePage++;
                 swipeRefreshLayout.setRefreshing(false);
-                if (getNewArticleUserDataListSubscriber != null && !getNewArticleUserDataListSubscriber.isUnsubscribed())
-                    getNewArticleUserDataListSubscriber.unsubscribe();
                 getNewArticleUserDataList();
             } else {
                 ryScrollListener.setLoadingMore(false);
@@ -438,21 +443,15 @@ public class MainActivity extends BaseActivity implements
      * 修改首页设置界面
      */
     private void updateMainSetView() {
-        if (dataRes == 0) {// 笔记
-            topTv.setText(getString(R.string.notes_tip));
+        if (dataRes == 0) {
             setaLocalAdapter();
-            // 加载数据
-            swipeRefreshLayout.autoRefresh();
-            onRefresh();
-            updateEditImgBtnVisibility();
-        } else {// 阅读
-            topTv.setText(getString(R.string.reading_tip));
+        } else {
             setaNewAdapter();
-            // 加载数据
-            swipeRefreshLayout.autoRefresh();
-            onRefresh();
-            updateEditImgBtnVisibility();
         }
+        // 加载数据
+        swipeRefreshLayout.autoRefresh();
+        onRefresh();
+        updateEditImgBtnVisibility();
     }
 
     // 更新状态布局
@@ -488,30 +487,31 @@ public class MainActivity extends BaseActivity implements
         }
     }
 
-    // 刷新本地文章列表
+    // 刷新本地笔记列表
     private void setaLocalAdapter() {
-        if (aLocalAdapter == null)
+        if (aLocalAdapter == null) {
             aLocalAdapter = new ALocalAdapter(this, localEntities);
-        else
+        } else {
             aLocalAdapter.reflashData(localEntities);
-
+        }
         if (recyclerView.getAdapter() != aLocalAdapter)
             recyclerView.setAdapter(aLocalAdapter);
     }
 
-    // 刷新推荐文章列表
+    // 刷新推荐图文文列表
     private void setaNewAdapter() {
-        if (aNewAdapter == null)
+        if (aNewAdapter == null) {
             aNewAdapter = new ANewAdapter(this, articleUserDataList, footerData);
-        else
+        } else {
             aNewAdapter.reflashData(articleUserDataList);
-
-        if (recyclerView.getAdapter() != aNewAdapter)
+        }
+        if (recyclerView.getAdapter() != aNewAdapter) {
             recyclerView.setAdapter(aNewAdapter);
-
+        }
         stateLayout.setVisibility(View.GONE);
         swipeRefreshLayout.setVisibility(View.VISIBLE);
-        isCanLoadMore = ((articleUserDataList.size() >= PAGE_SIZE_NEW_ARTICLE) && (articleUserDataList.size() % PAGE_SIZE_NEW_ARTICLE == 0));
+        isCanLoadMore = ((articleUserDataList.size() >= PAGE_SIZE_NEW_ARTICLE)
+                && (articleUserDataList.size() % PAGE_SIZE_NEW_ARTICLE == 0));
         updateFooterView();
     }
 
@@ -541,8 +541,9 @@ public class MainActivity extends BaseActivity implements
 
     // 初始化数据
     private void initData() {
-        if (mSideMenuDatas == null)
+        if (mSideMenuDatas == null) {
             mSideMenuDatas = new ArrayList<>();
+        }
         mSideMenuDatas.clear();
         mSideMenuDatas.add(new SideMenuItem(0, getString(R.string.util), false));
         mSideMenuDatas.add(new SideMenuItem(R.drawable.icon_location, getString(R.string.notes), false));
@@ -565,9 +566,9 @@ public class MainActivity extends BaseActivity implements
     }
 
     /**
-     * 获取本地文章相关信息
+     * 获取本地笔记相关信息
      */
-    private void getLocalArticleList() {
+    private void getLocalNotesList() {
         // 清空原有数据
         if (localEntities.size() > 0)
             localEntities.clear();
@@ -617,9 +618,9 @@ public class MainActivity extends BaseActivity implements
         // 刷新界面
         swipeRefreshLayout.setRefreshing(false);
         ryScrollListener.setLoadingMore(false);
-        if (localEntities.size() <= 0)
+        if (localEntities.size() <= 0) {
             updateStateLayout(true, 4, null);
-        else {
+        } else {
             updateStateLayout(false, -1, null);
             setaLocalAdapter();
         }
@@ -630,6 +631,9 @@ public class MainActivity extends BaseActivity implements
      */
     private void getNewArticleUserDataList() {
         if (NetworkUtil.isNetworkConnected(this)) {
+            if (getNewArticleUserDataListSubscriber != null && !getNewArticleUserDataListSubscriber.isUnsubscribed()) {
+                getNewArticleUserDataListSubscriber.unsubscribe();
+            }
             getNewArticleUserDataListSubscriber = new Subscriber<ResultData<ArrayList<ArticleUserData>>>() {
                 @Override
                 public void onCompleted() {
@@ -679,8 +683,9 @@ public class MainActivity extends BaseActivity implements
                 }
             };
             HttpMethods.getInstance().getNewArticleUserDataList(getNewArticleUserDataListSubscriber, newArticlePage);
-            if (mSubscription == null)
+            if (mSubscription == null) {
                 mSubscription = new CompositeSubscription();
+            }
             mSubscription.add(getNewArticleUserDataListSubscriber);
         } else {// 无网络
             updateStateLayout(true, 1, null);
@@ -709,9 +714,8 @@ public class MainActivity extends BaseActivity implements
     @Override
     public void onNetChange(boolean netWorkState) {
         super.onNetChange(netWorkState);
-        if (netWorkState) {
-            if (dataRes == 1)
-                getNewArticleUserDataList();
+        if (netWorkState && dataRes == 1) {
+            getNewArticleUserDataList();
         }
     }
 
@@ -777,8 +781,9 @@ public class MainActivity extends BaseActivity implements
      * 关闭本地操作Dialog
      */
     private void closeLocalOperDialog() {
-        if (localOperDialog != null)
+        if (localOperDialog != null) {
             localOperDialog.closeDiyDialog();
+        }
     }
 
     /**
@@ -792,12 +797,11 @@ public class MainActivity extends BaseActivity implements
                     @Override
                     public void onEnsure() {
                         if (ClickUtil.isFastClick()) return;
-                        // 删除文件
-                        boolean bool = FileUtil.deleteDirs(filePath);
-                        if (bool) {
+                        if (FileUtil.deleteDirs(filePath)) {
                             // 移除数据
-                            if (position >= 0 && position < localEntities.size())
+                            if (position >= 0 && position < localEntities.size()) {
                                 localEntities.remove(position);
+                            }
                             // 刷新列表
                             aLocalAdapter.reflashData(localEntities);
                         } else {
@@ -812,8 +816,9 @@ public class MainActivity extends BaseActivity implements
      * 关闭删除Dialog
      */
     private void closeDelDialog() {
-        if (delDialog != null)
+        if (delDialog != null) {
             delDialog.closeTipDialog();
+        }
     }
 
     /**
@@ -832,8 +837,9 @@ public class MainActivity extends BaseActivity implements
             aDetailDialog.setDiyDialogWidth(75);
         }
         if (localEntity != null) {
-            if (localEntity.getFile() != null)
+            if (localEntity.getFile() != null) {
                 adNameTv.setText(localEntity.getFile().getName());
+            }
             adTimeTv.setText(localEntity.getaFormatTime());
             adSizeTv.setText(localEntity.getaFormatSize());
             adPathTv.setText(localEntity.getaFilePath());
@@ -845,8 +851,9 @@ public class MainActivity extends BaseActivity implements
      * 关闭详情Dialog
      */
     private void closeADetailDialog() {
-        if (aDetailDialog != null)
+        if (aDetailDialog != null) {
             aDetailDialog.closeDiyDialog();
+        }
     }
 
     /**
@@ -889,15 +896,17 @@ public class MainActivity extends BaseActivity implements
             editImgBtn.clearAnimation();
         if (dataRes == 0) {
             if (editImgBtn.getVisibility() != View.VISIBLE) {
-                if (showAnimation == null)
+                if (showAnimation == null) {
                     showAnimation = AnimationUtils.loadAnimation(this, R.anim.editimgbtn_show);
+                }
                 editImgBtn.startAnimation(showAnimation);
                 editImgBtn.setVisibility(View.VISIBLE);
             }
         } else {
             if (editImgBtn.getVisibility() != View.GONE) {
-                if (hiddenAnimation == null)
+                if (hiddenAnimation == null) {
                     hiddenAnimation = AnimationUtils.loadAnimation(this, R.anim.editimgbtn_hidden);
+                }
                 editImgBtn.startAnimation(hiddenAnimation);
                 editImgBtn.setVisibility(View.GONE);
             }
@@ -907,7 +916,7 @@ public class MainActivity extends BaseActivity implements
     /**
      * 刷新用户相关信息
      */
-    private void reflashHeaderLayout() {
+    private void refreshHeaderLayout() {
         if (UserUtil.isLogin(this)) {
             nameTv.setText(ConstantUtil.userDto.getUser().getuNickname());
             phoneTv.setText(ConstantUtil.userDto.getUser().getuIntroduce());
@@ -924,10 +933,8 @@ public class MainActivity extends BaseActivity implements
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-            switch (requestCode) {
-                case FROM_MAIN_TO_LOGIN_REQUEST_CDE:// 登录返回-刷新界面
-                    reflashHeaderLayout();
-                    break;
+            if (requestCode == FROM_MAIN_TO_LOGIN_REQUEST_CDE) {// 登录返回-刷新界面
+                refreshHeaderLayout();
             }
         }
     }

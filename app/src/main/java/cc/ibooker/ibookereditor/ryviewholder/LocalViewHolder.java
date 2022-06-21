@@ -3,14 +3,13 @@ package cc.ibooker.ibookereditor.ryviewholder;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import org.greenrobot.eventbus.EventBus;
 
 import cc.ibooker.ibookereditor.R;
-import cc.ibooker.ibookereditor.activity.EditArticleActivity;
+import cc.ibooker.ibookereditor.activity.EditNotesActivity;
 import cc.ibooker.ibookereditor.bean.LocalEntity;
 import cc.ibooker.ibookereditor.event.LocalOperDialogEvent;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
@@ -44,7 +43,7 @@ public class LocalViewHolder extends RecyclerView.ViewHolder {
                 public void onClick(View view) {
                     if (ClickUtil.isFastClick()) return;
                     // 进入编辑界面
-                    Intent intent = new Intent(context, EditArticleActivity.class);
+                    Intent intent = new Intent(context, EditNotesActivity.class);
                     intent.putExtra("title", data.getaTitle());
                     intent.putExtra("filePath", data.getaFilePath());
                     intent.putExtra("_id", data.getaId());

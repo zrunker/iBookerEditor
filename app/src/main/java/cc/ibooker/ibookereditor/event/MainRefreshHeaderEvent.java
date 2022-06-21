@@ -3,10 +3,10 @@ package cc.ibooker.ibookereditor.event;
 /**
  * 首页用户信息刷新事件
  */
-public class MainReflashHeaderEvent {
+public class MainRefreshHeaderEvent {
     private boolean isReflash;
 
-    public MainReflashHeaderEvent(boolean isReflash) {
+    public MainRefreshHeaderEvent(boolean isReflash) {
         this.isReflash = isReflash;
     }
 

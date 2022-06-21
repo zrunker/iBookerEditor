@@ -155,7 +155,7 @@
 
         <!--编辑界面-->
         <activity
-            android:name=".activity.EditArticleActivity"
+            android:name=".activity.EditNotesActivity"
             android:alwaysRetainTaskState="true"
             android:hardwareAccelerated="true"
             android:launchMode="singleTask"

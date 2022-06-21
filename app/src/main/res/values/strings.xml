@@ -16,7 +16,7 @@
     <string name="feedback">反馈</string>
     <string name="score">评分</string>
     <string name="about">关于</string>
-    <string name="write_article">写文章</string>
+    <string name="write_notes">写笔记</string>
 
     <string name="save">保存</string>
     <string name="article_auto_save">自动保存</string>

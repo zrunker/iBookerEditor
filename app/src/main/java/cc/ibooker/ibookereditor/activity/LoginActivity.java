@@ -17,7 +17,7 @@ import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.base.BaseActivity;
 import cc.ibooker.ibookereditor.dto.ResultData;
 import cc.ibooker.ibookereditor.dto.UserDto;
-import cc.ibooker.ibookereditor.event.MainReflashHeaderEvent;
+import cc.ibooker.ibookereditor.event.MainRefreshHeaderEvent;
 import cc.ibooker.ibookereditor.event.UpdateUserInfoSuccessEvent;
 import cc.ibooker.ibookereditor.net.service.HttpMethods;
 import cc.ibooker.ibookereditor.sqlite.SQLiteDao;
@@ -64,7 +64,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     @Override
     public void finish() {
         // 发送通讯
-        EventBus.getDefault().postSticky(new MainReflashHeaderEvent(true));
+        EventBus.getDefault().postSticky(new MainRefreshHeaderEvent(true));
         setResult(RESULT_OK);
         super.finish();
         overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_bottom);

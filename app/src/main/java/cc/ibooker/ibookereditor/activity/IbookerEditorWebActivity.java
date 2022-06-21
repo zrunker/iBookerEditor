@@ -180,7 +180,7 @@ public class IbookerEditorWebActivity extends BaseActivity implements View.OnCli
             case R.id.img_edit:// 编辑
                 if (file != null && file.exists() && file.isFile()) {
                     // 进入编辑界面
-                    Intent intent = new Intent(this, EditArticleActivity.class);
+                    Intent intent = new Intent(this, EditNotesActivity.class);
                     intent.putExtra("title", title);
                     intent.putExtra("_id", -1);
                     intent.putExtra("filePath", file.getAbsolutePath());

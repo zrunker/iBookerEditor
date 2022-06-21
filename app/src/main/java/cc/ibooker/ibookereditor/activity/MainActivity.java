@@ -583,7 +583,7 @@ public class MainActivity extends BaseActivity implements
             fileInfoBeans.addAll(localFileList2);
         }
         // 合并数据
-        if (localFileList2 != null && localFileList2.size() > 0 && localFileList1.size() > 0) {
+        if (localFileList2.size() > 0 && localFileList1.size() > 0) {
             for (FileInfoBean data2 : localFileList2) {// 遍历本地
                 boolean isAdd = true;
                 for (FileInfoBean data1 : localFileList1) {// 遍历数据库

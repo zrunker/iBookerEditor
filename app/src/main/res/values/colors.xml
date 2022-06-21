@@ -3,6 +3,7 @@
     <color name="colorPrimary">#FE7517</color>
     <color name="colorPrimaryDark">#FE7517</color>
     <color name="colorAccent">#FE7517</color>
+    <color name="colorTitle">#FE7517</color>
 
     <color name="labelGreen">#81d700</color>
     <color name="labelBlue">#407ff2</color>

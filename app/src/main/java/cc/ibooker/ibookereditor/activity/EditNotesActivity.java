@@ -204,7 +204,7 @@ public class EditNotesActivity extends BaseActivity implements IbookerEditorTopV
 
         ibookerEditerView = findViewById(R.id.ibookereditorview);
         ibookerEditerView.setOnIbookerTitleEdTextChangedListener(new IbookerEditorEditView.OnIbookerTitleEdTextChangedListener() {
-            // 设置主题改变监听
+
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 

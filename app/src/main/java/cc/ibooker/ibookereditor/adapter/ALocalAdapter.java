@@ -18,7 +18,7 @@ import cc.ibooker.ibookereditor.ryviewholder.LocalViewHolder;
  * @author 邹峰立
  */
 public class ALocalAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private LayoutInflater inflater;
+    private final LayoutInflater inflater;
     private ArrayList<LocalEntity> mDatas;
 
     public ALocalAdapter(Context context, ArrayList<LocalEntity> list) {
@@ -26,7 +26,7 @@ public class ALocalAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         this.mDatas = list;
     }
 
-    public void reflashData(ArrayList<LocalEntity> list) {
+    public void refreshData(ArrayList<LocalEntity> list) {
         this.mDatas = list;
         this.notifyDataSetChanged();
     }

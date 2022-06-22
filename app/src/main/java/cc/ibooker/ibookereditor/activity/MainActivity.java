@@ -50,9 +50,7 @@ import cc.ibooker.ibookereditor.dto.FileInfoBean;
 import cc.ibooker.ibookereditor.dto.FooterData;
 import cc.ibooker.ibookereditor.dto.ResultData;
 import cc.ibooker.ibookereditor.event.LocalOperDialogEvent;
-import cc.ibooker.ibookereditor.event.MainRefreshHeaderEvent;
 import cc.ibooker.ibookereditor.event.SaveNotesSuccessEvent;
-import cc.ibooker.ibookereditor.event.UpdateUserInfoSuccessEvent;
 import cc.ibooker.ibookereditor.net.service.HttpMethods;
 import cc.ibooker.ibookereditor.sqlite.SQLiteDao;
 import cc.ibooker.ibookereditor.sqlite.SQLiteDaoImpl;
@@ -63,9 +61,6 @@ import cc.ibooker.ibookereditor.utils.DateUtil;
 import cc.ibooker.ibookereditor.utils.FileUtil;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
 import cc.ibooker.ibookereditor.utils.ToastUtil;
-import cc.ibooker.ibookereditor.utils.UserUtil;
-import cc.ibooker.ibookereditor.zglide.GlideApp;
-import cc.ibooker.ibookereditor.zglide.GlideCircleTransform;
 import cc.ibooker.ibookereditor.zrecycleview.AutoSwipeRefreshLayout;
 import cc.ibooker.ibookereditor.zrecycleview.MyLinearLayoutManager;
 import cc.ibooker.ibookereditor.zrecycleview.RecyclerViewScrollListener;
@@ -86,10 +81,7 @@ import static cc.ibooker.ibookereditor.utils.ConstantUtil.PERMISSIONS_REQUEST_OP
  */
 public class MainActivity extends BaseActivity implements View.OnClickListener,
         SwipeRefreshLayout.OnRefreshListener, RecyclerViewScrollListener.OnLoadListener {
-    private final int FROM_MAIN_TO_LOGIN_REQUEST_CDE = 111;
     private DrawerLayout drawer;
-    private TextView nameTv, phoneTv;
-    private ImageView picImg;
     private ImageButton editImgBtn;
     private Animation showAnimation, hiddenAnimation;
     private ListView sideListview;
@@ -160,9 +152,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
         initData();
         setSideAdapter();
 
-        // 获取用户信息
-        refreshHeaderLayout();
-
         // 加载数据
         SharedPreferences sharedPreferences = getSharedPreferences(ConstantUtil.SHAREDPREFERENCES_SET_NAME, Context.MODE_PRIVATE);
         dataRes = sharedPreferences.getInt(ConstantUtil.SHAREDPREFERENCES_MAIN_SET, 0);
@@ -188,8 +177,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
         super.onDestroy();
         EventBus.getDefault().removeStickyEvent(SaveNotesSuccessEvent.class);
         EventBus.getDefault().removeStickyEvent(LocalOperDialogEvent.class);
-        EventBus.getDefault().removeStickyEvent(MainRefreshHeaderEvent.class);
-        EventBus.getDefault().removeStickyEvent(UpdateUserInfoSuccessEvent.class);
         EventBus.getDefault().unregister(this);
         if (mSubscription != null) {
             mSubscription.clear();
@@ -230,24 +217,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
         EventBus.getDefault().removeStickyEvent(event);
     }
 
-    // 执行首页用户信息刷新事件
-    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
-    public void executeMainRefreshHeaderEvent(MainRefreshHeaderEvent event) {
-        if (event.isReflash()) {
-            refreshHeaderLayout();
-        }
-        EventBus.getDefault().removeStickyEvent(event);
-    }
-
-    // 执行修改用户信息成功事件
-    @Subscribe(threadMode = ThreadMode.MAIN, sticky = true)
-    public void executeUpdateUserInfoSuccessEvent(UpdateUserInfoSuccessEvent event) {
-        if (event.isReflash()) {
-            refreshHeaderLayout();
-        }
-        EventBus.getDefault().removeStickyEvent(event);
-    }
-
     // 返回按钮监听
     @Override
     public void onBackPressed() {
@@ -264,22 +233,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
     @Override
     public void onClick(View v) {
         if (ClickUtil.isFastClick()) return;
-        switch (v.getId()) {
-            case R.id.ibtn_edit:// 编辑
-                Intent intent_edit = new Intent(this, EditNotesActivity.class);
-                startActivity(intent_edit);
-                break;
-            case R.id.layout_side_nav_bar_header:// 个人中心
-                drawer.closeDrawer(GravityCompat.START, true);
-                if (!UserUtil.isLogin(this)) {
-                    Intent intent = new Intent(this, LoginActivity.class);
-                    startActivityForResult(intent, FROM_MAIN_TO_LOGIN_REQUEST_CDE);
-                    overridePendingTransition(R.anim.slide_in_bottom, R.anim.slide_out_bottom);
-                } else {
-                    Intent intent = new Intent(this, MeInfoActivity.class);
-                    startActivity(intent);
-                }
-                break;
+        if (v.getId() == R.id.ibtn_edit) {// 编辑
+            Intent intent_edit = new Intent(this, EditNotesActivity.class);
+            startActivity(intent_edit);
         }
     }
 
@@ -309,10 +265,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
         // 侧边栏相关信息
         LinearLayout headerLayout = findViewById(R.id.layout_side_nav_bar_header);
         headerLayout.setOnClickListener(this);
-        picImg = findViewById(R.id.img_pic);
-        nameTv = findViewById(R.id.tv_name);
-        phoneTv = findViewById(R.id.tv_phone);
-
         sideListview = findViewById(R.id.listview);
         sideListview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -492,7 +444,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
         if (aLocalAdapter == null) {
             aLocalAdapter = new ALocalAdapter(this, localEntities);
         } else {
-            aLocalAdapter.reflashData(localEntities);
+            aLocalAdapter.refreshData(localEntities);
         }
         if (recyclerView.getAdapter() != aLocalAdapter)
             recyclerView.setAdapter(aLocalAdapter);
@@ -803,7 +755,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
                                 localEntities.remove(position);
                             }
                             // 刷新列表
-                            aLocalAdapter.reflashData(localEntities);
+                            aLocalAdapter.refreshData(localEntities);
                         } else {
                             ToastUtil.shortToast(MainActivity.this, "删除文件失败！");
                         }
@@ -909,32 +861,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
                 }
                 editImgBtn.startAnimation(hiddenAnimation);
                 editImgBtn.setVisibility(View.GONE);
-            }
-        }
-    }
-
-    /**
-     * 刷新用户相关信息
-     */
-    private void refreshHeaderLayout() {
-        if (UserUtil.isLogin(this)) {
-            nameTv.setText(ConstantUtil.userDto.getUser().getuNickname());
-            phoneTv.setText(ConstantUtil.userDto.getUser().getuIntroduce());
-            GlideApp.with(this)
-                    .load(ConstantUtil.userDto.getUser().getuPic())
-                    .placeholder(R.drawable.icon_mepic)
-                    .error(R.drawable.icon_mepic)
-                    .transforms(new GlideCircleTransform())
-                    .into(picImg);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
-            if (requestCode == FROM_MAIN_TO_LOGIN_REQUEST_CDE) {// 登录返回-刷新界面
-                refreshHeaderLayout();
             }
         }
     }

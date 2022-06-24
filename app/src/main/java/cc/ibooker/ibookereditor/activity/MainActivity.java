@@ -19,7 +19,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -39,6 +38,7 @@ import cc.ibooker.ibookereditor.base.BaseActivity;
 import cc.ibooker.ibookereditor.bean.LocalEntity;
 import cc.ibooker.ibookereditor.bean.SideMenuItem;
 import cc.ibooker.ibookereditor.dto.FileInfoBean;
+import cc.ibooker.ibookereditor.dto.RvEmptyData;
 import cc.ibooker.ibookereditor.event.LocalOperDialogEvent;
 import cc.ibooker.ibookereditor.event.SaveNotesSuccessEvent;
 import cc.ibooker.ibookereditor.sqlite.SQLiteDao;
@@ -48,6 +48,7 @@ import cc.ibooker.ibookereditor.utils.ClickUtil;
 import cc.ibooker.ibookereditor.utils.DateUtil;
 import cc.ibooker.ibookereditor.utils.FileUtil;
 import cc.ibooker.ibookereditor.utils.ToastUtil;
+import cc.ibooker.ibookereditor.view.RvEmptyView;
 import cc.ibooker.zdialoglib.DiyDialog;
 import cc.ibooker.zdialoglib.TipDialog;
 import cc.ibooker.zrecyclerviewlib.ZRecyclerView;
@@ -72,11 +73,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
     private ZRecyclerView zrv;
     private NotesAdapter notesAdapter;
     private ArrayList<LocalEntity> localEntities = new ArrayList<>();
-
-    // 网络状态、数据加载状态
-    private LinearLayout stateLayout;
-    private ImageView stateImg;
-    private TextView stateTv;
+    private RvEmptyData rvEmptyData;
 
     // 权限组
     private final String[] needPermissions = new String[]{
@@ -118,7 +115,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
         setSideAdapter();
 
         // 加载数据
-        onRefresh();
+        executeRefresh();
 
         EventBus.getDefault().register(this);
     }
@@ -200,6 +197,21 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
         zrvr = findViewById(R.id.zrvr);
         zrvr.setOnRvRefreshListener(this);
         zrv = zrvr.zRv;
+        // 空页面
+        rvEmptyData = new RvEmptyData(-100);
+        RvEmptyView rvEmptyView = new RvEmptyView(this, rvEmptyData);
+        rvEmptyView.getEmptyView()
+                .findViewById(R.id.tv_reload)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (ClickUtil.isFastClick()) return;
+                        updateEmptyView(-100, null, null);
+                        executeRefresh();
+                    }
+                });
+        zrv.addEmptyView(rvEmptyView);
+        setNotesAdapter();
 
         // 侧边栏相关信息
         LinearLayout headerLayout = findViewById(R.id.layout_side_nav_bar_header);
@@ -257,24 +269,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
             }
         });
 
-        // 状态信息
-        stateLayout = findViewById(R.id.layout_state);
-        stateImg = stateLayout.findViewById(R.id.img_state);
-        stateTv = stateLayout.findViewById(R.id.tv_state_tip);
-        TextView reloadTv = stateLayout.findViewById(R.id.tv_reload);
-        reloadTv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (ClickUtil.isFastClick()) return;
-                updateStateLayout(false, -1, null);
-                onRefresh();
-            }
-        });
-        updateStateLayout(false, -1, null);
-
         // 初始化sqLiteDao
         if (sqLiteDao == null) {
             sqLiteDao = new SQLiteDaoImpl(this);
+        }
+    }
+
+    // 执行下拉刷新
+    private void executeRefresh() {
+        if (!zrvr.isRefreshing()) {
+            zrvr.autoRefresh();
+            onRefresh();
         }
     }
 
@@ -284,44 +289,37 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
         getLocalNotesList();
     }
 
-    // 更新状态布局
-    private void updateStateLayout(boolean isShow, int state, String stateTip) {
-        if (isShow) {
-            stateLayout.setVisibility(View.VISIBLE);
-            switch (state) {
-                case 1:// 无网络
-                    stateImg.setImageResource(R.drawable.img_load_error);
-                    stateTv.setText(getResources().getString(R.string.nonet_tip));
-                    break;
-                case 2:// 异常
-                    stateImg.setImageResource(R.drawable.img_load_error);
-                    stateTv.setText(stateTip);
-                    break;
-                case 3:// 失败
-                    stateImg.setImageResource(R.drawable.img_load_failed);
-                    stateTv.setText(stateTip);
-                    break;
-                case 4:// 数据为空
-                    stateImg.setImageResource(R.drawable.img_load_empty);
-                    stateTv.setText(getResources().getString(R.string.no_data));
-                    break;
-                case 0:// 成功
-                    stateImg.setImageResource(R.drawable.img_load_success);
-                    stateTv.setText(stateTip);
-                    break;
-            }
-        } else {
-            stateLayout.setVisibility(View.GONE);
-        }
+    /**
+     * 修改空页面
+     *
+     * @param statue   状态，-100-隐藏，0-成功，1-无网络，2-异常，3-失败，4-数据为空
+     * @param tip      提示
+     * @param operText 操作文本
+     */
+    private void updateEmptyView(int statue, String tip, String operText) {
+        rvEmptyData.setStatue(statue);
+        if (!TextUtils.isEmpty(tip))
+            rvEmptyData.setTip(tip);
+        if (!TextUtils.isEmpty(operText))
+            rvEmptyData.setOperText(operText);
+        zrv.refreshRvEmptyView();
     }
 
     // 刷新本地笔记列表
     private void setNotesAdapter() {
+        // 刷新列表
         if (notesAdapter == null) {
-            notesAdapter = new NotesAdapter(this, localEntities);
+            notesAdapter = new NotesAdapter( localEntities);
             zrv.setAdapter(notesAdapter);
         } else {
             notesAdapter.refreshData(localEntities);
+        }
+
+        zrvr.setRefreshing(false);
+        if (localEntities == null || localEntities.size() <= 0) {
+            updateEmptyView(4, "未获取到任何数据！", null);
+        } else {
+            updateEmptyView(-100, null, null);
         }
     }
 
@@ -393,7 +391,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
                         }
                     }
                 }
-
             }
         }
 
@@ -401,13 +398,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
         localEntities = localFileListToEntities(fileInfoBeans);
 
         // 刷新界面
-        zrvr.setRefreshing(false);
-        if (localEntities.size() <= 0) {
-            updateStateLayout(true, 4, null);
-        } else {
-            updateStateLayout(false, -1, null);
-            setNotesAdapter();
-        }
+        setNotesAdapter();
     }
 
     /**
@@ -484,6 +475,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
         if (delDialog == null)
             delDialog = new TipDialog(this);
         delDialog.setEnsureColor("#FE7517")
+                .setTopLayoutMargin(10,0,10,0)
                 .setOnTipEnsureListener(new TipDialog.OnTipEnsureListener() {
                     @Override
                     public void onEnsure() {

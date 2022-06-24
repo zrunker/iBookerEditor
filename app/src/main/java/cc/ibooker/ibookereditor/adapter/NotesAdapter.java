@@ -1,8 +1,6 @@
 package cc.ibooker.ibookereditor.adapter;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -11,39 +9,74 @@ import java.util.ArrayList;
 import cc.ibooker.ibookereditor.R;
 import cc.ibooker.ibookereditor.bean.LocalEntity;
 import cc.ibooker.ibookereditor.ryviewholder.LocalViewHolder;
+import cc.ibooker.zrecyclerviewlib.BaseRvAdapter;
+import cc.ibooker.zrecyclerviewlib.BaseViewHolder;
 
 /**
- * 本地文章Adapter
+ * 本地笔记Adapter
  *
  * @author 邹峰立
  */
-public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private final LayoutInflater inflater;
-    private ArrayList<LocalEntity> mDatas;
+public class NotesAdapter extends BaseRvAdapter<LocalEntity> {
+    private int startPosition;
 
-    public NotesAdapter(Context context, ArrayList<LocalEntity> list) {
-        this.inflater = LayoutInflater.from(context);
-        this.mDatas = list;
+    public NotesAdapter(ArrayList<LocalEntity> list) {
+        super(list);
+        this.startPosition = getDataSize();
     }
 
-    public void refreshData(ArrayList<LocalEntity> list) {
-        this.mDatas = list;
-        this.notifyDataSetChanged();
+    // 移除数据
+    public void refreshRemoveItem(int positionStart, int itemCount) {
+        if (itemCount > 1)
+            notifyItemRangeRemoved(positionStart, itemCount);
+        else
+            notifyItemRemoved(positionStart);
+        this.startPosition = getDataSize();
     }
 
-    @NonNull
+    // 刷新Item
+    public void refreshItems(int page, ArrayList<LocalEntity> list) {
+        if (page <= 1)
+            refreshData(list);
+        else
+            addAllItems(list);
+    }
+
+    // 刷新数据
+    private void addAllItems(ArrayList<LocalEntity> list) {
+        if (list != null)
+            if (startPosition >= list.size())
+                this.notifyDataSetChanged();
+            else
+                this.notifyItemRangeInserted(startPosition, list.size() - startPosition);
+        // 重新标记位置
+        this.startPosition = getDataSize();
+    }
+
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new LocalViewHolder(inflater.inflate(R.layout.activity_main_ry_item_local, parent, false));
+    public BaseRvAdapter<?> removeItem2(int position) {
+        super.removeItem2(position);
+        this.startPosition = getDataSize();
+        return this;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        ((LocalViewHolder) holder).onBindData(mDatas.get(position), position);
+    public BaseRvAdapter<?> refreshData(ArrayList<LocalEntity> list) {
+        if (list != null)
+            this.startPosition = list.size();
+        else
+            this.startPosition = 0;
+        return super.refreshData(list);
     }
 
     @Override
-    public int getItemCount() {
-        return mDatas.size();
+    public BaseViewHolder<?, ?> onCreateItemViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
+        return new LocalViewHolder(LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.activity_main_ry_item_local, viewGroup, false));
     }
+
+    @Override
+    public void onBindItemViewHolder(@NonNull BaseViewHolder baseViewHolder, int position) {
+        ((LocalViewHolder) baseViewHolder).onBindData(getData().get(position), position);
+    }
+
 }

@@ -17,7 +17,7 @@ public class ConstantUtil {
     public final static int TEXTVIEWSIZE = 1;
 
     /**
-     * 本地文章每页显示条目
+     * 本地笔记每页显示条目
      */
     public final static int PAGE_SIZE_LOCAL_ARTICLE = 15;
 

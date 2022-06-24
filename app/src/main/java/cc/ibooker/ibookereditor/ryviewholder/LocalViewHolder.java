@@ -2,7 +2,6 @@ package cc.ibooker.ibookereditor.ryviewholder;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
@@ -13,13 +12,14 @@ import cc.ibooker.ibookereditor.activity.EditNotesActivity;
 import cc.ibooker.ibookereditor.bean.LocalEntity;
 import cc.ibooker.ibookereditor.event.LocalOperDialogEvent;
 import cc.ibooker.ibookereditor.utils.ClickUtil;
+import cc.ibooker.zrecyclerviewlib.BaseViewHolder;
 
 /**
- * 本地文章ViewHolder
+ * 本地笔记ViewHolder
  * <p>
  * Created by 邹峰立 on 2018/3/27 0027.
  */
-public class LocalViewHolder extends RecyclerView.ViewHolder {
+public class LocalViewHolder extends BaseViewHolder<View, LocalEntity> {
     private final Context context;
     private final View view;
     private final TextView titleTv, sizeTv, timeTv;

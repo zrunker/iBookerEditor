@@ -3,7 +3,7 @@ package cc.ibooker.ibookereditor.event;
 import cc.ibooker.ibookereditor.dto.FileInfoBean;
 
 /**
- * 保存文章事件
+ * 保存笔记事件
  * <p>
  * Created by 邹峰立 on 2018/3/28.
  */

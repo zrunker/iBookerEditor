@@ -9,11 +9,6 @@
     tools:context="cc.ibooker.ibookereditor.activity.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <include
-        android:id="@+id/layout_state"
-        layout="@layout/layout_result_state"
-        android:visibility="gone" />
-
     <cc.ibooker.zrecyclerviewlib.ZRvRefreshLayout
         android:id="@+id/zrvr"
         android:layout_width="match_parent"

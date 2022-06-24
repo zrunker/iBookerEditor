@@ -37,7 +37,7 @@
     </style>
 
 
-    <!--编辑文章界面Style-->
+    <!--编辑界面Style-->
     <style name="EditArticleActivityTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>

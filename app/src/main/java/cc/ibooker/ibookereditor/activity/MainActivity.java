@@ -14,6 +14,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -309,7 +310,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
     private void setNotesAdapter() {
         // 刷新列表
         if (notesAdapter == null) {
-            notesAdapter = new NotesAdapter( localEntities);
+            notesAdapter = new NotesAdapter(localEntities);
             zrv.setAdapter(notesAdapter);
         } else {
             notesAdapter.refreshData(localEntities);
@@ -475,7 +476,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,
         if (delDialog == null)
             delDialog = new TipDialog(this);
         delDialog.setEnsureColor("#FE7517")
-                .setTopLayoutMargin(10,0,10,0)
+                .setTopLayoutGravity(Gravity.CENTER)
                 .setOnTipEnsureListener(new TipDialog.OnTipEnsureListener() {
                     @Override
                     public void onEnsure() {

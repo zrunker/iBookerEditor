@@ -4,12 +4,6 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 
-import com.mob.MobSDK;
-import com.tencent.bugly.crashreport.CrashReport;
-
-import cc.ibooker.ibookereditor.BuildConfig;
-import cc.ibooker.ibookereditor.utils.AppUtil;
-
 /**
  * 初始化APP - IntentService
  */
@@ -40,14 +34,6 @@ public class InitializeService extends IntentService {
         // 应用程序捕获异常
         CrashHandler crashHandler = CrashHandler.getInstance();
         crashHandler.init(getApplicationContext());
-
-        // ShareSdk
-        MobSDK.init(this);
-
-        // Bugly
-        CrashReport.UserStrategy strategy = new CrashReport.UserStrategy(getApplicationContext());
-        strategy.setAppVersion(AppUtil.getVersion(getApplicationContext()));// App的版本
-        CrashReport.initCrashReport(getApplicationContext(), "108bf3bed2", BuildConfig.DEBUG, strategy);
     }
 
 }

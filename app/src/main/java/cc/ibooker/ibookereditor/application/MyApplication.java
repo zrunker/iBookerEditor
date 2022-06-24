@@ -7,7 +7,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.Log;
 
-import com.mob.MobSDK;
 import com.umeng.commonsdk.UMConfigure;
 import com.umeng.message.IUmengRegisterCallback;
 import com.umeng.message.PushAgent;
@@ -61,8 +60,9 @@ public class MyApplication extends Application {
                 // 调用super则会走通知展示流程，不调用super则不展示通知
                 SharedPreferences sharedPreferences = instance.getSharedPreferences(ConstantUtil.SHAREDPREFERENCES_SET_NAME, Context.MODE_PRIVATE);
                 boolean bool = sharedPreferences.getBoolean(ConstantUtil.SHAREDPREFERENCES_ARTICLE_RECOMMEND, true);
-                if (bool)
+                if (bool) {
                     super.dealWithNotificationMessage(context, msg);
+                }
             }
         };
         mPushAgent.setMessageHandler(messageHandler);

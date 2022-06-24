@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by 邹峰立 on 2017/2/16 0016.
  */
 class SQLiteHelper extends SQLiteOpenHelper {
-    private AtomicInteger mOpenCounter = new AtomicInteger(0);
+    private final AtomicInteger mOpenCounter = new AtomicInteger(0);
     private SQLiteDatabase mDatabase;
 
     private static SQLiteHelper SQLiteHelper;
@@ -74,7 +74,6 @@ class SQLiteHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         // 创建数据表
         db.execSQL(SQLiteConstant.SQL_CREATE_TABLE_LOCALFILE);
-        db.execSQL(SQLiteConstant.SQL_CREATE_TABLE_USER);
     }
 
     /**
@@ -91,8 +90,6 @@ class SQLiteHelper extends SQLiteOpenHelper {
             try {// 升级数据库
                 db.execSQL(SQLiteConstant.SQL_DROP_TABLE_LOCALFILE);
                 db.execSQL(SQLiteConstant.SQL_CREATE_TABLE_LOCALFILE);
-                db.execSQL(SQLiteConstant.SQL_DROP_TABLE_USER);
-                db.execSQL(SQLiteConstant.SQL_CREATE_TABLE_USER);
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();

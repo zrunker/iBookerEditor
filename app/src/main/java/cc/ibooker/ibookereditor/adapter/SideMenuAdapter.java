@@ -18,8 +18,8 @@ import cc.ibooker.ibookereditor.bean.SideMenuItem;
  * Created by 邹峰立 on 2018/3/27.
  */
 public class SideMenuAdapter extends BaseAdapter {
-    private Context context;
-    private LayoutInflater inflater;
+    private final Context context;
+    private final LayoutInflater inflater;
     private ArrayList<SideMenuItem> mDatas;
 
     public SideMenuAdapter(Context context, ArrayList<SideMenuItem> list) {
@@ -68,10 +68,7 @@ public class SideMenuAdapter extends BaseAdapter {
         SideMenuItem data = mDatas.get(position);
         holder.textView.setText(data.getName());
         holder.img.setImageResource(data.getRes());
-        if (position == 2)
-            holder.view.setVisibility(View.VISIBLE);
-        else
-            holder.view.setVisibility(View.GONE);
+//        holder.view.setVisibility(position == 1 ? View.VISIBLE : View.GONE);
         return convertView;
     }
 

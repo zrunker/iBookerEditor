@@ -3,22 +3,17 @@
     <color name="colorPrimary">#FE7517</color>
     <color name="colorPrimaryDark">#FE7517</color>
     <color name="colorAccent">#FE7517</color>
-    <color name="colorTitle">#FE7517</color>
 
-    <color name="labelGreen">#81d700</color>
-    <color name="labelBlue">#407ff2</color>
     <color name="labelOrange">#FE6517</color>
 
     <!--白色-->
     <color name="colorWhite">#FFFFFF</color>
     <!--浅灰色-->
-    <color name="colorLightGray">#F5F5F5</color>
     <!--灰色-->
     <color name="colorGray">#DEDEDE</color>
     <!--黑色-->
     <color name="colorBlank">#000000</color>
 
     <color name="colorEFEFEF">#EFEFEF</color>
-    <color name="musicColor">#171717</color>
 
 </resources>

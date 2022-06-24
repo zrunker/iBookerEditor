@@ -59,66 +59,9 @@
         android:largeHeap="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="GoogleAppIndexingWarning">
-
-        <!-- 高德地图-设置key -->
-        <meta-data
-            android:name="com.amap.api.v2.apikey"
-            android:value="e8257ce7f5b0c7036b20b055022f52a1" />
-        <!-- 高德地图-定位需要的服务 -->
-        <service android:name="com.amap.api.location.APSService" />
-
-        <!-- ShareSDK的activity -->
-        <activity
-            android:name="com.mob.tools.MobUIShell"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:windowSoftInputMode="stateHidden|adjustResize">
-
-            <!-- 调用新浪原生SDK，需要注册的回调activity -->
-            <intent-filter>
-                <action android:name="com.sina.weibo.sdk.action.ACTION_SDK_REQ_ACTIVITY" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-
-            <!--集成line客户端登录授权，需要添如下格式的过滤器-->
-            <intent-filter>
-                <data android:scheme="line.1477692153" />
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-
-        </activity>
-        <!-- 填写您从Mob开发者后台中得到的Appkey和AppSecret -->
-        <meta-data
-            android:name="Mob-AppKey"
-            android:value="27a5e37c748ec" />
-        <meta-data
-            android:name="Mob-AppSecret"
-            android:value="33006bc4fd415d6a15ab93ec458a70d1" />
-
-        <!--微信分享回调 -->
-        <activity
-            android:name=".wxapi.WXEntryActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:exported="true"
-            android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
-        <!--<activity
-            android:name="cn.sharesdk.tencent.qq.ReceiveActivity"
-            android:launchMode="singleTask"
-            android:noHistory="true">
-            <intent-filter><action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="tencent100371282" />
-            </intent-filter>
-        </activity>-->
+        android:usesCleartextTraffic="true"
+        tools:ignore="GoogleAppIndexingWarning"
+        tools:targetApi="m">
 
         <!--启动页-->
         <activity
@@ -175,20 +118,12 @@
 
         <!--书客编辑器Web页面-->
         <activity
-            android:name=".activity.IbookerEditorWebActivity"
+            android:name=".activity.WebActivity"
             android:alwaysRetainTaskState="true"
             android:hardwareAccelerated="true"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan">
-            <intent-filter tools:ignore="AppLinkUrlError">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:mimeType="*/*" />
-                <data android:mimeType="md/*" />
-            </intent-filter>
-        </activity>
+            android:windowSoftInputMode="adjustPan" />
 
         <!--设置-->
         <activity
@@ -208,36 +143,6 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
 
-        <!--登录-->
-        <activity
-            android:name=".activity.LoginActivity"
-            android:alwaysRetainTaskState="true"
-            android:hardwareAccelerated="true"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait"
-            android:theme="@style/EditArticleActivityTheme"
-            android:windowSoftInputMode="adjustPan" />
-
-        <!--显示文章详情-->
-        <activity
-            android:name=".activity.ArticleDetailActivity"
-            android:alwaysRetainTaskState="true"
-            android:hardwareAccelerated="true"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait"
-            android:theme="@style/TranslucentTheme"
-            android:windowSoftInputMode="adjustPan">
-
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="ibookereditor" />
-            </intent-filter>
-        </activity>
-
         <!--注册广播-->
         <receiver android:name=".broadcastreceiver.NetBroadcastReceiver">
             <intent-filter>
@@ -246,9 +151,6 @@
                     tools:ignore="BatteryLife" />
             </intent-filter>
         </receiver>
-
-        <!--下载服务-->
-        <service android:name=".service.DownLoadService" />
 
         <!--启动APP加速服务-->
         <service
@@ -266,88 +168,6 @@
                 android:resource="@xml/filepaths" />
         </provider>
 
-        <!--个人中心-->
-        <activity
-            android:name=".activity.MeInfoActivity"
-            android:alwaysRetainTaskState="true"
-            android:hardwareAccelerated="true"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" />
-
-        <!--视频播放-->
-        <activity
-            android:name=".activity.VideoPlayerActivity"
-            android:alwaysRetainTaskState="true"
-            android:configChanges="orientation|screenSize|keyboard|keyboardHidden"
-            android:hardwareAccelerated="true"
-            android:launchMode="singleTask"
-            android:theme="@style/BlankTheme"
-            android:windowSoftInputMode="adjustPan" />
-
-        <!--音频播放-->
-        <activity
-            android:name=".activity.AudioPlayerActivity"
-            android:alwaysRetainTaskState="true"
-            android:configChanges="orientation|screenSize|keyboard|keyboardHidden"
-            android:hardwareAccelerated="true"
-            android:launchMode="singleTask"
-            android:theme="@style/MusicTheme"
-            android:windowSoftInputMode="adjustPan" />
-
-        <!--注册-->
-        <activity
-            android:name=".activity.RegActivity"
-            android:alwaysRetainTaskState="true"
-            android:hardwareAccelerated="true"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" />
-
-        <!--忘记密码一-->
-        <activity
-            android:name=".activity.ForgetPasswdOneActivity"
-            android:alwaysRetainTaskState="true"
-            android:hardwareAccelerated="true"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" />
-
-        <!--忘记密码一-->
-        <activity
-            android:name=".activity.ForgetPasswdTwoActivity"
-            android:alwaysRetainTaskState="true"
-            android:hardwareAccelerated="true"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" />
-
-        <!--完善个人信息-->
-        <activity
-            android:name=".activity.PrefectMeInfoActivity"
-            android:alwaysRetainTaskState="true"
-            android:hardwareAccelerated="true"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" />
-
-        <!--高德地图定位+poi搜索-->
-        <activity
-            android:name=".activity.AMapLocationPOIActivity"
-            android:alwaysRetainTaskState="true"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:hardwareAccelerated="true"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait" />
-
-        <!--图像预览-->
-        <activity
-            android:name=".activity.PicActivity"
-            android:alwaysRetainTaskState="true"
-            android:hardwareAccelerated="true"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" />
     </application>
 
 </manifest>

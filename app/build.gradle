@@ -37,8 +37,9 @@ android {
         }
     }
 
-    lintOptions {
-        abortOnError false
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
@@ -61,50 +62,16 @@ dependencies {
     /*引入书客编辑器*/
     implementation 'com.github.zrunker:IbookerEditorAndroid:v1.4.3'
 
-    /*网络框架 rxjava + retrofit + okhttp + glide*/
-    implementation 'io.reactivex:rxjava:1.2.10'
-    implementation 'io.reactivex:rxandroid:1.2.1'
-    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.2.0'
-    implementation 'com.squareup.retrofit2:adapter-rxjava:2.2.0'
-    implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.10.0'
-    implementation 'com.squareup.okhttp:okhttp-urlconnection:2.7.5'
-    implementation 'com.github.bumptech.glide:glide:4.7.1'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.7.1'
-    implementation 'com.github.bumptech.glide:okhttp3-integration:4.7.1'
-
+    implementation 'com.github.bumptech.glide:glide:3.8.0'
     implementation 'org.greenrobot:eventbus:3.1.1'
 
     implementation 'com.github.zrunker:ZDialog:v1.1.5.38'
-    implementation 'com.github.zrunker:ZPopupWindow:v1.2.2'
-    implementation 'com.github.zrunker:ZEditText:v1.0.4.5'
-    implementation 'com.github.zrunker:ZCountDownView:v1.1.1'
     implementation 'com.github.zrunker:ZRecyclerView:v1.1.4.2'
-
-    /*bugly*/
-    implementation 'com.tencent.bugly:crashreport:4.0.4'
 
     /*友盟*/
     implementation 'com.umeng.sdk:common:1.5.3'
     implementation 'com.umeng.sdk:analytics:7.5.0'
     implementation 'com.umeng.sdk:utdid:1.1.5.3'
     implementation 'com.umeng.sdk:push:4.2.0'
-
-    /*ShareSDK*/
-    implementation files('libs/MobCommons-2018.0918.1444.jar')
-    implementation files('libs/MobTools-2018.0911.1425.jar')
-    implementation files('libs/ShareSDK-Core-3.2.1.jar')
-    implementation files('libs/ShareSDK-QQ-3.2.1.jar')
-    implementation files('libs/ShareSDK-QZone-3.2.1.jar')
-    implementation files('libs/ShareSDK-SinaWeibo-3.2.1.jar')
-    implementation files('libs/ShareSDK-TencentWeibo-3.2.1.jar')
-    implementation files('libs/ShareSDK-Wechat-3.2.1.jar')
-    implementation files('libs/ShareSDK-Wechat-Core-3.2.1.jar')
-    implementation files('libs/ShareSDK-Wechat-Moments-3.2.1.jar')
-
-    /*高德地图*/
-    implementation files('libs/AMap2DMap_5.2.0_AMapSearch_6.5.0_AMapLocation_4.3.0_20181016.jar')
 }
 

@@ -15,7 +15,7 @@ import cc.ibooker.ibookereditor.R;
  * 本地Dialog操作Adapter
  */
 public class LocalOperDialogLvAdapter extends BaseAdapter {
-    private LayoutInflater inflater;
+    private final LayoutInflater inflater;
     private ArrayList<String> mDatas = new ArrayList<>();
 
     public LocalOperDialogLvAdapter(Context context) {

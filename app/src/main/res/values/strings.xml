@@ -8,9 +8,6 @@
 
     <string name="mepic">个人图像</string>
     <string name="util">工具</string>
-    <string name="article">文章</string>
-    <string name="local">本地</string>
-    <string name="recommend">推荐</string>
     <string name="grammar_reference">语法参考</string>
     <string name="set">设置</string>
     <string name="feedback">反馈</string>
@@ -18,15 +15,11 @@
     <string name="about">关于</string>
     <string name="write_notes">写笔记</string>
 
-    <string name="save">保存</string>
     <string name="article_auto_save">自动保存</string>
-    <string name="good_article_recommend">好文推荐</string>
+    <string name="good_article_recommend">图文推荐</string>
     <string name="common_set">通用设置</string>
     <string name="clear_cache">清空缓存</string>
     <string name="version_update">版本更新</string>
-
-    <string name="quit_login">退出登录</string>
-    <string name="login">登录</string>
 
     <string name="nonet_tip">网络开小差啦~</string>
     <string name="no_data">未获取到任何数据</string>
@@ -43,8 +36,6 @@
     <string name="complain">投诉</string>
     <string name="message">留言</string>
 
-    <string name="account_hint">请输入账号</string>
-    <string name="passwd_hint">请输入密码</string>
     <string name="detail">详情</string>
     <string name="share">分享</string>
     <string name="delete">删除</string>
@@ -53,13 +44,7 @@
     <string name="font_size_add">A+</string>
     <string name="font_size_reduce">A-</string>
 
-    <string name="main_set">首页设置</string>
     <string name="notes">笔记</string>
-    <string name="notes_tip">笔记 - 从某时某刻起你就云同步了</string>
-    <string name="reading">阅读</string>
-    <string name="reading_tip">阅读 - 有深度的不一定是文章</string>
-    <string name="meinfo">个人中心</string>
-    <string name="like_article">喜欢文章</string>
     <string name="name_">名称：</string>
     <string name="time_">时间：</string>
     <string name="size_">大小：</string>
@@ -67,35 +52,5 @@
 
     <string name="user_protocol">用户协议</string>
     <string name="enjoy_us">加入我们</string>
-    <string name="reg_account">注册账号</string>
-    <string name="forget_passwd">忘记密码？</string>
-    <string name="input_phone">请输入手机号</string>
-    <string name="input_passwd">请输入密码</string>
-    <string name="input_ensure_passwd">确认密码</string>
-    <string name="input_code">请输入验证码</string>
-    <string name="input_phone_tip">请输入11位手机号码</string>
-    <string name="input_code_tip">请输入6位数字验证码</string>
-    <string name="input_passwd_tip">密码(以字母开头，长度在4~20之间，只能包含字母、数字和下划线)</string>
-    <string name="reg">注册</string>
-    <string name="reset_passwd">重置密码</string>
-    <string name="next">下一步</string>
-    <string name="prefect_info">完善信息</string>
-    <string name="nickname">昵称</string>
-    <string name="input_nickname">请输入昵称</string>
-    <string name="sex">性别</string>
-    <string name="male">男</string>
-    <string name="female">女</string>
-    <string name="height_rule">身高(CM)</string>
-    <string name="weight_rule">体重(KG)</string>
-    <string name="input_height">请输入身高</string>
-    <string name="input_weight">请输入体重</string>
-    <string name="domicile">现居住地</string>
-    <string name="input_domicile">请输入现居住地</string>
-    <string name="introduce">自我简介</string>
-    <string name="input_introduce">请输入自我简介</string>
-    <string name="birthday">出生日期</string>
-    <string name="input_birthday">请输入出生日期</string>
-    <string name="choose_pic">选择图片</string>
-    <string name="search">搜索</string>
 
 </resources>

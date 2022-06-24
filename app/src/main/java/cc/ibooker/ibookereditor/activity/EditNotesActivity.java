@@ -337,14 +337,12 @@ public class EditNotesActivity extends BaseActivity implements IbookerEditorTopV
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 if (i == 0) {// 帮助
-                    Intent intentGrammer = new Intent(EditNotesActivity.this, ArticleDetailActivity.class);
-                    intentGrammer.putExtra("aId", 1L);
-                    intentGrammer.putExtra("title", "语法参考");
+                    Intent intentGrammer = new Intent(EditNotesActivity.this, WebActivity.class);
+                    intentGrammer.putExtra("webUrl", "http://ibooker.cc/article/1/detail");
                     startActivity(intentGrammer);
                 } else if (i == 1) {// 关于
-                    Intent intentAbout = new Intent(EditNotesActivity.this, ArticleDetailActivity.class);
-                    intentAbout.putExtra("aId", 182L);
-                    intentAbout.putExtra("title", "关于");
+                    Intent intentAbout = new Intent(EditNotesActivity.this, WebActivity.class);
+                    intentAbout.putExtra("webUrl", "http://ibooker.cc/article/182/detail");
                     startActivity(intentAbout);
                 }
             }

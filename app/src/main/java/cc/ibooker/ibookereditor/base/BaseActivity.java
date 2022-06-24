@@ -101,7 +101,6 @@ public abstract class BaseActivity extends AppCompatActivity implements NetBroad
         return true;
     }
 
-
     /**
      * 权限请求方法
      */

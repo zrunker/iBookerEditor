@@ -8,13 +8,11 @@
     tools:openDrawer="start">
 
     <include
-        android:id="@+id/app_bar_main"
         layout="@layout/app_bar_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
     <include
-        android:id="@+id/nav_view"
         layout="@layout/layout_side_nav_bar"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"

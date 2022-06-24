@@ -3,13 +3,10 @@ package cc.ibooker.ibookereditor.sqlite;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.text.TextUtils;
 
 import java.util.ArrayList;
 
-import cc.ibooker.ibookereditor.bean.UserEntity;
 import cc.ibooker.ibookereditor.dto.FileInfoBean;
-import cc.ibooker.ibookereditor.dto.UserDto;
 
 import static cc.ibooker.ibookereditor.utils.ConstantUtil.PAGE_SIZE_LOCAL_ARTICLE;
 
@@ -18,7 +15,7 @@ import static cc.ibooker.ibookereditor.utils.ConstantUtil.PAGE_SIZE_LOCAL_ARTICL
  * Created by 邹峰立 on 2017/2/16 0016.
  */
 public class SQLiteDaoImpl implements SQLiteDao {
-    private SQLiteHelper dbHelper;
+    private final SQLiteHelper dbHelper;
 
     /**
      * 构造方法
@@ -176,103 +173,6 @@ public class SQLiteDaoImpl implements SQLiteDao {
         cursor.close();
         dbHelper.closeDatabase();
         return list;
-    }
-
-    /**
-     * 插入用户表
-     *
-     * @param data 待插入数据
-     */
-    @Override
-    public synchronized void insertUser(UserDto data) {
-        if (data != null && data.getUser() != null && !TextUtils.isEmpty(data.getUa()) && !TextUtils.isEmpty(data.getToken())) {
-            deleteUser(data);
-
-            SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
-            String sql = "insert into t_user(u_id, u_phone, u_pic, u_nickname, u_sex, u_height, u_weight, u_birthday, u_domicile, u_pointx, u_pointy, u_introduce, u_ua, u_token) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-            db.execSQL(sql, new Object[]{data.getUser().getuId(), data.getUser().getuPhone(), data.getUser().getuPic(),
-                    data.getUser().getuNickname(), data.getUser().getuSex(), data.getUser().getuHeight(), data.getUser().getuWeight(),
-                    data.getUser().getuBirthday(), data.getUser().getuDomicile(), data.getUser().getuPointx(), data.getUser().getuPointy(),
-                    data.getUser().getuIntroduce(), data.getUa(), data.getToken()});
-            dbHelper.closeDatabase();
-        }
-    }
-
-    /**
-     * 根据账号或者用户ID删除用户信息
-     *
-     * @param data 待删除数据
-     */
-    @Override
-    public synchronized void deleteUser(UserDto data) {
-        if (data != null && data.getUser() != null) {
-            SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
-            db.execSQL("delete from t_user where u_id=? or u_phone=?", new Object[]{data.getUser().getuId(), data.getUser().getuPhone()});
-            dbHelper.closeDatabase();
-        }
-    }
-
-    /**
-     * 查询用户信息
-     */
-    @Override
-    public UserDto selectUser() {
-        SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可读的数据库
-        UserDto userDto = null;
-        Cursor cursor = db.rawQuery("select * from t_user", null);
-        if (cursor.moveToFirst()) {
-            userDto = new UserDto();
-            UserEntity userEntity = new UserEntity();
-            long u_id = cursor.getLong(cursor.getColumnIndex("u_id"));
-            userEntity.setuId(u_id);
-            long u_phone = cursor.getLong(cursor.getColumnIndex("u_phone"));
-            userEntity.setuPhone(u_phone);
-            String u_pic = cursor.getString(cursor.getColumnIndex("u_pic"));
-            userEntity.setuPic(u_pic);
-            String u_nickname = cursor.getString(cursor.getColumnIndex("u_nickname"));
-            userEntity.setuNickname(u_nickname);
-            String u_sex = cursor.getString(cursor.getColumnIndex("u_sex"));
-            userEntity.setuSex(u_sex);
-            float u_height = cursor.getFloat(cursor.getColumnIndex("u_height"));
-            userEntity.setuHeight(u_height);
-            float u_weight = cursor.getFloat(cursor.getColumnIndex("u_weight"));
-            userEntity.setuWeight(u_weight);
-            String u_birthday = cursor.getString(cursor.getColumnIndex("u_birthday"));
-            userEntity.setuBirthday(u_birthday);
-            String u_domicile = cursor.getString(cursor.getColumnIndex("u_domicile"));
-            userEntity.setuDomicile(u_domicile);
-            double u_pointx = cursor.getDouble(cursor.getColumnIndex("u_pointx"));
-            userEntity.setuPointx(u_pointx);
-            double u_pointy = cursor.getDouble(cursor.getColumnIndex("u_pointy"));
-            userEntity.setuPointy(u_pointy);
-            String u_introduce = cursor.getString(cursor.getColumnIndex("u_introduce"));
-            userEntity.setuIntroduce(u_introduce);
-            userDto.setUser(userEntity);
-            String u_ua = cursor.getString(cursor.getColumnIndex("u_ua"));
-            userDto.setUa(u_ua);
-            String u_token = cursor.getString(cursor.getColumnIndex("u_token"));
-            userDto.setToken(u_token);
-        }
-        cursor.close();
-        dbHelper.closeDatabase();
-        return userDto;
-    }
-
-    /**
-     * 修改用户表
-     *
-     * @param data 待修改数据
-     */
-    @Override
-    public void updateUser(UserDto data) {
-        if (data != null && data.getUser() != null) {
-            SQLiteDatabase db = dbHelper.openDatabase(); // 获取一个可写的数据库
-            db.execSQL("update t_user set u_pic = ?, u_nickname = ?, u_introduce = ?, u_sex = ?, u_height = ?, u_weight = ?, u_birthday = ?, u_domicile = ?, u_pointx = ?, u_pointy = ? where u_id=? or u_phone=?",
-                    new Object[]{data.getUser().getuPic(), data.getUser().getuNickname(), data.getUser().getuIntroduce(), data.getUser().getuSex(),
-                            data.getUser().getuHeight(), data.getUser().getuWeight(), data.getUser().getuBirthday(), data.getUser().getuDomicile(), data.getUser().getuPointx(), data.getUser().getuPointy(),
-                            data.getUser().getuId(), data.getUser().getuPhone()});
-            dbHelper.closeDatabase();
-        }
     }
 
 }

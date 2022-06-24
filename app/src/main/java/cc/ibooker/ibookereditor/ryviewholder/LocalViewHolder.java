@@ -20,9 +20,9 @@ import cc.ibooker.ibookereditor.utils.ClickUtil;
  * Created by 邹峰立 on 2018/3/27 0027.
  */
 public class LocalViewHolder extends RecyclerView.ViewHolder {
-    private Context context;
-    private View view;
-    private TextView titleTv, sizeTv, timeTv;
+    private final Context context;
+    private final View view;
+    private final TextView titleTv, sizeTv, timeTv;
 
     public LocalViewHolder(View itemView) {
         super(itemView);

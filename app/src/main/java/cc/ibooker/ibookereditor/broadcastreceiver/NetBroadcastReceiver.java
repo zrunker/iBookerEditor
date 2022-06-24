@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 
 import cc.ibooker.ibookereditor.base.BaseActivity;
-import cc.ibooker.ibookereditor.base.BaseFragment;
-import cc.ibooker.ibookereditor.base.BaseFragmentActivity;
 import cc.ibooker.ibookereditor.utils.NetworkUtil;
 
 
@@ -26,10 +24,6 @@ public class NetBroadcastReceiver extends BroadcastReceiver {
             // 接口回调传过去状态的类型
             if (BaseActivity.netEvent != null)
                 BaseActivity.netEvent.onNetChange(netWorkState);
-            if (BaseFragment.netEvent != null)
-                BaseFragment.netEvent.onNetChange(netWorkState);
-            if (BaseFragmentActivity.netEvent != null)
-                BaseFragmentActivity.netEvent.onNetChange(netWorkState);
         }
     }
 
